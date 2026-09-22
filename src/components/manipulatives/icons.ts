@@ -1,0 +1,46 @@
+// Emoji icon bank — zero asset dependencies, bright and legible at small sizes.
+const ICONS: Record<string, string> = {
+  apple: "🍎",
+  pencil: "✏️",
+  egg: "🥚",
+  book: "📗",
+  cookie: "🍪",
+  flower: "🌷",
+  grape: "🍇",
+  wheel: "🛞",
+  chair: "🪑",
+  player: "🧑",
+  crayon: "🖍️",
+  car: "🚗",
+  shoe: "👟",
+  spoon: "🥄",
+  brush: "🪮",
+  marker: "🖊️",
+  feather: "🪶",
+  strawberry: "🍓",
+  paperclip: "📎",
+  dog: "🐶",
+  rice: "🍚",
+  bike: "🚲",
+  watermelon: "🍉",
+  star: "⭐",
+  crown: "👑",
+  shield: "🛡️",
+  mountain: "⛰️",
+  compass: "🧭",
+  scale: "⚖️",
+  tree: "🌳",
+  trophy: "🏆",
+  medal: "🏅",
+  flame: "🔥",
+  brain: "🧠",
+  fox: "🦊",
+  cat: "🐱",
+  bread: "🍞",
+  cube: "🟪",
+};
+
+export function icon(key: string | undefined): string {
+  if (!key) return "🔷";
+  return ICONS[key] ?? "🔷";
+}

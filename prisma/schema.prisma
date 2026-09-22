@@ -1,0 +1,387 @@
+// Singapore Math learning app — curriculum, mastery, and progress data model.
+// SQLite for zero-config local dev; schema is plain relational Prisma and
+// migrates to Postgres/Supabase later by swapping the datasource provider.
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+// ── People ──────────────────────────────────────────────────────────────
+
+model Parent {
+  id        String    @id @default(cuid())
+  email     String    @unique
+  name      String
+  createdAt DateTime  @default(now())
+  students  Student[]
+}
+
+model Student {
+  id        String   @id @default(cuid())
+  parentId  String
+  parent    Parent   @relation(fields: [parentId], references: [id], onDelete: Cascade)
+  name      String
+  avatarKey String   @default("fox")
+  birthYear Int?
+  createdAt DateTime @default(now())
+
+  currentGradeId String?
+  currentGrade   Grade?  @relation(fields: [currentGradeId], references: [id])
+
+  totalXp      Int       @default(0)
+  streakDays   Int       @default(0)
+  lastActiveAt DateTime?
+
+  lessonProgress  LessonProgress[]
+  attempts        Attempt[]
+  skillMastery    SkillMastery[]
+  factMastery     FactMastery[]
+  sessions        LearningSession[]
+  misconceptions  Misconception[]
+  xpEvents        XpEvent[]
+  achievements    StudentAchievement[]
+  assessmentTakes AssessmentAttempt[]
+}
+
+// ── Curriculum hierarchy: Grade → Chapter → Lesson → Concept → Skill ─────
+
+model Grade {
+  id       String    @id @default(cuid())
+  name     String // "Grade 2"
+  sequence String // "Dimensions Math 2A"
+  order    Int
+  chapters Chapter[]
+  students Student[]
+}
+
+model Chapter {
+  id          String   @id @default(cuid())
+  gradeId     String
+  grade       Grade    @relation(fields: [gradeId], references: [id], onDelete: Cascade)
+  order       Int
+  code        String   @unique // "ch1"
+  title       String
+  description String
+  worldName   String // "Number Kingdom"
+  worldTheme  String // icon/color key for the mission map
+  lessons     Lesson[]
+}
+
+enum LessonType {
+  STANDARD
+  PRACTICE
+  REVIEW
+  ASSESSMENT
+}
+
+model Lesson {
+  id              String     @id @default(cuid())
+  chapterId       String
+  chapter         Chapter    @relation(fields: [chapterId], references: [id], onDelete: Cascade)
+  order           Int
+  code            String     @unique // "ch7-l1"
+  title           String
+  type            LessonType @default(STANDARD)
+  objective       String
+  missionBriefing String // short in-world framing text shown to the child
+
+  concepts Concept[]
+  progress LessonProgress[]
+  sessions LearningSession[]
+}
+
+model Concept {
+  id       String  @id @default(cuid())
+  lessonId String
+  lesson   Lesson  @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  order    Int
+  title    String
+  bigIdea  String // one-sentence "what should click" summary
+  skills   Skill[]
+}
+
+model Skill {
+  id          String  @id @default(cuid())
+  conceptId   String
+  concept     Concept @relation(fields: [conceptId], references: [id], onDelete: Cascade)
+  code        String  @unique // "ch7.mult5.table"
+  title       String
+  description String
+  stage       Stage   @default(CONCRETE) // dominant C-P-A stage for this skill's intro
+
+  prerequisites SkillPrerequisite[] @relation("SkillToPrereq")
+  requiredBy    SkillPrerequisite[] @relation("PrereqToSkill")
+
+  questions    Question[]     @relation("QuestionSkills")
+  skillMastery SkillMastery[]
+  achievements Achievement[]
+}
+
+enum Stage {
+  CONCRETE
+  PICTORIAL
+  ABSTRACT
+}
+
+model SkillPrerequisite {
+  id             String @id @default(cuid())
+  skillId        String
+  skill          Skill  @relation("SkillToPrereq", fields: [skillId], references: [id], onDelete: Cascade)
+  prerequisiteId String
+  prerequisite   Skill  @relation("PrereqToSkill", fields: [prerequisiteId], references: [id], onDelete: Cascade)
+
+  @@unique([skillId, prerequisiteId])
+}
+
+// ── Questions: deterministic generator templates + generated instances ───
+
+enum QuestionKind {
+  MULTIPLE_CHOICE
+  FILL_IN_BLANK
+  DRAG_DROP
+  NUMBER_LINE
+  MATCHING
+  BUILD_MODEL
+  BUILD_EQUATION
+  EXPLAIN_THINKING
+  FIND_THE_MISTAKE
+  WORD_PROBLEM
+  SORT_ORDER
+  ESTIMATION
+  ARRAY_VISUAL
+  BAR_MODEL
+}
+
+model Question {
+  id          String       @id @default(cuid())
+  code        String       @unique // "ch7.mult5.table.build"
+  kind        QuestionKind
+  stage       Stage        @default(ABSTRACT)
+  generatorId String // key into the deterministic math-engine generator registry
+  paramsJson  String // JSON config passed to the generator (ranges, context, etc.)
+  difficulty  Int          @default(1) // 1..5, used for adaptive selection
+
+  skills    Skill[]            @relation("QuestionSkills")
+  instances QuestionInstance[]
+}
+
+// A concretely generated question shown to a student — numbers are fixed so
+// the attempt is reproducible and reviewable later.
+model QuestionInstance {
+  id         String   @id @default(cuid())
+  questionId String
+  question   Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  seed       String
+  promptJson String // rendered prompt data (text, numbers, image refs)
+  answerJson String // canonical correct answer + accepted equivalents
+  createdAt  DateTime @default(now())
+
+  attempts Attempt[]
+}
+
+// ── Attempts, hints, sessions ─────────────────────────────────────────────
+
+model LearningSession {
+  id        String    @id @default(cuid())
+  studentId String
+  student   Student   @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  lessonId  String?
+  lesson    Lesson?   @relation(fields: [lessonId], references: [id])
+  startedAt DateTime  @default(now())
+  endedAt   DateTime?
+  xpEarned  Int       @default(0)
+  phase     String? // which lesson-architecture phase was active when session ended
+
+  attempts Attempt[]
+}
+
+model Attempt {
+  id                 String           @id @default(cuid())
+  studentId          String
+  student            Student          @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  questionInstanceId String
+  questionInstance   QuestionInstance @relation(fields: [questionInstanceId], references: [id], onDelete: Cascade)
+  sessionId          String?
+  session            LearningSession? @relation(fields: [sessionId], references: [id])
+
+  responseJson   String
+  correct        Boolean
+  hintLevelUsed  Int      @default(0)
+  responseTimeMs Int
+  strategyTag    String? // free-text tag inferred from response pattern
+  independent    Boolean  @default(true) // false if given after a worked example
+  createdAt      DateTime @default(now())
+
+  hints Hint[]
+}
+
+model Hint {
+  id        String   @id @default(cuid())
+  attemptId String
+  attempt   Attempt  @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+  level     Int // 1-4
+  content   String
+  source    String   @default("rule") // "rule" | "ai"
+  createdAt DateTime @default(now())
+}
+
+// ── Mastery engine ─────────────────────────────────────────────────────
+
+enum MasteryState {
+  NOT_INTRODUCED
+  INTRODUCED
+  DEVELOPING
+  PRACTICING
+  PROFICIENT
+  MASTERED
+  NEEDS_REVIEW
+}
+
+model SkillMastery {
+  id        String       @id @default(cuid())
+  studentId String
+  student   Student      @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  skillId   String
+  skill     Skill        @relation(fields: [skillId], references: [id], onDelete: Cascade)
+  state     MasteryState @default(NOT_INTRODUCED)
+
+  attemptsCount    Int       @default(0)
+  correctCount     Int       @default(0)
+  independentCount Int       @default(0)
+  avgHintLevel     Float     @default(0)
+  rollingAccuracy  Float     @default(0) // EWMA over recent attempts
+  lastPracticedAt  DateTime?
+  nextReviewDueAt  DateTime?
+  streakCorrect    Int       @default(0)
+
+  @@unique([studentId, skillId])
+}
+
+// Individual arithmetic facts (e.g. "6x5", "30/5") tracked separately from
+// conceptual skill mastery — see spec: fluency speed is not conceptual mastery.
+model FactMastery {
+  id        String  @id @default(cuid())
+  studentId String
+  student   Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  operation String // "x" | "/"
+  operandA  Int
+  operandB  Int
+  factKey   String // normalized e.g. "x:5:6"
+
+  attempts        Int          @default(0)
+  correct         Int          @default(0)
+  incorrect       Int          @default(0)
+  avgResponseMs   Int          @default(0)
+  avgHintLevel    Float        @default(0)
+  confidence      Float        @default(0) // 0..1, independent correct rate
+  mastery         MasteryState @default(NOT_INTRODUCED)
+  lastPracticedAt DateTime?
+
+  @@unique([studentId, factKey])
+}
+
+// ── Misconceptions ─────────────────────────────────────────────────────
+
+model Misconception {
+  id           String    @id @default(cuid())
+  studentId    String
+  student      Student   @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  pattern      String // e.g. "MULT_AS_ADDITION", "DIVISION_OPERAND_CONFUSION"
+  skillCode    String
+  evidenceJson String
+  status       String    @default("ACTIVE") // ACTIVE | RESOLVED
+  detectedAt   DateTime  @default(now())
+  resolvedAt   DateTime?
+}
+
+// ── Gamification ────────────────────────────────────────────────────────
+
+model Achievement {
+  id          String  @id @default(cuid())
+  code        String  @unique
+  title       String
+  description String
+  icon        String
+  skillId     String?
+  skill       Skill?  @relation(fields: [skillId], references: [id])
+
+  studentAchievements StudentAchievement[]
+}
+
+model StudentAchievement {
+  id            String      @id @default(cuid())
+  studentId     String
+  student       Student     @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  achievementId String
+  achievement   Achievement @relation(fields: [achievementId], references: [id], onDelete: Cascade)
+  earnedAt      DateTime    @default(now())
+
+  @@unique([studentId, achievementId])
+}
+
+model XpEvent {
+  id        String   @id @default(cuid())
+  studentId String
+  student   Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  amount    Int
+  reason    String
+  createdAt DateTime @default(now())
+}
+
+// ── Lesson progress (resume where left off) ───────────────────────────
+
+enum LessonPhase {
+  BRIEFING
+  EXPLORE
+  DISCOVER
+  YOUR_TURN
+  CHALLENGE
+  GAME
+  MASTERY_CHECK
+  COMPLETE
+}
+
+model LessonProgress {
+  id        String      @id @default(cuid())
+  studentId String
+  student   Student     @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  lessonId  String
+  lesson    Lesson      @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  phase     LessonPhase @default(BRIEFING)
+  completed Boolean     @default(false)
+  updatedAt DateTime    @updatedAt
+
+  @@unique([studentId, lessonId])
+}
+
+// ── Assessments ───────────────────────────────────────────────────────
+
+enum AssessmentStyle {
+  TEST_A
+  TEST_B
+}
+
+model Assessment {
+  id        String          @id @default(cuid())
+  chapterId String
+  style     AssessmentStyle
+  title     String
+
+  attempts AssessmentAttempt[]
+}
+
+model AssessmentAttempt {
+  id           String     @id @default(cuid())
+  studentId    String
+  student      Student    @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  assessmentId String
+  assessment   Assessment @relation(fields: [assessmentId], references: [id], onDelete: Cascade)
+  scoreJson    String
+  startedAt    DateTime   @default(now())
+  completedAt  DateTime?
+}
