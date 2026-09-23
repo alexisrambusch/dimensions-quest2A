@@ -6,6 +6,7 @@ import { weightGenerators } from "./generators/weight";
 import { multiplicationGenerators } from "./generators/multiplication";
 import { divisionGenerators } from "./generators/division";
 import { mixedFactGenerators } from "./generators/mixedFacts";
+import { numberLineGenerators } from "./generators/numberLine";
 
 const ALL_GENERATORS: Generator[] = [
   ...placeValueGenerators,
@@ -15,6 +16,7 @@ const ALL_GENERATORS: Generator[] = [
   ...multiplicationGenerators,
   ...divisionGenerators,
   ...mixedFactGenerators,
+  ...numberLineGenerators,
 ];
 
 const REGISTRY = new Map<string, Generator>(ALL_GENERATORS.map((g) => [g.id, g]));

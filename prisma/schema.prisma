@@ -60,16 +60,17 @@ model Grade {
 }
 
 model Chapter {
-  id          String   @id @default(cuid())
+  id          String       @id @default(cuid())
   gradeId     String
-  grade       Grade    @relation(fields: [gradeId], references: [id], onDelete: Cascade)
+  grade       Grade        @relation(fields: [gradeId], references: [id], onDelete: Cascade)
   order       Int
-  code        String   @unique // "ch1"
+  code        String       @unique // "ch1"
   title       String
   description String
   worldName   String // "Number Kingdom"
   worldTheme  String // icon/color key for the mission map
   lessons     Lesson[]
+  assessments Assessment[]
 }
 
 enum LessonType {
@@ -367,10 +368,14 @@ enum AssessmentStyle {
 }
 
 model Assessment {
-  id        String          @id @default(cuid())
-  chapterId String
-  style     AssessmentStyle
-  title     String
+  id            String          @id @default(cuid())
+  code          String          @unique // "ch1-testA"
+  chapterId     String
+  chapter       Chapter         @relation(fields: [chapterId], references: [id], onDelete: Cascade)
+  style         AssessmentStyle
+  title         String
+  description   String
+  questionsJson String // ordered list of {questionCode, generatorId, params, difficulty, skillCode?}
 
   attempts AssessmentAttempt[]
 }

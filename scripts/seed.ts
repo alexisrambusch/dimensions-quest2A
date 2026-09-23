@@ -3,6 +3,7 @@ import { PrismaClient } from "../src/generated/prisma/client";
 import { PrismaBetterSqlite3 } from "@prisma/adapter-better-sqlite3";
 import { grade2a } from "../src/lib/curriculum/grade2a";
 import { ACHIEVEMENTS } from "../src/lib/gamification/achievements";
+import { ASSESSMENTS } from "../src/lib/curriculum/assessments";
 
 const adapter = new PrismaBetterSqlite3({ url: process.env.DATABASE_URL ?? "file:./dev.db" });
 const prisma = new PrismaClient({ adapter });
@@ -20,6 +21,8 @@ async function main() {
   // since a skill's prerequisites may reference a skill defined in a later chapter file's
   // scan order (e.g. ch3 depends on ch1) that must already exist as a row.
   const skillCodeToId = new Map<string, string>();
+  const questionCodeToId = new Map<string, string>();
+  const chapterCodeToId = new Map<string, string>();
 
   for (const [chapterIndex, chapter] of grade2a.chapters.entries()) {
     const chapterRow = await prisma.chapter.upsert({
@@ -119,11 +122,12 @@ async function main() {
                 skills: { connect: [{ id: skillRow.id }] },
               },
             });
-            void questionRow;
+            questionCodeToId.set(q.code, questionRow.id);
           }
         }
       }
     }
+    chapterCodeToId.set(chapter.code, chapterRow.id);
     console.log(`  Chapter ${chapter.code}: ${chapter.lessons.length} lessons seeded.`);
   }
 
@@ -164,6 +168,40 @@ async function main() {
     });
   }
   console.log(`  Seeded ${ACHIEVEMENTS.length} achievements.`);
+
+  // Assessments (Test A / Test B) — curated subsets of already-seeded questions.
+  let assessmentCount = 0;
+  for (const a of ASSESSMENTS) {
+    const chapterId = chapterCodeToId.get(a.chapterCode);
+    if (!chapterId) {
+      console.warn(`  WARNING: chapter "${a.chapterCode}" not found for assessment "${a.code}"; skipping.`);
+      continue;
+    }
+    const missing = a.questionCodes.filter((qc) => !questionCodeToId.has(qc));
+    if (missing.length > 0) {
+      console.warn(`  WARNING: assessment "${a.code}" references unknown question codes: ${missing.join(", ")}`);
+    }
+    await prisma.assessment.upsert({
+      where: { code: a.code },
+      update: {
+        chapterId,
+        style: a.style,
+        title: a.title,
+        description: a.description,
+        questionsJson: JSON.stringify(a.questionCodes),
+      },
+      create: {
+        code: a.code,
+        chapterId,
+        style: a.style,
+        title: a.title,
+        description: a.description,
+        questionsJson: JSON.stringify(a.questionCodes),
+      },
+    });
+    assessmentCount++;
+  }
+  console.log(`  Seeded ${assessmentCount} assessments.`);
 
   // Default household: one parent profile (this developer's account) and one student profile
   // so the app is immediately usable without a signup flow.

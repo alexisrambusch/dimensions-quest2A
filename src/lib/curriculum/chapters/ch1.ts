@@ -84,6 +84,23 @@ export const ch1: ChapterDef = {
             },
           ],
         },
+        {
+          title: "Where Numbers Live",
+          bigIdea: "A number line shows where a number sits compared to its neighbors — a spatial sense of size.",
+          skills: [
+            {
+              code: "ch1.numberline",
+              title: "Place numbers on a number line",
+              description: "Locate a given number's position on a number line.",
+              stage: "PICTORIAL",
+              prerequisites: ["ch1.compare"],
+              questions: [
+                { code: "ch1.numberline.q1", kind: "NUMBER_LINE", stage: "PICTORIAL", generatorId: "numberline.place", params: {}, difficulty: 1 },
+                { code: "ch1.numberline.q2", kind: "NUMBER_LINE", stage: "PICTORIAL", generatorId: "numberline.place", params: {}, difficulty: 3 },
+              ],
+            },
+          ],
+        },
       ],
     },
     {
@@ -154,11 +171,12 @@ export const ch1: ChapterDef = {
               title: "Chapter 1 mixed review",
               description: "Mixed practice across all Chapter 1 skills.",
               stage: "ABSTRACT",
-              prerequisites: ["ch1.compare", "ch1.order", "ch1.patterns"],
+              prerequisites: ["ch1.compare", "ch1.order", "ch1.patterns", "ch1.numberline"],
               questions: [
                 { code: "ch1.review.q1", kind: "MULTIPLE_CHOICE", stage: "ABSTRACT", generatorId: "compare.numbers", params: {}, difficulty: 3 },
                 { code: "ch1.review.q2", kind: "SORT_ORDER", stage: "ABSTRACT", generatorId: "order.numbers", params: {}, difficulty: 3 },
                 { code: "ch1.review.q3", kind: "BUILD_MODEL", stage: "CONCRETE", generatorId: "placevalue.build", params: {}, difficulty: 3 },
+                { code: "ch1.review.q4", kind: "NUMBER_LINE", stage: "PICTORIAL", generatorId: "numberline.place", params: {}, difficulty: 3 },
               ],
             },
           ],

@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getActiveStudent, switchProfileAction } from "@/lib/actions/students";
 import { getMissionMap } from "@/lib/actions/curriculum";
+import { getChapterAssessments } from "@/lib/actions/assessment";
 import { icon } from "@/components/manipulatives/icons";
 import { CARD } from "@/components/ui";
 
@@ -34,6 +35,10 @@ export default async function MissionMapPage() {
   if (!student) redirect("/profiles");
 
   const chapters = await getMissionMap(student.id);
+  const assessmentsByChapter = await Promise.all(
+    chapters.map(async (c) => ({ code: c.code, assessments: await getChapterAssessments(c.code, student.id) })),
+  );
+  const assessmentsMap = new Map(assessmentsByChapter.map((a) => [a.code, a.assessments]));
 
   return (
     <main className="flex-1 p-6 max-w-4xl mx-auto w-full flex flex-col gap-6">
@@ -91,6 +96,24 @@ export default async function MissionMapPage() {
                 );
               })}
             </div>
+            {chapter.status !== "LOCKED" && (assessmentsMap.get(chapter.code)?.length ?? 0) > 0 && (
+              <div className="flex flex-wrap gap-2 pt-1 border-t border-slate-100">
+                {assessmentsMap.get(chapter.code)!.map((a) => (
+                  <Link
+                    key={a.code}
+                    href={`/assessment/${a.code}`}
+                    className="inline-flex items-center gap-1.5 rounded-xl border-2 border-amber-300 bg-amber-50 text-amber-800 px-3 py-2 text-sm font-semibold hover:border-amber-500"
+                  >
+                    📝 {a.title}
+                    {a.bestScore && (
+                      <span className="text-xs font-bold text-amber-600">
+                        (best {a.bestScore.correct}/{a.bestScore.total})
+                      </span>
+                    )}
+                  </Link>
+                ))}
+              </div>
+            )}
           </section>
         ))}
       </div>

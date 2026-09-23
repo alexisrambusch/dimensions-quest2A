@@ -10,6 +10,7 @@ import { NumberBond } from "../manipulatives/NumberBond";
 import { BarModelMultiplication, BarModelDivision, BarModelPartWhole, BarModelCompare } from "../manipulatives/BarModel";
 import { RulerMeasure } from "../manipulatives/RulerMeasure";
 import { SortNumbers } from "../manipulatives/SortNumbers";
+import { NumberLine } from "../manipulatives/NumberLine";
 import { icon } from "../manipulatives/icons";
 import { CHOICE_BUTTON_IDLE, CHOICE_BUTTON_SELECTED, PRIMARY_BUTTON } from "../ui";
 
@@ -118,6 +119,12 @@ export function QuestionRenderer({ prompt, onSubmit, disabled }: Props) {
           <ChoiceGrid choices={d.choices} value={response as string | undefined} onChange={setResponse} />
           <span>{d.b}</span>
         </div>
+      );
+      break;
+
+    case "numberLine":
+      body = (
+        <NumberLine min={d.min} max={d.max} step={d.step} value={response as number | undefined} onChange={setResponse} />
       );
       break;
 
