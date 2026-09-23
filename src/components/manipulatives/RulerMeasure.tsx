@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { icon } from "./icons";
 
 interface Props {
@@ -16,6 +16,7 @@ interface Props {
 export function RulerMeasure({ object, icon: iconKey, actualLength, maxLength, unit, unitLabel, onChange }: Props) {
   const [estimate, setEstimate] = useState<number | "">("");
   const [measured, setMeasured] = useState<number | null>(null);
+  const trackRef = useRef<HTMLDivElement>(null);
   const ticks = Array.from({ length: maxLength + 1 }, (_, i) => i);
   // Inches get wider spacing and a tick at every unit (fewer, bigger marks);
   // centimeters get tighter spacing with a labeled mark every 5th tick.
@@ -25,6 +26,15 @@ export function RulerMeasure({ object, icon: iconKey, actualLength, maxLength, u
   function commit(nextMeasured: number) {
     setMeasured(nextMeasured);
     if (estimate !== "") onChange({ estimate: Number(estimate), measured: nextMeasured });
+  }
+
+  // The tick buttons are precise but narrow targets, especially at inch
+  // spacing — without this, tapping between them (very easy on a
+  // touchscreen) silently does nothing. This makes the whole track tappable.
+  function commitFromClientX(clientX: number) {
+    const rect = trackRef.current!.getBoundingClientRect();
+    const ratio = Math.min(1, Math.max(0, (clientX - rect.left) / rect.width));
+    commit(Math.round(ratio * maxLength));
   }
 
   function commitEstimate(v: number) {
@@ -52,7 +62,12 @@ export function RulerMeasure({ object, icon: iconKey, actualLength, maxLength, u
           <span className="text-4xl leading-none">{icon(iconKey)}</span>
           <div className="h-1 flex-1 bg-slate-400 rounded" />
         </div>
-        <div className="relative h-10 bg-amber-50 border-2 border-amber-300 rounded-md">
+        <div
+          ref={trackRef}
+          onClick={(e) => commitFromClientX(e.clientX)}
+          onTouchStart={(e) => commitFromClientX(e.touches[0].clientX)}
+          className="relative h-10 bg-amber-50 border-2 border-amber-300 rounded-md cursor-pointer touch-none"
+        >
           {ticks.map((t) => (
             <button
               key={t}
