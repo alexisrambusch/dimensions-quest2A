@@ -2,6 +2,8 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getActiveStudent } from "@/lib/actions/students";
 import { getParentDashboard } from "@/lib/actions/parentDashboard";
+import { getParentPinStatus, isParentUnlocked, lockParentDashboard } from "@/lib/actions/parentAuth";
+import { ParentPinGate } from "@/components/ParentPinGate";
 import { icon } from "@/components/manipulatives/icons";
 import { CARD } from "@/components/ui";
 
@@ -18,6 +20,16 @@ export default async function ParentDashboardPage() {
   const student = await getActiveStudent();
   if (!student) redirect("/profiles");
 
+  const unlocked = await isParentUnlocked();
+  if (!unlocked) {
+    const { hasPin } = await getParentPinStatus();
+    return (
+      <main className="flex-1 p-6 flex items-center justify-center">
+        <ParentPinGate hasPin={hasPin} />
+      </main>
+    );
+  }
+
   const data = await getParentDashboard(student.id);
 
   return (
@@ -30,9 +42,16 @@ export default async function ParentDashboardPage() {
             <p className="text-sm text-slate-500">Parent Dashboard</p>
           </div>
         </div>
-        <Link href="/map" className="text-sm font-semibold text-violet-600 hover:underline">
-          ← Back to quest map
-        </Link>
+        <div className="flex items-center gap-4">
+          <Link href="/map" className="text-sm font-semibold text-violet-600 hover:underline">
+            ← Back to quest map
+          </Link>
+          <form action={lockParentDashboard}>
+            <button type="submit" className="text-sm font-semibold text-slate-400 hover:text-slate-600">
+              🔒 Lock
+            </button>
+          </form>
+        </div>
       </header>
 
       <section className={`${CARD} grid grid-cols-2 sm:grid-cols-4 gap-4 text-center`}>

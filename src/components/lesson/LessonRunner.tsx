@@ -13,6 +13,9 @@ import {
   type AttemptResult,
 } from "@/lib/actions/lesson";
 import { QuestionRenderer } from "./QuestionRenderer";
+import { MatchingGame } from "./MatchingGame";
+import { startMatchingGame, completeMatchingGame, type MatchingGameBoard } from "@/lib/actions/matchingGame";
+import { getMatchingGameFactor } from "@/lib/curriculum/matchingGames";
 import { CARD, PRIMARY_BUTTON, SECONDARY_BUTTON } from "../ui";
 import clsx from "clsx";
 import type { LessonPhase } from "@/generated/prisma/enums";
@@ -88,18 +91,9 @@ export function LessonRunner({
   const [lessonXp, setLessonXp] = useState(0);
   const [badges, setBadges] = useState<Array<{ code: string; title: string; icon: string }>>([]);
   const [loadingQuestion, setLoadingQuestion] = useState(false);
+  const [matchingBoard, setMatchingBoard] = useState<MatchingGameBoard | null>(null);
   const servedAtRef = useRef<number>(Date.now());
-
-  useEffect(() => {
-    startSession(studentId, runtime.lesson.id).then(setSessionId);
-    // Resuming mid-lesson: the initial stage may already be past BRIEFING
-    // (from a prior session), so the question loop needs a kickstart here —
-    // otherwise a returning student lands on a permanent "Loading..." screen.
-    if (stage !== "BRIEFING" && stage !== "COMPLETE") {
-      loadQuestion([]);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [studentId, runtime.lesson.id]);
+  const matchingFactor = getMatchingGameFactor(runtime.lesson.code);
 
   const loadQuestion = useCallback(
     async (exclude: string[]) => {
@@ -116,16 +110,46 @@ export function LessonRunner({
     [studentId, runtime.lesson.code],
   );
 
+  async function loadMatchingGame() {
+    setLoadingQuestion(true);
+    const board = await startMatchingGame(matchingFactor!);
+    setMatchingBoard(board);
+    setLoadingQuestion(false);
+  }
+
+  useEffect(() => {
+    startSession(studentId, runtime.lesson.id).then(setSessionId);
+    // Resuming mid-lesson: the initial stage may already be past BRIEFING
+    // (from a prior session), so the question loop needs a kickstart here —
+    // otherwise a returning student lands on a permanent "Loading..." screen.
+    if (stage === "GAME" && matchingFactor !== undefined) {
+      loadMatchingGame();
+    } else if (stage !== "BRIEFING" && stage !== "COMPLETE") {
+      loadQuestion([]);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [studentId, runtime.lesson.id]);
+
   async function beginStage(next: Stage) {
     setStage(next);
     setAnsweredInStage(0);
     await setLessonPhase(studentId, runtime.lesson.id, next as LessonPhase);
-    if (next !== "BRIEFING" && next !== "COMPLETE") {
+    if (next === "GAME" && matchingFactor !== undefined) {
+      await loadMatchingGame();
+    } else if (next !== "BRIEFING" && next !== "COMPLETE") {
       await loadQuestion(askedCodes);
     }
     if (next === "COMPLETE" && sessionId) {
       await endSession(sessionId);
     }
+  }
+
+  async function handleMatchingComplete(results: Array<{ a: number; factor: number; mistakes: number }>) {
+    const res = await completeMatchingGame(studentId, results);
+    setLessonXp((x) => x + res.xpAwarded);
+    if (res.newBadges.length) setBadges((b) => [...b, ...res.newBadges]);
+    const idx = STAGE_ORDER.indexOf("GAME");
+    await beginStage(STAGE_ORDER[idx + 1]);
   }
 
   async function handleHint() {
@@ -273,6 +297,22 @@ export function LessonRunner({
               </div>
             )}
           </>
+        )}
+      </div>
+    );
+  }
+
+  if (stage === "GAME" && matchingFactor !== undefined) {
+    return (
+      <div className={`${CARD} max-w-lg mx-auto flex flex-col gap-5`}>
+        <div>
+          <p className="text-xs font-bold uppercase tracking-wide text-violet-400">Fact Blast!</p>
+          <p className="text-slate-500 text-sm">Match every ×{matchingFactor} equation to its answer.</p>
+        </div>
+        {loadingQuestion || !matchingBoard ? (
+          <p className="text-center text-slate-400 py-8">Loading...</p>
+        ) : (
+          <MatchingGame board={matchingBoard} onComplete={handleMatchingComplete} />
         )}
       </div>
     );
