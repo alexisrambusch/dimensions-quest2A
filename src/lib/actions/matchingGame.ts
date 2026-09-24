@@ -44,6 +44,9 @@ export async function startMatchingGame(factor: number): Promise<MatchingGameBoa
 
 export interface MatchingGameResult {
   xpAwarded: number;
+  coinsAwarded: number;
+  leveledUp: boolean;
+  newLevel: number;
   newBadges: Array<{ code: string; title: string; icon: string }>;
 }
 
@@ -63,7 +66,13 @@ export async function completeMatchingGame(
     });
     xpAwarded += independent ? 4 : 2;
   }
-  await awardXp(prisma, studentId, xpAwarded, "Fact Blast game");
-  const newBadges = await checkAndAwardAchievements(prisma, studentId);
-  return { xpAwarded, newBadges };
+  const xpResult = await awardXp(prisma, studentId, xpAwarded, "Fact Blast game");
+  const badgeResult = await checkAndAwardAchievements(prisma, studentId);
+  return {
+    xpAwarded,
+    coinsAwarded: xpResult.coinsAwarded + badgeResult.coinsAwarded,
+    leveledUp: xpResult.leveledUp || badgeResult.leveledUp,
+    newLevel: badgeResult.newLevel,
+    newBadges: badgeResult.newBadges,
+  };
 }

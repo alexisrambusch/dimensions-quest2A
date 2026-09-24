@@ -115,6 +115,11 @@ export function AssessmentRunner({ assessmentCode, studentId, title, description
           You got {result.correct} of {result.total} ({pct}%)!
         </h1>
         {pct >= 80 && <p className="text-center text-emerald-600 font-semibold">Excellent work! 🌟</p>}
+        {result.leveledUp && (
+          <div className="rounded-xl bg-amber-50 border border-amber-300 p-3 text-center font-bold text-amber-700">
+            🎉 Level Up! You&apos;re now Level {result.newLevel}!
+          </div>
+        )}
         {result.newBadges.length > 0 && (
           <div className="flex flex-wrap gap-3 justify-center">
             {result.newBadges.map((b) => (
@@ -138,7 +143,9 @@ export function AssessmentRunner({ assessmentCode, studentId, title, description
             </div>
           ))}
         </div>
-        <p className="text-center text-xs text-blue-500 font-semibold">+{result.xpAwarded} XP</p>
+        <p className="text-center text-xs text-blue-500 font-semibold">
+          +{result.xpAwarded} XP{result.coinsAwarded > 0 ? ` · +${result.coinsAwarded} 🪙` : ""}
+        </p>
         <button className={PRIMARY_BUTTON} onClick={() => router.push("/map")}>
           Back to the Map
         </button>

@@ -221,6 +221,9 @@ export interface AttemptResult {
   correctValue: unknown;
   explanation: string;
   xpAwarded: number;
+  coinsAwarded: number;
+  leveledUp: boolean;
+  newLevel: number;
   masteryState: string;
   newBadges: Array<{ code: string; title: string; icon: string }>;
   reteachSuggested: boolean;
@@ -310,17 +313,20 @@ export async function submitAttempt(input: {
   const baseXp = result.correct ? 10 : 2;
   const hintPenalty = Math.min(baseXp - 1, input.hintLevelUsed * 2);
   const xpAwarded = result.correct ? Math.max(2, baseXp - hintPenalty) : baseXp;
-  await awardXp(prisma, input.studentId, xpAwarded, result.correct ? `Correct: ${input.questionCode}` : `Attempt: ${input.questionCode}`);
+  const xpResult = await awardXp(prisma, input.studentId, xpAwarded, result.correct ? `Correct: ${input.questionCode}` : `Attempt: ${input.questionCode}`);
 
-  const newBadges = await checkAndAwardAchievements(prisma, input.studentId);
+  const badgeResult = await checkAndAwardAchievements(prisma, input.studentId);
 
   return {
     correct: result.correct,
     correctValue: instance.answer.value,
     explanation: instance.answer.explanation,
     xpAwarded,
+    coinsAwarded: xpResult.coinsAwarded + badgeResult.coinsAwarded,
+    leveledUp: xpResult.leveledUp || badgeResult.leveledUp,
+    newLevel: badgeResult.newLevel,
     masteryState,
-    newBadges,
+    newBadges: badgeResult.newBadges,
     reteachSuggested,
     misconceptionDescription,
   };

@@ -1,31 +1,40 @@
 import type { PrismaClient } from "@/generated/prisma/client";
-import { awardXp } from "../mastery/engine";
+import { awardXp, type XpAwardResult } from "../mastery/engine";
+import { levelForXp } from "./level";
 
 const BADGE_XP_BONUS = 25;
 
-async function grant(prisma: PrismaClient, studentId: string, code: string): Promise<boolean> {
+async function grant(prisma: PrismaClient, studentId: string, code: string): Promise<XpAwardResult | null> {
   const achievement = await prisma.achievement.findUnique({ where: { code } });
-  if (!achievement) return false;
+  if (!achievement) return null;
   const already = await prisma.studentAchievement.findUnique({
     where: { studentId_achievementId: { studentId, achievementId: achievement.id } },
   });
-  if (already) return false;
+  if (already) return null;
   await prisma.studentAchievement.create({ data: { studentId, achievementId: achievement.id } });
-  await awardXp(prisma, studentId, BADGE_XP_BONUS, `Badge: ${achievement.title}`);
-  return true;
+  return awardXp(prisma, studentId, BADGE_XP_BONUS, `Badge: ${achievement.title}`);
+}
+
+export interface AchievementResult {
+  newBadges: Array<{ code: string; title: string; icon: string }>;
+  coinsAwarded: number;
+  leveledUp: boolean;
+  newLevel: number;
 }
 
 /** Re-evaluate all achievement conditions for a student and grant any newly earned ones. */
-export async function checkAndAwardAchievements(
-  prisma: PrismaClient,
-  studentId: string,
-): Promise<Array<{ code: string; title: string; icon: string }>> {
+export async function checkAndAwardAchievements(prisma: PrismaClient, studentId: string): Promise<AchievementResult> {
   const newlyEarned: Array<{ code: string; title: string; icon: string }> = [];
+  let coinsAwarded = 0;
+  let leveledUp = false;
 
   async function tryGrant(code: string) {
-    if (await grant(prisma, studentId, code)) {
+    const xpResult = await grant(prisma, studentId, code);
+    if (xpResult) {
       const a = await prisma.achievement.findUnique({ where: { code } });
       if (a) newlyEarned.push({ code: a.code, title: a.title, icon: a.icon });
+      coinsAwarded += xpResult.coinsAwarded;
+      if (xpResult.leveledUp) leveledUp = true;
     }
   }
 
@@ -69,7 +78,8 @@ export async function checkAndAwardAchievements(
   });
   if (independentCorrect >= 5) await tryGrant("careful_thinker");
 
-  return newlyEarned;
+  const finalStudent = await prisma.student.findUniqueOrThrow({ where: { id: studentId }, select: { totalXp: true } });
+  return { newBadges: newlyEarned, coinsAwarded, leveledUp, newLevel: levelForXp(finalStudent.totalXp) };
 }
 
 /** Update the daily streak counter — called once per session start. */

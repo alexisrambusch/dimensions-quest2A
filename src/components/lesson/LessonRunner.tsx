@@ -95,6 +95,9 @@ export function LessonRunner({
   const [feedback, setFeedback] = useState<AttemptResult | null>(null);
   const [attemptsOnQuestion, setAttemptsOnQuestion] = useState(0);
   const [lessonXp, setLessonXp] = useState(0);
+  const [lessonCoins, setLessonCoins] = useState(0);
+  const [leveledUp, setLeveledUp] = useState(false);
+  const [newLevel, setNewLevel] = useState<number | null>(null);
   const [badges, setBadges] = useState<Array<{ code: string; title: string; icon: string }>>([]);
   const [loadingQuestion, setLoadingQuestion] = useState(false);
   const [matchingBoard, setMatchingBoard] = useState<MatchingGameBoard | null>(null);
@@ -153,6 +156,11 @@ export function LessonRunner({
   async function handleMatchingComplete(results: Array<{ a: number; factor: number; mistakes: number }>) {
     const res = await completeMatchingGame(studentId, results);
     setLessonXp((x) => x + res.xpAwarded);
+    setLessonCoins((c) => c + res.coinsAwarded);
+    if (res.leveledUp) {
+      setLeveledUp(true);
+      setNewLevel(res.newLevel);
+    }
     if (res.newBadges.length) setBadges((b) => [...b, ...res.newBadges]);
     const idx = STAGE_ORDER.indexOf("GAME");
     await beginStage(STAGE_ORDER[idx + 1]);
@@ -196,6 +204,11 @@ export function LessonRunner({
       hintLevelUsed: hintLevel,
     });
     setLessonXp((x) => x + result.xpAwarded);
+    setLessonCoins((c) => c + result.coinsAwarded);
+    if (result.leveledUp) {
+      setLeveledUp(true);
+      setNewLevel(result.newLevel);
+    }
     if (result.newBadges.length) setBadges((b) => [...b, ...result.newBadges]);
     setAttemptsOnQuestion((n) => n + 1);
     setFeedback(result);
@@ -283,8 +296,15 @@ export function LessonRunner({
           {alreadyCompleted && lessonXp === 0 ? "Mission already complete! ⭐" : "Mission Complete! 🎉"}
         </h1>
         <p className="text-slate-600">
-          {lessonXp > 0 ? `You earned ${lessonXp} XP in this mission.` : "Great job finishing this one already — head back to keep exploring the map."}
+          {lessonXp > 0
+            ? `You earned ${lessonXp} XP${lessonCoins > 0 ? ` and ${lessonCoins} 🪙 coins` : ""} in this mission.`
+            : "Great job finishing this one already — head back to keep exploring the map."}
         </p>
+        {leveledUp && (
+          <div className="rounded-xl bg-amber-50 border border-amber-300 p-3 font-bold text-amber-700">
+            🎉 Level Up! You&apos;re now Level {newLevel}!
+          </div>
+        )}
         {badges.length > 0 && (
           <div className="flex flex-wrap gap-3 justify-center">
             {badges.map((b) => (
@@ -441,7 +461,12 @@ export function LessonRunner({
                   <p>{feedback.misconceptionDescription}</p>
                 </div>
               )}
-              <p className="text-xs text-blue-500 font-semibold mt-2">+{feedback.xpAwarded} XP</p>
+              <p className="text-xs text-blue-500 font-semibold mt-2">
+                +{feedback.xpAwarded} XP{feedback.coinsAwarded > 0 ? ` · +${feedback.coinsAwarded} 🪙` : ""}
+              </p>
+              {feedback.leveledUp && (
+                <p className="text-sm font-bold text-amber-700 mt-1">🎉 Level Up! You&apos;re now Level {feedback.newLevel}!</p>
+              )}
               <button className={clsx(PRIMARY_BUTTON, "mt-3")} onClick={handleNext}>
                 Next
               </button>

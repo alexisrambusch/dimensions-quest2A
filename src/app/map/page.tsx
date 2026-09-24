@@ -5,6 +5,7 @@ import { getMissionMap } from "@/lib/actions/curriculum";
 import { getChapterAssessments } from "@/lib/actions/assessment";
 import { icon } from "@/components/manipulatives/icons";
 import { CARD } from "@/components/ui";
+import { levelForXp } from "@/lib/gamification/level";
 
 export const dynamic = "force-dynamic";
 
@@ -49,10 +50,18 @@ export default async function MissionMapPage() {
           <span className="text-4xl">{icon(student.avatarKey)}</span>
           <div>
             <h1 className="text-2xl font-black text-blue-800">{student.name}&apos;s Quest Map</h1>
-            <p className="text-sm text-blue-500 font-semibold">{student.totalXp} XP · {student.streakDays} day streak</p>
+            <p className="text-sm text-blue-500 font-semibold">
+              Level {levelForXp(student.totalXp)} · {student.totalXp} XP · {student.coins} 🪙 · {student.streakDays} day streak
+            </p>
           </div>
         </div>
         <div className="flex gap-3">
+          <Link href="/trophies" className="text-sm font-semibold text-slate-500 hover:text-blue-700 self-center">
+            Trophy Case
+          </Link>
+          <Link href="/shop" className="text-sm font-semibold text-slate-500 hover:text-blue-700 self-center">
+            Shop
+          </Link>
           <Link href="/parent" className="text-sm font-semibold text-slate-500 hover:text-blue-700 self-center">
             Parent Dashboard
           </Link>

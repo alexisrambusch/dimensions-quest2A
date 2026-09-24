@@ -36,6 +36,7 @@ model Student {
   currentGrade   Grade?  @relation(fields: [currentGradeId], references: [id])
 
   totalXp      Int       @default(0)
+  coins        Int       @default(0) // spent in the shop; minted automatically whenever totalXp crosses a level threshold
   streakDays   Int       @default(0)
   lastActiveAt DateTime?
 
@@ -48,6 +49,7 @@ model Student {
   xpEvents        XpEvent[]
   achievements    StudentAchievement[]
   assessmentTakes AssessmentAttempt[]
+  creatures       StudentCreature[]
 }
 
 // ── Curriculum hierarchy: Grade → Chapter → Lesson → Concept → Skill ─────
@@ -331,6 +333,37 @@ model StudentAchievement {
   earnedAt      DateTime    @default(now())
 
   @@unique([studentId, achievementId])
+}
+
+// Original creature-collecting shop economy (coins, minted per level-up, buy
+// a mystery capsule for a weighted-random creature — never real-world IP).
+enum CreatureRarity {
+  COMMON
+  RARE
+  LEGENDARY
+}
+
+model Creature {
+  id          String         @id @default(cuid())
+  code        String         @unique
+  name        String
+  description String
+  icon        String
+  rarity      CreatureRarity
+
+  studentCreatures StudentCreature[]
+}
+
+model StudentCreature {
+  id              String   @id @default(cuid())
+  studentId       String
+  student         Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  creatureId      String
+  creature        Creature @relation(fields: [creatureId], references: [id], onDelete: Cascade)
+  count           Int      @default(1) // how many times this creature has been pulled (duplicates still count)
+  firstObtainedAt DateTime @default(now())
+
+  @@unique([studentId, creatureId])
 }
 
 model XpEvent {

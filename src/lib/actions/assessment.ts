@@ -107,6 +107,9 @@ export interface AssessmentResult {
   total: number;
   perQuestion: Array<{ questionCode: string; correct: boolean; explanation: string }>;
   xpAwarded: number;
+  coinsAwarded: number;
+  leveledUp: boolean;
+  newLevel: number;
   newBadges: Array<{ code: string; title: string; icon: string }>;
 }
 
@@ -167,8 +170,17 @@ export async function submitAssessment(
   });
 
   const xpAwarded = correctCount * 8 + (correctCount === total ? 20 : 0);
-  await awardXp(prisma, studentId, xpAwarded, `Assessment: ${correctCount}/${total}`);
-  const newBadges = await checkAndAwardAchievements(prisma, studentId);
+  const xpResult = await awardXp(prisma, studentId, xpAwarded, `Assessment: ${correctCount}/${total}`);
+  const badgeResult = await checkAndAwardAchievements(prisma, studentId);
 
-  return { correct: correctCount, total, perQuestion, xpAwarded, newBadges };
+  return {
+    correct: correctCount,
+    total,
+    perQuestion,
+    xpAwarded,
+    coinsAwarded: xpResult.coinsAwarded + badgeResult.coinsAwarded,
+    leveledUp: xpResult.leveledUp || badgeResult.leveledUp,
+    newLevel: badgeResult.newLevel,
+    newBadges: badgeResult.newBadges,
+  };
 }

@@ -1,6 +1,7 @@
 import type { PrismaClient } from "@/generated/prisma/client";
 import { grade2a } from "./curriculum/grade2a";
 import { ACHIEVEMENTS } from "./gamification/achievements";
+import { CREATURES } from "./gamification/creatures";
 import { ASSESSMENTS } from "./curriculum/assessments";
 
 const HOUSEHOLD_PARENT_EMAIL = "alexisrambusch@gmail.com";
@@ -180,6 +181,27 @@ export async function seedDatabase(prisma: PrismaClient): Promise<string[]> {
     });
   }
   say(`  Seeded ${ACHIEVEMENTS.length} achievements.`);
+
+  // Shop creature roster (real animals + fun facts, upserted so re-seeding is safe).
+  for (const c of CREATURES) {
+    await prisma.creature.upsert({
+      where: { code: c.code },
+      update: { name: c.name, description: c.description, icon: c.icon, rarity: c.rarity },
+      create: { code: c.code, name: c.name, description: c.description, icon: c.icon, rarity: c.rarity },
+    });
+  }
+  // Drop any previously-seeded creatures that fell out of the roster, as long as nobody has collected one yet.
+  const currentCreatureCodes = CREATURES.map((c) => c.code);
+  const staleCreatures = await prisma.creature.findMany({
+    where: { code: { notIn: currentCreatureCodes } },
+    include: { _count: { select: { studentCreatures: true } } },
+  });
+  for (const stale of staleCreatures) {
+    if (stale._count.studentCreatures === 0) {
+      await prisma.creature.delete({ where: { id: stale.id } });
+    }
+  }
+  say(`  Seeded ${CREATURES.length} shop creatures.`);
 
   // Assessments (Test A / Test B) — curated subsets of already-seeded questions.
   let assessmentCount = 0;

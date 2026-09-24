@@ -1,5 +1,6 @@
 import type { PrismaClient } from "@/generated/prisma/client";
 import type { MasteryState } from "@/generated/prisma/enums";
+import { COINS_PER_LEVEL, levelForXp } from "../gamification/level";
 
 type Tx = Pick<PrismaClient, "skillMastery" | "factMastery" | "student" | "xpEvent" | "misconception">;
 
@@ -182,7 +183,30 @@ export async function updateFactMastery(
   });
 }
 
-export async function awardXp(prisma: Tx, studentId: string, amount: number, reason: string): Promise<void> {
+export interface XpAwardResult {
+  leveledUp: boolean;
+  newLevel: number;
+  coinsAwarded: number;
+}
+
+/** Awards XP and, if it pushes the student across one or more level thresholds, mints coins to spend in the shop. */
+export async function awardXp(prisma: Tx, studentId: string, amount: number, reason: string): Promise<XpAwardResult> {
+  const before = await prisma.student.findUniqueOrThrow({ where: { id: studentId }, select: { totalXp: true } });
+  const levelBefore = levelForXp(before.totalXp);
+
   await prisma.xpEvent.create({ data: { studentId, amount, reason } });
-  await prisma.student.update({ where: { id: studentId }, data: { totalXp: { increment: amount } } });
+  const after = await prisma.student.update({
+    where: { id: studentId },
+    data: { totalXp: { increment: amount } },
+    select: { totalXp: true },
+  });
+  const levelAfter = levelForXp(after.totalXp);
+  const levelsGained = Math.max(0, levelAfter - levelBefore);
+  const coinsAwarded = levelsGained * COINS_PER_LEVEL;
+
+  if (coinsAwarded > 0) {
+    await prisma.student.update({ where: { id: studentId }, data: { coins: { increment: coinsAwarded } } });
+  }
+
+  return { leveledUp: levelsGained > 0, newLevel: levelAfter, coinsAwarded };
 }
