@@ -33,21 +33,26 @@ export function ShopClient({ studentId, initial }: { studentId: string; initial:
   async function handleOpen() {
     setPulling(true);
     setError(null);
-    const res = await openMysteryOrb(studentId);
-    setPulling(false);
-    if ("error" in res) {
-      setError(res.error);
-      return;
+    try {
+      const res = await openMysteryOrb(studentId);
+      if ("error" in res) {
+        setError(res.error);
+        return;
+      }
+      setState((s) => ({
+        ...s,
+        coins: res.coinsRemaining,
+        creatures: s.creatures.map((c) => (c.code === res.creature.code ? { ...c, owned: true, count: c.count + 1 } : c)),
+      }));
+      setReveal({
+        creature: { ...res.creature, owned: true, count: 1 },
+        context: res.isNew ? "new" : "duplicate",
+      });
+    } catch {
+      setError("Something went wrong opening that orb — please try again.");
+    } finally {
+      setPulling(false);
     }
-    setState((s) => ({
-      ...s,
-      coins: res.coinsRemaining,
-      creatures: s.creatures.map((c) => (c.code === res.creature.code ? { ...c, owned: true, count: c.count + 1 } : c)),
-    }));
-    setReveal({
-      creature: { ...res.creature, owned: true, count: 1 },
-      context: res.isNew ? "new" : "duplicate",
-    });
   }
 
   const canAfford = state.coins >= state.orbCost;
