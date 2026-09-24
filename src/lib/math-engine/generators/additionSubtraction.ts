@@ -254,6 +254,52 @@ export const addSubTwoStep: Generator = {
   validate: (response, answer) => validateNumeric(response, answer),
 };
 
+function shuffle<T>(arr: T[], rng: () => number): T[] {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(rng() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+/** "Which two of these four numbers give the greatest/least answer when subtracted?" — the pair has to be found before the subtraction even starts. */
+export const addSubExtremePair: Generator = {
+  id: "addsub.extremepair",
+  generate(seed, difficulty, params): GeneratedInstance {
+    const rng = seededRng(seed);
+    const max = difficulty <= 3 ? 400 : difficulty <= 4 ? 700 : 999;
+    const mode = (params.mode as "greatest" | "least" | undefined) ?? (rng() < 0.5 ? "greatest" : "least");
+    const values = new Set<number>();
+    while (values.size < 4) values.add(randInt(rng, 10, max));
+    const sorted = Array.from(values).sort((x, y) => x - y);
+    const result =
+      mode === "greatest"
+        ? sorted[3] - sorted[0]
+        : Math.min(sorted[1] - sorted[0], sorted[2] - sorted[1], sorted[3] - sorted[2]);
+    const shown = shuffle(sorted, rng);
+    const text = `Which two of these numbers will give the ${mode} answer when one is subtracted from the other? ${shown.join(", ")}. Find the answer.`;
+    return {
+      prompt: {
+        view: "numericAnswer",
+        kind: "WORD_PROBLEM",
+        stage: "ABSTRACT",
+        text,
+        data: {},
+      },
+      answer: {
+        value: result,
+        explanation:
+          mode === "greatest"
+            ? `The greatest gap is between the biggest and smallest number: ${sorted[3]} − ${sorted[0]} = ${result}.`
+            : `The smallest gap is between two numbers that are close together once sorted: ${result}.`,
+      },
+      meta: { values: sorted, mode },
+    };
+  },
+  validate: (response, answer) => validateNumeric(response, answer),
+};
+
 export const additionSubtractionGenerators = [
   numberBondMissingPart,
   additionWithin1000,
@@ -262,4 +308,5 @@ export const additionSubtractionGenerators = [
   addSubMissingOperand,
   addSubFindMistake,
   addSubTwoStep,
+  addSubExtremePair,
 ];
