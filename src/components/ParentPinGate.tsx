@@ -58,7 +58,7 @@ export function ParentPinGate({ hasPin }: { hasPin: boolean }) {
             value={pin}
             onChange={(e) => setPin(e.target.value.replace(/\D/g, ""))}
             placeholder="New PIN"
-            className="text-center text-2xl tracking-[0.5em] rounded-xl border-2 border-slate-300 focus:border-violet-500 outline-none py-3"
+            className="text-center text-2xl tracking-[0.5em] rounded-xl border-2 border-slate-300 focus:border-blue-500 outline-none py-3"
           />
           <input
             type="password"
@@ -67,7 +67,7 @@ export function ParentPinGate({ hasPin }: { hasPin: boolean }) {
             value={confirmPin}
             onChange={(e) => setConfirmPin(e.target.value.replace(/\D/g, ""))}
             placeholder="Confirm PIN"
-            className="text-center text-2xl tracking-[0.5em] rounded-xl border-2 border-slate-300 focus:border-violet-500 outline-none py-3"
+            className="text-center text-2xl tracking-[0.5em] rounded-xl border-2 border-slate-300 focus:border-blue-500 outline-none py-3"
           />
           {error && <p className="text-sm text-rose-600 text-center">{error}</p>}
           <button type="submit" disabled={pin.length !== 4 || busy} className={PRIMARY_BUTTON}>
@@ -93,7 +93,7 @@ export function ParentPinGate({ hasPin }: { hasPin: boolean }) {
           value={pin}
           onChange={(e) => setPin(e.target.value.replace(/\D/g, ""))}
           placeholder="PIN"
-          className="text-center text-2xl tracking-[0.5em] rounded-xl border-2 border-slate-300 focus:border-violet-500 outline-none py-3"
+          className="text-center text-2xl tracking-[0.5em] rounded-xl border-2 border-slate-300 focus:border-blue-500 outline-none py-3"
         />
         {error && <p className="text-sm text-rose-600 text-center">{error}</p>}
         <button type="submit" disabled={pin.length !== 4 || busy} className={PRIMARY_BUTTON}>

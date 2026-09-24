@@ -29,7 +29,7 @@ function NumericBlank({ value, onChange }: { value: number | undefined; onChange
       onChange={(e) => onChange(Number(e.target.value))}
       placeholder="?"
       autoFocus
-      className="w-24 text-center text-3xl font-black rounded-xl border-2 border-slate-300 focus:border-violet-500 outline-none py-2"
+      className="w-24 text-center text-3xl font-black rounded-xl border-2 border-slate-300 focus:border-blue-500 outline-none py-2"
     />
   );
 }
@@ -89,7 +89,7 @@ export function QuestionRenderer({ prompt, onSubmit, disabled }: Props) {
     case "placeValueChart":
       body = (
         <div className="flex flex-col items-center gap-3">
-          <div className="text-3xl font-black text-violet-700">{d.target}</div>
+          <div className="text-3xl font-black text-blue-700">{d.target}</div>
           <div className="flex items-center gap-2 text-lg font-semibold">
             <NumericBlank
               value={(response as any)?.hundreds}
@@ -240,7 +240,7 @@ export function QuestionRenderer({ prompt, onSubmit, disabled }: Props) {
               onClick={() => setResponse(opt.name)}
               className={clsx(
                 "flex flex-col items-center gap-2 rounded-2xl border-2 p-4",
-                response === opt.name ? "border-violet-500 bg-violet-50" : "border-slate-200 bg-white",
+                response === opt.name ? "border-blue-500 bg-blue-50" : "border-slate-200 bg-white",
               )}
             >
               <span className="text-4xl">{icon(opt.icon)}</span>

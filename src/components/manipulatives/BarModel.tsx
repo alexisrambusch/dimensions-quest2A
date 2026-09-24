@@ -1,6 +1,6 @@
 "use client";
 
-const SEGMENT_COLORS = ["bg-violet-400", "bg-amber-400", "bg-sky-400", "bg-emerald-400", "bg-rose-400", "bg-fuchsia-400"];
+const SEGMENT_COLORS = ["bg-blue-400", "bg-amber-400", "bg-sky-400", "bg-emerald-400", "bg-rose-400", "bg-orange-400"];
 
 /** A single labeled bar made of one or more segments, used across all bar-model variants. */
 function Bar({ segments }: { segments: Array<{ label: string; flex: number; color?: string }> }) {

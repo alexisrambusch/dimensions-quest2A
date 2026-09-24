@@ -71,7 +71,7 @@ export function AssessmentRunner({ assessmentCode, studentId, title, description
   if (stage === "INTRO") {
     return (
       <div className={`${CARD} max-w-lg mx-auto flex flex-col gap-4 text-center`}>
-        <p className="text-xs font-bold uppercase tracking-wide text-violet-400">{style === "TEST_A" ? "Test A" : "Test B"}</p>
+        <p className="text-xs font-bold uppercase tracking-wide text-blue-400">{style === "TEST_A" ? "Test A" : "Test B"}</p>
         <h1 className="text-2xl font-black text-slate-800">{title}</h1>
         <p className="text-slate-600">{description}</p>
         <p className="text-sm text-slate-400">{questionCount} questions · no hints this time — show what you know!</p>
@@ -87,10 +87,10 @@ export function AssessmentRunner({ assessmentCode, studentId, title, description
     return (
       <div className={`${CARD} max-w-lg mx-auto flex flex-col gap-5`}>
         <div className="flex items-center justify-between">
-          <p className="text-xs font-bold uppercase tracking-wide text-violet-400">{title}</p>
+          <p className="text-xs font-bold uppercase tracking-wide text-blue-400">{title}</p>
           <div className="flex gap-1">
             {runtime.questions.map((_, i) => (
-              <span key={i} className={clsx("h-2.5 w-2.5 rounded-full", i < index ? "bg-emerald-400" : i === index ? "bg-violet-400" : "bg-slate-200")} />
+              <span key={i} className={clsx("h-2.5 w-2.5 rounded-full", i < index ? "bg-emerald-400" : i === index ? "bg-blue-400" : "bg-slate-200")} />
             ))}
           </div>
         </div>
@@ -138,7 +138,7 @@ export function AssessmentRunner({ assessmentCode, studentId, title, description
             </div>
           ))}
         </div>
-        <p className="text-center text-xs text-violet-500 font-semibold">+{result.xpAwarded} XP</p>
+        <p className="text-center text-xs text-blue-500 font-semibold">+{result.xpAwarded} XP</p>
         <button className={PRIMARY_BUTTON} onClick={() => router.push("/map")}>
           Back to the Map
         </button>

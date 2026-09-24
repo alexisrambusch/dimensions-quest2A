@@ -20,7 +20,7 @@ const WORLD_ICONS: Record<string, string> = {
 
 const LESSON_STATUS_STYLE: Record<string, string> = {
   LOCKED: "bg-slate-100 text-slate-400 border-slate-200 cursor-not-allowed",
-  AVAILABLE: "bg-white text-violet-700 border-violet-300 hover:border-violet-500",
+  AVAILABLE: "bg-white text-blue-700 border-blue-300 hover:border-blue-500",
   IN_PROGRESS: "bg-amber-50 text-amber-700 border-amber-400",
   COMPLETE: "bg-emerald-50 text-emerald-700 border-emerald-400",
 };
@@ -48,16 +48,16 @@ export default async function MissionMapPage() {
         <div className="flex items-center gap-3">
           <span className="text-4xl">{icon(student.avatarKey)}</span>
           <div>
-            <h1 className="text-2xl font-black text-violet-800">{student.name}&apos;s Quest Map</h1>
-            <p className="text-sm text-violet-500 font-semibold">{student.totalXp} XP · {student.streakDays} day streak</p>
+            <h1 className="text-2xl font-black text-blue-800">{student.name}&apos;s Quest Map</h1>
+            <p className="text-sm text-blue-500 font-semibold">{student.totalXp} XP · {student.streakDays} day streak</p>
           </div>
         </div>
         <div className="flex gap-3">
-          <Link href="/parent" className="text-sm font-semibold text-slate-500 hover:text-violet-700 self-center">
+          <Link href="/parent" className="text-sm font-semibold text-slate-500 hover:text-blue-700 self-center">
             Parent Dashboard
           </Link>
           <form action={switchProfileAction}>
-            <button type="submit" className="text-sm font-semibold text-slate-500 hover:text-violet-700">
+            <button type="submit" className="text-sm font-semibold text-slate-500 hover:text-blue-700">
               Switch profile
             </button>
           </form>

@@ -224,7 +224,7 @@ export function LessonRunner({
   if (stage === "BRIEFING") {
     return (
       <div className={`${CARD} max-w-lg mx-auto text-center flex flex-col gap-4`}>
-        <p className="text-xs font-bold uppercase tracking-wide text-violet-400">
+        <p className="text-xs font-bold uppercase tracking-wide text-blue-400">
           {runtime.lesson.worldName} · {runtime.lesson.chapterTitle}
         </p>
         <h1 className="text-2xl font-black text-slate-800">{runtime.lesson.title}</h1>
@@ -268,12 +268,12 @@ export function LessonRunner({
     return (
       <div className={`${CARD} max-w-lg mx-auto flex flex-col gap-6`}>
         <div>
-          <p className="text-xs font-bold uppercase tracking-wide text-violet-400">{config.label}</p>
+          <p className="text-xs font-bold uppercase tracking-wide text-blue-400">{config.label}</p>
           <p className="text-slate-600 mt-1">{config.blurb}</p>
         </div>
         {runtime.concepts.map((c) => (
-          <div key={c.title} className="rounded-xl bg-violet-50 border border-violet-100 p-4">
-            <p className="font-bold text-violet-800">{c.title}</p>
+          <div key={c.title} className="rounded-xl bg-blue-50 border border-blue-100 p-4">
+            <p className="font-bold text-blue-800">{c.title}</p>
             <p className="text-slate-600 text-sm mt-1">{c.bigIdea}</p>
           </div>
         ))}
@@ -306,7 +306,7 @@ export function LessonRunner({
     return (
       <div className={`${CARD} max-w-lg mx-auto flex flex-col gap-5`}>
         <div>
-          <p className="text-xs font-bold uppercase tracking-wide text-violet-400">Fact Blast!</p>
+          <p className="text-xs font-bold uppercase tracking-wide text-blue-400">Fact Blast!</p>
           <p className="text-slate-500 text-sm">Match every ×{matchingFactor} equation to its answer.</p>
         </div>
         {loadingQuestion || !matchingBoard ? (
@@ -323,7 +323,7 @@ export function LessonRunner({
     <div className={`${CARD} max-w-lg mx-auto flex flex-col gap-5`}>
       <div className="flex items-center justify-between">
         <div>
-          <p className="text-xs font-bold uppercase tracking-wide text-violet-400">{config.label}</p>
+          <p className="text-xs font-bold uppercase tracking-wide text-blue-400">{config.label}</p>
           <p className="text-slate-500 text-sm">{config.blurb}</p>
         </div>
         <div className="flex gap-1">
@@ -396,12 +396,12 @@ export function LessonRunner({
               </p>
               <p className="text-slate-600 mt-1">{feedback.explanation}</p>
               {feedback.reteachSuggested && feedback.misconceptionDescription && (
-                <div className="mt-3 rounded-lg bg-violet-100 border border-violet-300 p-3 text-left text-sm text-violet-800">
+                <div className="mt-3 rounded-lg bg-blue-100 border border-blue-300 p-3 text-left text-sm text-blue-800">
                   <p className="font-bold">Let&apos;s look at this together:</p>
                   <p>{feedback.misconceptionDescription}</p>
                 </div>
               )}
-              <p className="text-xs text-violet-500 font-semibold mt-2">+{feedback.xpAwarded} XP</p>
+              <p className="text-xs text-blue-500 font-semibold mt-2">+{feedback.xpAwarded} XP</p>
               <button className={clsx(PRIMARY_BUTTON, "mt-3")} onClick={handleNext}>
                 Next
               </button>

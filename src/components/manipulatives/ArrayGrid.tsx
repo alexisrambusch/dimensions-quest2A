@@ -21,7 +21,7 @@ export function ArrayGrid({ rows, cols, itemIcon }: Props) {
               {Array.from({ length: cols }, (_, c) => (
                 <span
                   key={c}
-                  className="h-8 w-8 flex items-center justify-center rounded-md bg-violet-50 border border-violet-200 text-lg leading-none"
+                  className="h-8 w-8 flex items-center justify-center rounded-md bg-blue-50 border border-blue-200 text-lg leading-none"
                 >
                   {glyph}
                 </span>

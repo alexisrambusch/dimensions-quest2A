@@ -56,12 +56,12 @@ export function PlaceValueBuilder({ target, onBuilt }: Props) {
           </div>
         ))}
       </div>
-      <div className="text-3xl font-black text-violet-700 tabular-nums">{built}</div>
+      <div className="text-3xl font-black text-blue-700 tabular-nums">{built}</div>
       <button
         type="button"
         disabled={!complete}
         onClick={() => onBuilt(built)}
-        className="rounded-2xl bg-violet-600 disabled:bg-slate-200 disabled:text-slate-400 text-white font-bold px-6 py-3 shadow-md"
+        className="rounded-2xl bg-blue-600 disabled:bg-slate-200 disabled:text-slate-400 text-white font-bold px-6 py-3 shadow-md"
       >
         {complete ? "That's my number!" : `Build ${target} to continue`}
       </button>
