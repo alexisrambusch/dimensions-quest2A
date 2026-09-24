@@ -1,5 +1,5 @@
-import type { Generator, GeneratedInstance } from "../types";
-import { seededRng, randInt } from "../random";
+import type { Generator, GeneratedInstance, ValidationResult } from "../types";
+import { seededRng, randInt, pick } from "../random";
 import { pickContext } from "../contexts";
 import { divFactKey, multFactKey } from "../facts";
 import { validateNumeric } from "../numeric";
@@ -124,4 +124,45 @@ export const divWordProblemMeasurement: Generator = {
   validate: (response, answer) => validateNumeric(response, answer),
 };
 
-export const divisionGenerators = [divFromMult, divFact, divWordProblemPartitive, divWordProblemMeasurement];
+/** "Find the mistake" — surfaces the divide-as-subtract misconception (total minus divisor, instead of splitting into equal groups). */
+export const divFindMistake: Generator = {
+  id: "div.findmistake",
+  generate(seed, difficulty, params): GeneratedInstance {
+    const factor = params.factor as number;
+    const rng = seededRng(seed);
+    const [lo, hi] = difficultyRange(difficulty);
+    const a = Math.max(2, randInt(rng, lo, hi));
+    const total = a * factor;
+    const correct = a;
+    const wrongAsSubtraction = Math.max(0, total - factor);
+    const shownAnswer = pick(rng, [correct, wrongAsSubtraction]);
+    const isWrong = shownAnswer !== correct;
+    return {
+      prompt: {
+        view: "findMistake",
+        kind: "FIND_THE_MISTAKE",
+        stage: "ABSTRACT",
+        text: `A friend says ${total} ÷ ${factor} = ${shownAnswer}. Are they right?`,
+        data: {},
+      },
+      answer: {
+        value: !isWrong,
+        explanation: isWrong
+          ? `${total} ÷ ${factor} means splitting ${total} into groups of ${factor}, which gives ${correct}, not ${shownAnswer}.`
+          : `That's correct: ${total} ÷ ${factor} = ${correct}.`,
+      },
+      meta: { a: total, b: factor, op: "d", shownAnswer, correct },
+    };
+  },
+  validate(response, answer): ValidationResult {
+    return { correct: response === answer.value };
+  },
+};
+
+export const divisionGenerators = [
+  divFromMult,
+  divFact,
+  divWordProblemPartitive,
+  divWordProblemMeasurement,
+  divFindMistake,
+];

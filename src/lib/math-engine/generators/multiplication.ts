@@ -161,4 +161,81 @@ export const multFindMistake: Generator = {
   },
 };
 
-export const multiplicationGenerators = [multTable, multArray, multFact, multWordProblem, multFindMistake];
+/** True/false claim about the commutative property — catches "swapping the numbers always works" applied carelessly to the wrong pair. */
+export const multCommutativeClaim: Generator = {
+  id: "mult.commutativeclaim",
+  generate(seed, difficulty, params): GeneratedInstance {
+    const factor = params.factor as number;
+    const rng = seededRng(seed);
+    const [lo, hi] = difficultyRange(difficulty);
+    const a = randInt(rng, lo, hi);
+    const isTrue = rng() < 0.5;
+    let wrongPartner = factor + (rng() < 0.5 ? 1 : 2);
+    if (wrongPartner === factor) wrongPartner += 1;
+    const rightFactor = isTrue ? factor : wrongPartner;
+    const text = `${a} × ${factor} = ${rightFactor} × ${a}. Is this correct?`;
+    return {
+      prompt: {
+        view: "findMistake",
+        kind: "FIND_THE_MISTAKE",
+        stage: "ABSTRACT",
+        text,
+        data: {},
+      },
+      answer: {
+        value: isTrue,
+        explanation: `${a} × ${factor} and ${factor} × ${a} always give the same product — that's the commutative property. Swapping in a different number changes the answer.`,
+      },
+      meta: { a, factor, wrongPartner, isTrue },
+    };
+  },
+  validate(response, answer): ValidationResult {
+    return { correct: response === answer.value };
+  },
+};
+
+/** "Would you multiply or divide?" — tests recognizing the structure of a problem before any computing happens. */
+export const multDivChooseOperation: Generator = {
+  id: "multdiv.chooseoperation",
+  generate(seed, difficulty, params): GeneratedInstance {
+    const factor = params.factor as number;
+    const rng = seededRng(seed);
+    const [lo, hi] = difficultyRange(difficulty);
+    const a = randInt(rng, lo, hi);
+    const ctx = pickContext(rng);
+    const isMultiply = rng() < 0.5;
+    const text = isMultiply
+      ? `There are ${a} ${ctx.containerPlural}. Each ${ctx.container} has ${factor} ${ctx.itemPlural}. Would you multiply or divide to find the total number of ${ctx.itemPlural}?`
+      : `There are ${a * factor} ${ctx.itemPlural} shared equally among ${factor} ${ctx.containerPlural}. Would you multiply or divide to find how many ${ctx.itemPlural} are in each ${ctx.container}?`;
+    const answerValue = isMultiply ? "multiply" : "divide";
+    return {
+      prompt: {
+        view: "chooseUnit",
+        kind: "MULTIPLE_CHOICE",
+        stage: "ABSTRACT",
+        text,
+        data: { choices: ["multiply", "divide"] },
+      },
+      answer: {
+        value: answerValue,
+        explanation: isMultiply
+          ? `You know the number of groups and the size of each group, so multiply to find the total.`
+          : `You know the total and the number of groups, so divide to find the size of each group.`,
+      },
+      meta: { isMultiply, a, factor },
+    };
+  },
+  validate(response, answer): ValidationResult {
+    return { correct: response === answer.value };
+  },
+};
+
+export const multiplicationGenerators = [
+  multTable,
+  multArray,
+  multFact,
+  multWordProblem,
+  multFindMistake,
+  multCommutativeClaim,
+  multDivChooseOperation,
+];
