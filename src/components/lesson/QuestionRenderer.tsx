@@ -153,17 +153,22 @@ export function QuestionRenderer({ prompt, onSubmit, disabled }: Props) {
       body = <NumberBond whole={d.whole} known={d.known} hidden={d.hidden} value={response as number | undefined} onChange={setResponse} />;
       break;
 
-    case "regroupingColumns":
+    case "regroupingColumns": {
+      // `missing` (default "result") lets a generator ask for any one slot — the
+      // sum/difference itself, or a missing addend/minuend/subtrahend — while
+      // reusing the same three-number equation layout.
+      const missing = (d.missing as "a" | "b" | "result" | undefined) ?? "result";
       body = (
         <div className="flex items-center gap-3 text-3xl font-black text-slate-800">
-          <span>{d.a}</span>
+          {missing === "a" ? <NumericBlank value={response as number | undefined} onChange={setResponse} /> : <span>{d.a}</span>}
           <span>{d.op}</span>
-          <span>{d.b}</span>
+          {missing === "b" ? <NumericBlank value={response as number | undefined} onChange={setResponse} /> : <span>{d.b}</span>}
           <span>=</span>
-          <NumericBlank value={response as number | undefined} onChange={setResponse} />
+          {missing === "result" ? <NumericBlank value={response as number | undefined} onChange={setResponse} /> : <span>{d.result}</span>}
         </div>
       );
       break;
+    }
 
     case "equation":
       body = (

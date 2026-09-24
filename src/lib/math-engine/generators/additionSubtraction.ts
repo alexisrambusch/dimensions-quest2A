@@ -1,4 +1,4 @@
-import type { Generator, GeneratedInstance } from "../types";
+import type { Generator, GeneratedInstance, ValidationResult } from "../types";
 import { seededRng, randInt } from "../random";
 import { pickContext } from "../contexts";
 import { validateNumeric } from "../numeric";
@@ -152,9 +152,114 @@ export const addSubWordProblem: Generator = {
   validate: (response, answer) => validateNumeric(response, answer),
 };
 
+/** Find a missing addend/subtrahend/minuend instead of the result — the inverse-operation reasoning workbooks call "find the missing number." */
+export const addSubMissingOperand: Generator = {
+  id: "addsub.missingoperand",
+  generate(seed, difficulty, params): GeneratedInstance {
+    const rng = seededRng(seed);
+    const opParam = (params.op as "add" | "sub" | undefined) ?? (rng() < 0.5 ? "add" : "sub");
+    const max = difficulty <= 2 ? 99 : difficulty <= 4 ? 499 : 899;
+    const missing = (params.missing as "a" | "b" | undefined) ?? (rng() < 0.5 ? "a" : "b");
+    let a: number, b: number, result: number;
+    if (opParam === "add") {
+      a = randInt(rng, 10, max);
+      b = randInt(rng, 10, max - 10);
+      result = a + b;
+    } else {
+      a = randInt(rng, 20, max);
+      b = randInt(rng, 10, a - 1);
+      result = a - b;
+    }
+    const symbol = opParam === "add" ? "+" : "−";
+    const answerValue = missing === "a" ? a : b;
+    return {
+      prompt: {
+        view: "regroupingColumns",
+        kind: "BUILD_EQUATION",
+        stage: "ABSTRACT",
+        text: `Find the missing number.`,
+        data: { a, b, op: symbol, result, missing },
+      },
+      answer: { value: answerValue, explanation: `${a} ${symbol} ${b} = ${result}.` },
+      meta: { a, b, op: opParam },
+    };
+  },
+  validate: (response, answer) => validateNumeric(response, answer),
+};
+
+/** "Is this addition/subtraction correct?" — seeded with the classic forgot-to-regroup slip so a right answer has to be checked, not just produced. */
+export const addSubFindMistake: Generator = {
+  id: "addsub.findmistake",
+  generate(seed, difficulty, params): GeneratedInstance {
+    const rng = seededRng(seed);
+    const opParam = (params.op as "add" | "sub" | undefined) ?? (rng() < 0.5 ? "add" : "sub");
+    const max = difficulty <= 2 ? 99 : difficulty <= 4 ? 499 : 899;
+    const a = randInt(rng, 20, max);
+    const b = opParam === "add" ? randInt(rng, 10, max) : randInt(rng, 10, a - 1);
+    const correct = opParam === "add" ? a + b : a - b;
+    const isTrue = rng() < 0.5;
+    let shown = correct;
+    if (!isTrue) {
+      const da = String(a).padStart(3, "0").split("").map(Number);
+      const db = String(b).padStart(3, "0").split("").map(Number);
+      const digitwise = opParam === "add" ? da.map((d, i) => d + db[i]) : da.map((d, i) => Math.abs(d - db[i]));
+      shown = Number(digitwise.join(""));
+      if (shown === correct) shown = correct + (rng() < 0.5 ? 10 : -10);
+    }
+    const symbol = opParam === "add" ? "+" : "−";
+    return {
+      prompt: {
+        view: "findMistake",
+        kind: "FIND_THE_MISTAKE",
+        stage: "ABSTRACT",
+        text: `${a} ${symbol} ${b} = ${shown}. Is this correct?`,
+        data: {},
+      },
+      answer: { value: isTrue, explanation: `${a} ${symbol} ${b} = ${correct}.` },
+      meta: { a, b, op: opParam },
+    };
+  },
+  validate(response, answer): ValidationResult {
+    return { correct: response === answer.value };
+  },
+};
+
+/** Two operations in one story — read, do the first step, then use that result for the second. */
+export const addSubTwoStep: Generator = {
+  id: "addsub.twostep",
+  generate(seed, difficulty): GeneratedInstance {
+    const rng = seededRng(seed);
+    const max = difficulty <= 2 ? 150 : difficulty <= 4 ? 400 : 700;
+    const ctx = pickContext(rng);
+    const a = randInt(rng, 10, max);
+    const b = randInt(rng, 10, max);
+    const total = a + b;
+    const c = randInt(rng, 5, Math.min(total - 1, max));
+    const result = total - c;
+    const names = ["Ravi", "Sofia", "Malik", "Elena", "Theo", "Amara"];
+    const name = names[Math.floor(rng() * names.length)];
+    const text = `${name} collected ${a} ${ctx.itemPlural} in the morning and ${b} more ${ctx.itemPlural} in the afternoon. Then ${name} gave away ${c} ${ctx.itemPlural}. How many ${ctx.itemPlural} does ${name} have left?`;
+    return {
+      prompt: {
+        view: "numericAnswer",
+        kind: "WORD_PROBLEM",
+        stage: "ABSTRACT",
+        text,
+        data: {},
+      },
+      answer: { value: result, explanation: `${a} + ${b} = ${total}, then ${total} − ${c} = ${result}.` },
+      meta: { a, b, c },
+    };
+  },
+  validate: (response, answer) => validateNumeric(response, answer),
+};
+
 export const additionSubtractionGenerators = [
   numberBondMissingPart,
   additionWithin1000,
   subtractionWithin1000,
   addSubWordProblem,
+  addSubMissingOperand,
+  addSubFindMistake,
+  addSubTwoStep,
 ];
