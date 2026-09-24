@@ -274,6 +274,10 @@ export function QuestionRenderer({ prompt, onSubmit, disabled }: Props) {
       readyToSubmit = !!response && typeof response === "object";
       break;
 
+    case "numericAnswer":
+      body = <NumericBlank value={response as number | undefined} onChange={setResponse} />;
+      break;
+
     case "findMistake":
       body = (
         <div className="flex flex-col items-center gap-4">
