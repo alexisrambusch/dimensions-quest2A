@@ -93,6 +93,12 @@ model Lesson {
   objective       String
   missionBriefing String // short in-world framing text shown to the child
 
+  // A single worked example — problem, ordered think-aloud steps, final
+  // answer — shown before any practice questions. JSON-encoded WorkedExample
+  // from src/lib/curriculum/types.ts; nullable so lessons can be migrated in
+  // gradually (the LEARN stage is skipped when this is absent).
+  workedExampleJson String?
+
   concepts Concept[]
   progress LessonProgress[]
   sessions LearningSession[]
@@ -340,6 +346,7 @@ model XpEvent {
 
 enum LessonPhase {
   BRIEFING
+  LEARN
   EXPLORE
   DISCOVER
   YOUR_TURN

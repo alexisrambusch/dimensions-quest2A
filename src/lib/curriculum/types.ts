@@ -27,12 +27,24 @@ export interface ConceptDef {
 
 export type LessonType = "STANDARD" | "PRACTICE" | "REVIEW" | "ASSESSMENT";
 
+/**
+ * A single worked example shown before any practice questions: a concrete
+ * problem, the think-aloud reasoning steps a student should walk through,
+ * and the resolved answer. This is the "I do" before "you do."
+ */
+export interface WorkedExample {
+  problem: string;
+  steps: string[];
+  answer: string;
+}
+
 export interface LessonDef {
   code: string;
   title: string;
   type: LessonType;
   objective: string;
   missionBriefing: string;
+  workedExample?: WorkedExample;
   concepts: ConceptDef[];
 }
 

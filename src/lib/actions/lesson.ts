@@ -35,6 +35,7 @@ export async function getLessonRuntime(lessonCode: string, studentId: string) {
       type: lesson.type,
       objective: lesson.objective,
       missionBriefing: lesson.missionBriefing,
+      workedExample: lesson.workedExampleJson ? JSON.parse(lesson.workedExampleJson) : null,
       chapterTitle: lesson.chapter.title,
       worldName: lesson.chapter.worldName,
     },

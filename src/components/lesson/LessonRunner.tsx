@@ -33,6 +33,11 @@ interface ConceptInfo {
   bigIdea: string;
   skills: SkillInfo[];
 }
+interface WorkedExampleInfo {
+  problem: string;
+  steps: string[];
+  answer: string;
+}
 export interface LessonRuntime {
   lesson: {
     id: string;
@@ -41,6 +46,7 @@ export interface LessonRuntime {
     type: string;
     objective: string;
     missionBriefing: string;
+    workedExample: WorkedExampleInfo | null;
     chapterTitle: string;
     worldName: string;
   };
@@ -49,9 +55,9 @@ export interface LessonRuntime {
   completed: boolean;
 }
 
-type Stage = "BRIEFING" | "DISCOVER" | "YOUR_TURN" | "CHALLENGE" | "GAME" | "MASTERY_CHECK" | "COMPLETE";
+type Stage = "BRIEFING" | "LEARN" | "DISCOVER" | "YOUR_TURN" | "CHALLENGE" | "GAME" | "MASTERY_CHECK" | "COMPLETE";
 
-const STAGE_ORDER: Stage[] = ["BRIEFING", "DISCOVER", "YOUR_TURN", "CHALLENGE", "GAME", "MASTERY_CHECK", "COMPLETE"];
+const STAGE_ORDER: Stage[] = ["BRIEFING", "LEARN", "DISCOVER", "YOUR_TURN", "CHALLENGE", "GAME", "MASTERY_CHECK", "COMPLETE"];
 
 const STAGE_CONFIG: Partial<Record<Stage, { label: string; blurb: string; count: number; graded: boolean }>> = {
   DISCOVER: { label: "Discover", blurb: "Let's explore the idea together first.", count: 1, graded: false },
@@ -124,7 +130,7 @@ export function LessonRunner({
     // otherwise a returning student lands on a permanent "Loading..." screen.
     if (stage === "GAME" && matchingFactor !== undefined) {
       loadMatchingGame();
-    } else if (stage !== "BRIEFING" && stage !== "COMPLETE") {
+    } else if (stage !== "BRIEFING" && stage !== "LEARN" && stage !== "COMPLETE") {
       loadQuestion([]);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -136,7 +142,7 @@ export function LessonRunner({
     await setLessonPhase(studentId, runtime.lesson.id, next as LessonPhase);
     if (next === "GAME" && matchingFactor !== undefined) {
       await loadMatchingGame();
-    } else if (next !== "BRIEFING" && next !== "COMPLETE") {
+    } else if (next !== "BRIEFING" && next !== "LEARN" && next !== "COMPLETE") {
       await loadQuestion(askedCodes);
     }
     if (next === "COMPLETE" && sessionId) {
@@ -229,8 +235,42 @@ export function LessonRunner({
         </p>
         <h1 className="text-2xl font-black text-slate-800">{runtime.lesson.title}</h1>
         <p className="text-slate-600">{runtime.lesson.missionBriefing}</p>
-        <button className={PRIMARY_BUTTON} onClick={() => beginStage("DISCOVER")}>
+        <button
+          className={PRIMARY_BUTTON}
+          onClick={() => beginStage(runtime.lesson.workedExample ? "LEARN" : "DISCOVER")}
+        >
           Begin Mission
+        </button>
+      </div>
+    );
+  }
+
+  if (stage === "LEARN" && runtime.lesson.workedExample) {
+    const { problem, steps, answer } = runtime.lesson.workedExample;
+    return (
+      <div className={`${CARD} max-w-lg mx-auto flex flex-col gap-5`}>
+        <div>
+          <p className="text-xs font-bold uppercase tracking-wide text-blue-400">Learn It</p>
+          <p className="text-slate-600 mt-1">Let&apos;s think through one together before you try it yourself.</p>
+        </div>
+        <div className="rounded-xl bg-blue-50 border border-blue-100 p-4">
+          <p className="font-bold text-blue-800">{problem}</p>
+        </div>
+        <ol className="flex flex-col gap-2.5">
+          {steps.map((step, i) => (
+            <li key={i} className="flex gap-3 items-start">
+              <span className="shrink-0 h-6 w-6 rounded-full bg-blue-600 text-white text-xs font-black flex items-center justify-center">
+                {i + 1}
+              </span>
+              <span className="text-slate-700 text-sm pt-0.5">{step}</span>
+            </li>
+          ))}
+        </ol>
+        <div className="rounded-xl bg-emerald-50 border border-emerald-200 p-4 text-center">
+          <p className="font-bold text-emerald-700">{answer}</p>
+        </div>
+        <button className={PRIMARY_BUTTON} onClick={() => beginStage("DISCOVER")}>
+          Now you try!
         </button>
       </div>
     );

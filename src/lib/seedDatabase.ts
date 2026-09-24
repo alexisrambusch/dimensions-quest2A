@@ -66,6 +66,7 @@ export async function seedDatabase(prisma: PrismaClient): Promise<string[]> {
           type: lesson.type,
           objective: lesson.objective,
           missionBriefing: lesson.missionBriefing,
+          workedExampleJson: lesson.workedExample ? JSON.stringify(lesson.workedExample) : null,
         },
         create: {
           code: lesson.code,
@@ -75,6 +76,7 @@ export async function seedDatabase(prisma: PrismaClient): Promise<string[]> {
           type: lesson.type,
           objective: lesson.objective,
           missionBriefing: lesson.missionBriefing,
+          workedExampleJson: lesson.workedExample ? JSON.stringify(lesson.workedExample) : null,
         },
       });
 
