@@ -174,7 +174,7 @@ export const orderNumbers: Generator = {
         view: "sortNumbers",
         kind: "SORT_ORDER",
         stage: "ABSTRACT",
-        text: `Drag the numbers into order from least to greatest.`,
+        text: `Put the numbers in order from least to greatest.`,
         data: { values },
       },
       answer: {
