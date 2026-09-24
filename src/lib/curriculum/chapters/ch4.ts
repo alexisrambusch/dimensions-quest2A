@@ -13,6 +13,16 @@ export const ch4: ChapterDef = {
       type: "STANDARD",
       objective: "Decide whether centimeters or meters is the reasonable unit for measuring an object.",
       missionBriefing: "The Island surveyors need help picking the right measuring tool for each job.",
+      workedExample: {
+        problem: "Would you measure a paperclip in centimeters or meters? What about the length of a hallway?",
+        steps: [
+          "Centimeters are for small things — about the size of your finger or smaller steps.",
+          "Meters are for long things — hallways, pools, whole rooms.",
+          "A paperclip is tiny, so centimeters make sense for it.",
+          "A hallway is long, so meters make more sense there.",
+        ],
+        answer: "Paperclip → centimeters. Hallway → meters.",
+      },
       concepts: [
         {
           title: "Centimeters vs. Meters",
@@ -27,6 +37,8 @@ export const ch4: ChapterDef = {
               questions: [
                 { code: "ch4.chooseunit.q1", kind: "MULTIPLE_CHOICE", stage: "ABSTRACT", generatorId: "length.chooseunit", params: { system: "metric" }, difficulty: 1 },
                 { code: "ch4.chooseunit.q2", kind: "MULTIPLE_CHOICE", stage: "ABSTRACT", generatorId: "length.chooseunit", params: { system: "metric" }, difficulty: 2 },
+                { code: "ch4.chooseunit.q3", kind: "MULTIPLE_CHOICE", stage: "ABSTRACT", generatorId: "length.chooseunit", params: { system: "metric" }, difficulty: 3 },
+                { code: "ch4.chooseunit.q4", kind: "MULTIPLE_CHOICE", stage: "ABSTRACT", generatorId: "length.reasonableestimate", params: { unit: "m" }, difficulty: 3 },
               ],
             },
           ],
@@ -39,6 +51,16 @@ export const ch4: ChapterDef = {
       type: "STANDARD",
       objective: "Estimate an object's length in centimeters, then measure it with a ruler and compare.",
       missionBriefing: "Guess how long each Island object is, then check yourself with the ruler!",
+      workedExample: {
+        problem: "About how long is a crayon? Estimate first, then check with a ruler.",
+        steps: [
+          "A centimeter is about the width of your smallest fingernail — use that as a mental ruler.",
+          "A crayon looks like it's about as long as 8 fingernail-widths in a row.",
+          "So a good estimate is about 8 centimeters.",
+          "Now check with the real ruler: line up one end at 0, and read where the other end lands.",
+        ],
+        answer: "The crayon is about 8 cm long — checking confirms the estimate.",
+      },
       concepts: [
         {
           title: "Estimating Before Measuring",
@@ -53,6 +75,8 @@ export const ch4: ChapterDef = {
               questions: [
                 { code: "ch4.estimate.measure.q1", kind: "ESTIMATION", stage: "CONCRETE", generatorId: "length.estimatemeasure", params: { unit: "cm" }, difficulty: 1 },
                 { code: "ch4.estimate.measure.q2", kind: "ESTIMATION", stage: "CONCRETE", generatorId: "length.estimatemeasure", params: { unit: "cm" }, difficulty: 2 },
+                { code: "ch4.estimate.measure.q3", kind: "ESTIMATION", stage: "CONCRETE", generatorId: "length.estimatemeasure", params: { unit: "cm" }, difficulty: 3 },
+                { code: "ch4.estimate.measure.q4", kind: "FIND_THE_MISTAKE", stage: "ABSTRACT", generatorId: "length.rulerfindmistake", params: { unit: "cm" }, difficulty: 3 },
               ],
             },
           ],
@@ -65,6 +89,16 @@ export const ch4: ChapterDef = {
       type: "STANDARD",
       objective: "Choose between inches and feet, and measure objects in inches with a ruler.",
       missionBriefing: "The Island's American visitors measure things a different way — inches and feet! Give it a try.",
+      workedExample: {
+        problem: "Would you measure a pencil in inches or feet? About how many inches long is it?",
+        steps: [
+          "Inches are for small things, just like centimeters. Feet are for longer things, like meters.",
+          "A pencil is small, so inches make sense here.",
+          "A typical pencil is a little longer than your hand — about 7 inches.",
+          "Check with the inch ruler: line up one end at 0 and read where it ends.",
+        ],
+        answer: "Use inches — a pencil is about 7 inches long.",
+      },
       concepts: [
         {
           title: "Customary Units",
@@ -79,6 +113,8 @@ export const ch4: ChapterDef = {
               questions: [
                 { code: "ch4.chooseunit.customary.q1", kind: "MULTIPLE_CHOICE", stage: "ABSTRACT", generatorId: "length.chooseunit", params: { system: "customary" }, difficulty: 1 },
                 { code: "ch4.chooseunit.customary.q2", kind: "MULTIPLE_CHOICE", stage: "ABSTRACT", generatorId: "length.chooseunit", params: { system: "customary" }, difficulty: 2 },
+                { code: "ch4.chooseunit.customary.q3", kind: "MULTIPLE_CHOICE", stage: "ABSTRACT", generatorId: "length.chooseunit", params: { system: "customary" }, difficulty: 3 },
+                { code: "ch4.chooseunit.customary.q4", kind: "MULTIPLE_CHOICE", stage: "ABSTRACT", generatorId: "length.reasonableestimate", params: { unit: "in" }, difficulty: 3 },
               ],
             },
             {
@@ -90,6 +126,8 @@ export const ch4: ChapterDef = {
               questions: [
                 { code: "ch4.estimate.measure.inches.q1", kind: "ESTIMATION", stage: "CONCRETE", generatorId: "length.estimatemeasure", params: { unit: "in" }, difficulty: 1 },
                 { code: "ch4.estimate.measure.inches.q2", kind: "ESTIMATION", stage: "CONCRETE", generatorId: "length.estimatemeasure", params: { unit: "in" }, difficulty: 2 },
+                { code: "ch4.estimate.measure.inches.q3", kind: "ESTIMATION", stage: "CONCRETE", generatorId: "length.estimatemeasure", params: { unit: "in" }, difficulty: 3 },
+                { code: "ch4.estimate.measure.inches.q4", kind: "FIND_THE_MISTAKE", stage: "ABSTRACT", generatorId: "length.rulerfindmistake", params: { unit: "in" }, difficulty: 3 },
               ],
             },
           ],
@@ -102,6 +140,16 @@ export const ch4: ChapterDef = {
       type: "PRACTICE",
       objective: "Compare the lengths of two objects and identify which is longer.",
       missionBriefing: "Line up two Island objects side by side — which one wins the length contest?",
+      workedExample: {
+        problem: "A pencil is 18 cm long. A crayon is 9 cm long. Which is longer, and by how many centimeters?",
+        steps: [
+          "Both lengths are already in the same unit (centimeters), so you can compare the numbers directly.",
+          "18 is greater than 9, so the pencil is longer.",
+          "To find how much longer, subtract: 18 − 9.",
+          "18 − 9 = 9.",
+        ],
+        answer: "The pencil is longer, by 9 cm.",
+      },
       concepts: [
         {
           title: "Longer and Shorter",
@@ -116,6 +164,10 @@ export const ch4: ChapterDef = {
               questions: [
                 { code: "ch4.compare.q1", kind: "MULTIPLE_CHOICE", stage: "PICTORIAL", generatorId: "length.compare", params: { unit: "cm" }, difficulty: 1 },
                 { code: "ch4.compare.q2", kind: "MULTIPLE_CHOICE", stage: "PICTORIAL", generatorId: "length.compare", params: { unit: "in" }, difficulty: 2 },
+                { code: "ch4.compare.q3", kind: "MULTIPLE_CHOICE", stage: "PICTORIAL", generatorId: "length.comparethree", params: { unit: "cm", mode: "longest" }, difficulty: 3 },
+                { code: "ch4.compare.q4", kind: "MULTIPLE_CHOICE", stage: "PICTORIAL", generatorId: "length.comparethree", params: { unit: "in", mode: "shortest" }, difficulty: 3 },
+                { code: "ch4.compare.q5", kind: "WORD_PROBLEM", stage: "ABSTRACT", generatorId: "length.difference", params: { unit: "cm" }, difficulty: 3 },
+                { code: "ch4.compare.q6", kind: "WORD_PROBLEM", stage: "ABSTRACT", generatorId: "length.difference", params: { unit: "in" }, difficulty: 4 },
               ],
             },
           ],
@@ -128,6 +180,16 @@ export const ch4: ChapterDef = {
       type: "REVIEW",
       objective: "Review choosing units, estimating/measuring length, and comparing lengths.",
       missionBriefing: "Show the Island surveyors everything you've learned about length!",
+      workedExample: {
+        problem: "Quick recap: how do you decide what unit to use, and how do you compare lengths?",
+        steps: [
+          "Small objects use small units (centimeters or inches); long distances use big units (meters or feet).",
+          "To estimate, compare the object to something familiar you already know the size of.",
+          "To compare two measured lengths in the same unit, just compare the numbers.",
+          "To find 'how much longer,' subtract the shorter length from the longer one.",
+        ],
+        answer: "Pick the right-sized unit, estimate from something familiar, then compare or subtract the numbers.",
+      },
       concepts: [
         {
           title: "Mixed Review",
@@ -144,6 +206,10 @@ export const ch4: ChapterDef = {
                 { code: "ch4.review.q2", kind: "ESTIMATION", stage: "CONCRETE", generatorId: "length.estimatemeasure", params: { unit: "cm" }, difficulty: 2 },
                 { code: "ch4.review.q3", kind: "MULTIPLE_CHOICE", stage: "ABSTRACT", generatorId: "length.chooseunit", params: { system: "customary" }, difficulty: 2 },
                 { code: "ch4.review.q4", kind: "MULTIPLE_CHOICE", stage: "PICTORIAL", generatorId: "length.compare", params: { unit: "cm" }, difficulty: 2 },
+                { code: "ch4.review.q5", kind: "MULTIPLE_CHOICE", stage: "ABSTRACT", generatorId: "length.reasonableestimate", params: { unit: "m" }, difficulty: 4 },
+                { code: "ch4.review.q6", kind: "FIND_THE_MISTAKE", stage: "ABSTRACT", generatorId: "length.rulerfindmistake", params: { unit: "cm" }, difficulty: 4 },
+                { code: "ch4.review.q7", kind: "MULTIPLE_CHOICE", stage: "PICTORIAL", generatorId: "length.comparethree", params: { unit: "cm", mode: "longest" }, difficulty: 4 },
+                { code: "ch4.review.q8", kind: "WORD_PROBLEM", stage: "ABSTRACT", generatorId: "length.difference", params: { unit: "in" }, difficulty: 4 },
               ],
             },
           ],
