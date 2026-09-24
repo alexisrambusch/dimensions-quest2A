@@ -28,14 +28,32 @@ export interface ConceptDef {
 export type LessonType = "STANDARD" | "PRACTICE" | "REVIEW" | "ASSESSMENT";
 
 /**
+ * A picture attached to a worked-example step or answer, rendered by
+ * LearnVisual (src/components/lesson/LearnVisual.tsx). `view` selects which
+ * static diagram to draw — see that file for the full catalog of supported
+ * views and the data shape each one expects.
+ */
+export interface WorkedExampleVisual {
+  view: string;
+  data: Record<string, unknown>;
+}
+
+export interface WorkedExampleStep {
+  text: string;
+  visual?: WorkedExampleVisual;
+}
+
+/**
  * A single worked example shown before any practice questions: a concrete
- * problem, the think-aloud reasoning steps a student should walk through,
+ * problem, the think-aloud reasoning steps a student should walk through
+ * (each optionally paired with a picture, like the textbook's Learn pages),
  * and the resolved answer. This is the "I do" before "you do."
  */
 export interface WorkedExample {
   problem: string;
-  steps: string[];
+  steps: WorkedExampleStep[];
   answer: string;
+  answerVisual?: WorkedExampleVisual;
 }
 
 export interface LessonDef {

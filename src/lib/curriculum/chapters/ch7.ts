@@ -17,12 +17,13 @@ export const ch7: ChapterDef = {
       workedExample: {
         problem: "There are 5 gems in each chest. How many gems are in 3 chests?",
         steps: [
-          "1 chest has 5 gems.",
-          "2 chests have 5 + 5 = 10 gems.",
-          "3 chests have 10 + 5 = 15 gems — each new chest adds another 5.",
-          "That's the same as 3 × 5.",
+          { text: "1 chest has 5 gems.", visual: { view: "equalGroups", data: { groups: 1, perGroup: 5, itemIcon: "star" } } },
+          { text: "2 chests have 5 + 5 = 10 gems.", visual: { view: "equalGroups", data: { groups: 2, perGroup: 5, itemIcon: "star" } } },
+          { text: "3 chests have 10 + 5 = 15 gems — each new chest adds another 5.", visual: { view: "equalGroups", data: { groups: 3, perGroup: 5, itemIcon: "star" } } },
+          { text: "That's the same as 3 × 5.", visual: { view: "sortedNumbers", data: { values: [5, 10, 15] } } },
         ],
         answer: "3 × 5 = 15 gems.",
+        answerVisual: { view: "equation", data: { left: 3, op: "x", right: 5, result: 15 } },
       },
       concepts: [
         {
@@ -55,11 +56,12 @@ export const ch7: ChapterDef = {
       workedExample: {
         problem: "What is 5 × 7? What is 7 × 5?",
         steps: [
-          "Count by 5s seven times: 5, 10, 15, 20, 25, 30, 35.",
-          "So 5 × 7 = 35.",
-          "Multiplication works the same in either order, so 7 × 5 gives the same product.",
+          { text: "Count by 5s seven times: 5, 10, 15, 20, 25, 30, 35.", visual: { view: "sortedNumbers", data: { values: [5, 10, 15, 20, 25, 30, 35] } } },
+          { text: "So 5 × 7 = 35.", visual: { view: "equation", data: { left: 5, op: "x", right: 7, result: 35 } } },
+          { text: "Multiplication works the same in either order, so 7 × 5 gives the same product.", visual: { view: "equation", data: { left: 7, op: "x", right: 5, result: 35 } } },
         ],
         answer: "5 × 7 = 35 and 7 × 5 = 35.",
+        answerVisual: { view: "arrayGrid", data: { rows: 5, cols: 7, itemIcon: "grape" } },
       },
       concepts: [
         {
@@ -93,10 +95,11 @@ export const ch7: ChapterDef = {
       workedExample: {
         problem: "A vendor sells crystals in bags of 5. If someone buys 6 bags, how many crystals do they get?",
         steps: [
-          "6 bags of 5 crystals is 6 × 5.",
-          "Count by 5s six times: 5, 10, 15, 20, 25, 30.",
+          { text: "6 bags of 5 crystals is 6 × 5.", visual: { view: "equalGroups", data: { groups: 6, perGroup: 5, itemIcon: "cube" } } },
+          { text: "Count by 5s six times: 5, 10, 15, 20, 25, 30.", visual: { view: "sortedNumbers", data: { values: [5, 10, 15, 20, 25, 30] } } },
         ],
         answer: "6 × 5 = 30 crystals.",
+        answerVisual: { view: "equation", data: { left: 6, op: "x", right: 5, result: 30 } },
       },
       concepts: [
         {
@@ -129,12 +132,13 @@ export const ch7: ChapterDef = {
       workedExample: {
         problem: "There are 2 wings on each dragon. How many wings do 4 dragons have?",
         steps: [
-          "1 dragon has 2 wings.",
-          "2 dragons have 2 + 2 = 4 wings.",
-          "Each new dragon adds another 2 wings — that's doubling the number of dragons.",
-          "4 dragons: 4 × 2.",
+          { text: "1 dragon has 2 wings.", visual: { view: "equalGroups", data: { groups: 1, perGroup: 2, itemIcon: "feather" } } },
+          { text: "2 dragons have 2 + 2 = 4 wings.", visual: { view: "equalGroups", data: { groups: 2, perGroup: 2, itemIcon: "feather" } } },
+          { text: "Each new dragon adds another 2 wings — that's doubling the number of dragons." },
+          { text: "4 dragons: 4 × 2.", visual: { view: "equalGroups", data: { groups: 4, perGroup: 2, itemIcon: "feather" } } },
         ],
         answer: "4 × 2 = 8 wings.",
+        answerVisual: { view: "equation", data: { left: 4, op: "x", right: 2, result: 8 } },
       },
       concepts: [
         {
@@ -167,11 +171,12 @@ export const ch7: ChapterDef = {
       workedExample: {
         problem: "What is 2 × 8? What is 8 × 2?",
         steps: [
-          "×2 is the same as doubling — double 8 to get 2 × 8.",
-          "8 + 8 = 16, so 2 × 8 = 16.",
-          "Order doesn't matter, so 8 × 2 gives the same product.",
+          { text: "×2 is the same as doubling — double 8 to get 2 × 8.", visual: { view: "equalGroups", data: { groups: 8, perGroup: 2, itemIcon: "shoe" } } },
+          { text: "8 + 8 = 16, so 2 × 8 = 16.", visual: { view: "equation", data: { left: 8, op: "+", right: 8, result: 16 } } },
+          { text: "Order doesn't matter, so 8 × 2 gives the same product.", visual: { view: "equation", data: { left: 8, op: "x", right: 2, result: 16 } } },
         ],
         answer: "2 × 8 = 16 and 8 × 2 = 16.",
+        answerVisual: { view: "arrayGrid", data: { rows: 2, cols: 8, itemIcon: "shoe" } },
       },
       concepts: [
         {
@@ -205,10 +210,11 @@ export const ch7: ChapterDef = {
       workedExample: {
         problem: "A stable has 2 horses per stall. There are 7 stalls. How many horses in all?",
         steps: [
-          "7 stalls of 2 horses is 7 × 2.",
-          "Double 7: 7 + 7 = 14.",
+          { text: "7 stalls of 2 horses is 7 × 2.", visual: { view: "equalGroups", data: { groups: 7, perGroup: 2, itemIcon: "dog" } } },
+          { text: "Double 7: 7 + 7 = 14.", visual: { view: "equation", data: { left: 7, op: "+", right: 7, result: 14 } } },
         ],
         answer: "7 × 2 = 14 horses.",
+        answerVisual: { view: "equation", data: { left: 7, op: "x", right: 2, result: 14 } },
       },
       concepts: [
         {
@@ -241,11 +247,12 @@ export const ch7: ChapterDef = {
       workedExample: {
         problem: "There are 10 coins in each pouch. How many coins are in 6 pouches?",
         steps: [
-          "Count by 10s six times: 10, 20, 30, 40, 50, 60.",
-          "Notice the pattern: the ones digit is always 0, and the tens digit matches the number of pouches.",
-          "That's the same as 6 × 10.",
+          { text: "Count by 10s six times: 10, 20, 30, 40, 50, 60.", visual: { view: "sortedNumbers", data: { values: [10, 20, 30, 40, 50, 60] } } },
+          { text: "Notice the pattern: the ones digit is always 0, and the tens digit matches the number of pouches.", visual: { view: "numberLine", data: { min: 0, max: 60, step: 10, value: 60 } } },
+          { text: "That's the same as 6 × 10.", visual: { view: "arrayGrid", data: { rows: 6, cols: 10 } } },
         ],
         answer: "6 × 10 = 60 coins.",
+        answerVisual: { view: "equation", data: { left: 6, op: "x", right: 10, result: 60 } },
       },
       concepts: [
         {
@@ -291,10 +298,11 @@ export const ch7: ChapterDef = {
       workedExample: {
         problem: "You know 2 × 6 = 12. So what is 12 ÷ 2?",
         steps: [
-          "2 × 6 = 12 means 6 groups of 2 make 12.",
-          "12 ÷ 2 asks 'how many groups of 2 fit in 12?' — that's the same fact, asked backward.",
+          { text: "2 × 6 = 12 means 6 groups of 2 make 12.", visual: { view: "equalGroups", data: { groups: 6, perGroup: 2, itemIcon: "cube" } } },
+          { text: "12 ÷ 2 asks 'how many groups of 2 fit in 12?' — that's the same fact, asked backward.", visual: { view: "barModelDivision", data: { total: 12, perGroup: 2, mode: "measurement" } } },
         ],
         answer: "12 ÷ 2 = 6.",
+        answerVisual: { view: "equation", data: { left: 12, op: "/", right: 2, result: 6 } },
       },
       concepts: [
         {
@@ -327,11 +335,12 @@ export const ch7: ChapterDef = {
       workedExample: {
         problem: "You know 5 × 7 = 35 and 10 × 7 = 70. What are 35 ÷ 5 and 70 ÷ 10?",
         steps: [
-          "5 × 7 = 35 means 7 groups of 5 make 35, so 35 ÷ 5 undoes that: 7.",
-          "10 × 7 = 70 means 7 groups of 10 make 70, so 70 ÷ 10 undoes that: 7.",
-          "Once you know the multiplication fact, the division fact comes for free.",
+          { text: "5 × 7 = 35 means 7 groups of 5 make 35, so 35 ÷ 5 undoes that: 7.", visual: { view: "barModelDivision", data: { total: 35, groups: 7, perGroup: 5, mode: "partitive" } } },
+          { text: "10 × 7 = 70 means 7 groups of 10 make 70, so 70 ÷ 10 undoes that: 7.", visual: { view: "barModelDivision", data: { total: 70, groups: 7, perGroup: 10, mode: "partitive" } } },
+          { text: "Once you know the multiplication fact, the division fact comes for free." },
         ],
         answer: "35 ÷ 5 = 7, and 70 ÷ 10 = 7.",
+        answerVisual: { view: "equation", data: { left: 70, op: "/", right: 10, result: 7 } },
       },
       concepts: [
         {
@@ -383,11 +392,12 @@ export const ch7: ChapterDef = {
       workedExample: {
         problem: "Is 40 ÷ 5 the same fact family as 5 × 8? Solve both.",
         steps: [
-          "5 × 8 = 40, since 8 groups of 5 make 40.",
-          "40 ÷ 5 asks the same fact backward: how many groups of 5 make 40?",
-          "Recognizing the fact family means you don't have to solve each one from scratch.",
+          { text: "5 × 8 = 40, since 8 groups of 5 make 40.", visual: { view: "equalGroups", data: { groups: 8, perGroup: 5, itemIcon: "grape" } } },
+          { text: "40 ÷ 5 asks the same fact backward: how many groups of 5 make 40?", visual: { view: "barModelDivision", data: { total: 40, perGroup: 5, mode: "measurement" } } },
+          { text: "Recognizing the fact family means you don't have to solve each one from scratch." },
         ],
         answer: "Yes — 5 × 8 = 40 and 40 ÷ 5 = 8 are the same fact family.",
+        answerVisual: { view: "equation", data: { left: 40, op: "/", right: 5, result: 8 } },
       },
       concepts: [
         {
@@ -420,11 +430,12 @@ export const ch7: ChapterDef = {
       workedExample: {
         problem: "A baker makes 5 muffins in each tray. She bakes 9 trays. How many muffins in all?",
         steps: [
-          "You know the number of groups (9 trays) and the size of each group (5 muffins).",
-          "That means multiply: 9 × 5.",
-          "9 × 5 = 45.",
+          { text: "You know the number of groups (9 trays) and the size of each group (5 muffins).", visual: { view: "equalGroups", data: { groups: 9, perGroup: 5, itemIcon: "cookie" } } },
+          { text: "That means multiply: 9 × 5.", visual: { view: "equation", data: { left: 9, op: "x", right: 5, result: 45 } } },
+          { text: "9 × 5 = 45." },
         ],
         answer: "The baker makes 45 muffins in all.",
+        answerVisual: { view: "arrayGrid", data: { rows: 9, cols: 5, itemIcon: "cookie" } },
       },
       concepts: [
         {
@@ -458,12 +469,13 @@ export const ch7: ChapterDef = {
       workedExample: {
         problem: "Quick recap: what strategies unlock the ×2, ×5, ×10 facts and their division partners?",
         steps: [
-          "×2 is doubling — add the number to itself.",
-          "×5 counts up by 5s — 5, 10, 15, 20...",
-          "×10 shifts every digit up a place value, leaving a 0 in the ones place.",
-          "Every multiplication fact has a matching division fact — same three numbers, asked backward.",
+          { text: "×2 is doubling — add the number to itself.", visual: { view: "equation", data: { left: 4, op: "+", right: 4, result: 8 } } },
+          { text: "×5 counts up by 5s — 5, 10, 15, 20...", visual: { view: "sortedNumbers", data: { values: [5, 10, 15, 20] } } },
+          { text: "×10 shifts every digit up a place value, leaving a 0 in the ones place.", visual: { view: "numberLine", data: { min: 0, max: 100, step: 10, value: 70 } } },
+          { text: "Every multiplication fact has a matching division fact — same three numbers, asked backward." },
         ],
         answer: "Doubling for ×2, skip-counting for ×5, place-value shifting for ×10 — and division just undoes whichever one you used.",
+        answerVisual: { view: "equation", data: { left: 5, op: "x", right: 8, result: 40 } },
       },
       concepts: [
         {

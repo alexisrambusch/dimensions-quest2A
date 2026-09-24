@@ -16,10 +16,16 @@ export const ch4: ChapterDef = {
       workedExample: {
         problem: "Would you measure a paperclip in centimeters or meters? What about the length of a hallway?",
         steps: [
-          "Centimeters are for small things — about the size of your finger or smaller steps.",
-          "Meters are for long things — hallways, pools, whole rooms.",
-          "A paperclip is tiny, so centimeters make sense for it.",
-          "A hallway is long, so meters make more sense there.",
+          { text: "Centimeters are for small things — about the size of your finger or smaller steps." },
+          { text: "Meters are for long things — hallways, pools, whole rooms." },
+          {
+            text: "A paperclip is tiny, so centimeters make sense for it.",
+            visual: { view: "rulerMeasure", data: { object: "paperclip", icon: "paperclip", actualLength: 3, maxLength: 8, unitLabel: "cm" } },
+          },
+          {
+            text: "A hallway is long, so meters make more sense there — a meter is much bigger than a centimeter.",
+            visual: { view: "equals", data: { left: "1 m", right: "100 cm" } },
+          },
         ],
         answer: "Paperclip → centimeters. Hallway → meters.",
       },
@@ -54,12 +60,16 @@ export const ch4: ChapterDef = {
       workedExample: {
         problem: "About how long is a crayon? Estimate first, then check with a ruler.",
         steps: [
-          "A centimeter is about the width of your smallest fingernail — use that as a mental ruler.",
-          "A crayon looks like it's about as long as 8 fingernail-widths in a row.",
-          "So a good estimate is about 8 centimeters.",
-          "Now check with the real ruler: line up one end at 0, and read where the other end lands.",
+          { text: "A centimeter is about the width of your smallest fingernail — use that as a mental ruler." },
+          { text: "A crayon looks like it's about as long as 8 fingernail-widths in a row." },
+          { text: "So a good estimate is about 8 centimeters." },
+          {
+            text: "Now check with the real ruler: line up one end at 0, and read where the other end lands.",
+            visual: { view: "rulerMeasure", data: { object: "crayon", icon: "crayon", actualLength: 8, maxLength: 12, unitLabel: "cm" } },
+          },
         ],
         answer: "The crayon is about 8 cm long — checking confirms the estimate.",
+        answerVisual: { view: "compareNumbers", data: { a: "estimate: 8 cm", b: "measured: 8 cm", symbol: "=" } },
       },
       concepts: [
         {
@@ -92,12 +102,16 @@ export const ch4: ChapterDef = {
       workedExample: {
         problem: "Would you measure a pencil in inches or feet? About how many inches long is it?",
         steps: [
-          "Inches are for small things, just like centimeters. Feet are for longer things, like meters.",
-          "A pencil is small, so inches make sense here.",
-          "A typical pencil is a little longer than your hand — about 7 inches.",
-          "Check with the inch ruler: line up one end at 0 and read where it ends.",
+          { text: "Inches are for small things, just like centimeters. Feet are for longer things, like meters." },
+          { text: "A pencil is small, so inches make sense here." },
+          { text: "A typical pencil is a little longer than your hand — about 7 inches." },
+          {
+            text: "Check with the inch ruler: line up one end at 0 and read where it ends.",
+            visual: { view: "rulerMeasure", data: { object: "pencil", icon: "pencil", actualLength: 7, maxLength: 10, unitLabel: "in" } },
+          },
         ],
         answer: "Use inches — a pencil is about 7 inches long.",
+        answerVisual: { view: "equals", data: { left: "1 ft", right: "12 in" } },
       },
       concepts: [
         {
@@ -143,12 +157,19 @@ export const ch4: ChapterDef = {
       workedExample: {
         problem: "A pencil is 18 cm long. A crayon is 9 cm long. Which is longer, and by how many centimeters?",
         steps: [
-          "Both lengths are already in the same unit (centimeters), so you can compare the numbers directly.",
-          "18 is greater than 9, so the pencil is longer.",
-          "To find how much longer, subtract: 18 − 9.",
-          "18 − 9 = 9.",
+          { text: "Both lengths are already in the same unit (centimeters), so you can compare the numbers directly." },
+          {
+            text: "18 is greater than 9, so the pencil is longer.",
+            visual: { view: "barModelCompare", data: { larger: 18, smaller: 9 } },
+          },
+          { text: "To find how much longer, subtract: 18 − 9." },
+          {
+            text: "18 − 9 = 9.",
+            visual: { view: "compareNumbers", data: { a: "18 − 9", b: 9, symbol: "=" } },
+          },
         ],
         answer: "The pencil is longer, by 9 cm.",
+        answerVisual: { view: "barModelCompare", data: { larger: 18, smaller: 9 } },
       },
       concepts: [
         {
@@ -183,10 +204,22 @@ export const ch4: ChapterDef = {
       workedExample: {
         problem: "Quick recap: how do you decide what unit to use, and how do you compare lengths?",
         steps: [
-          "Small objects use small units (centimeters or inches); long distances use big units (meters or feet).",
-          "To estimate, compare the object to something familiar you already know the size of.",
-          "To compare two measured lengths in the same unit, just compare the numbers.",
-          "To find 'how much longer,' subtract the shorter length from the longer one.",
+          {
+            text: "Small objects use small units (centimeters or inches); long distances use big units (meters or feet).",
+            visual: { view: "rulerMeasure", data: { object: "paperclip", icon: "paperclip", actualLength: 3, maxLength: 8, unitLabel: "cm" } },
+          },
+          {
+            text: "To estimate, compare the object to something familiar you already know the size of.",
+            visual: { view: "rulerMeasure", data: { object: "crayon", icon: "crayon", actualLength: 8, maxLength: 12, unitLabel: "cm" } },
+          },
+          {
+            text: "To compare two measured lengths in the same unit, just compare the numbers.",
+            visual: { view: "barModelCompare", data: { larger: 18, smaller: 9 } },
+          },
+          {
+            text: "To find 'how much longer,' subtract the shorter length from the longer one.",
+            visual: { view: "compareNumbers", data: { a: "18 − 9", b: 9, symbol: "=" } },
+          },
         ],
         answer: "Pick the right-sized unit, estimate from something familiar, then compare or subtract the numbers.",
       },

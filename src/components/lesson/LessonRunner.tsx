@@ -13,6 +13,7 @@ import {
   type AttemptResult,
 } from "@/lib/actions/lesson";
 import { QuestionRenderer } from "./QuestionRenderer";
+import { LearnVisual, type LearnVisualSpec } from "./LearnVisual";
 import { MatchingGame } from "./MatchingGame";
 import { startMatchingGame, completeMatchingGame, type MatchingGameBoard } from "@/lib/actions/matchingGame";
 import { getMatchingGameFactor } from "@/lib/curriculum/matchingGames";
@@ -33,10 +34,15 @@ interface ConceptInfo {
   bigIdea: string;
   skills: SkillInfo[];
 }
+interface WorkedExampleStepInfo {
+  text: string;
+  visual?: LearnVisualSpec;
+}
 interface WorkedExampleInfo {
   problem: string;
-  steps: string[];
+  steps: WorkedExampleStepInfo[];
   answer: string;
+  answerVisual?: LearnVisualSpec;
 }
 export interface LessonRuntime {
   lesson: {
@@ -259,7 +265,7 @@ export function LessonRunner({
   }
 
   if (stage === "LEARN" && runtime.lesson.workedExample) {
-    const { problem, steps, answer } = runtime.lesson.workedExample;
+    const { problem, steps, answer, answerVisual } = runtime.lesson.workedExample;
     return (
       <div className={`${CARD} max-w-lg mx-auto flex flex-col gap-5`}>
         <div>
@@ -269,17 +275,25 @@ export function LessonRunner({
         <div className="rounded-xl bg-blue-50 border border-blue-100 p-4">
           <p className="font-bold text-blue-800">{problem}</p>
         </div>
-        <ol className="flex flex-col gap-2.5">
+        <ol className="flex flex-col gap-3">
           {steps.map((step, i) => (
-            <li key={i} className="flex gap-3 items-start">
-              <span className="shrink-0 h-6 w-6 rounded-full bg-blue-600 text-white text-xs font-black flex items-center justify-center">
-                {i + 1}
-              </span>
-              <span className="text-slate-700 text-sm pt-0.5">{step}</span>
+            <li key={i} className="flex flex-col gap-2">
+              <div className="flex gap-3 items-start">
+                <span className="shrink-0 h-6 w-6 rounded-full bg-blue-600 text-white text-xs font-black flex items-center justify-center">
+                  {i + 1}
+                </span>
+                <span className="text-slate-700 text-sm pt-0.5">{step.text}</span>
+              </div>
+              {step.visual && (
+                <div className="pl-9 flex justify-center">
+                  <LearnVisual view={step.visual.view} data={step.visual.data} />
+                </div>
+              )}
             </li>
           ))}
         </ol>
-        <div className="rounded-xl bg-emerald-50 border border-emerald-200 p-4 text-center">
+        <div className="rounded-xl bg-emerald-50 border border-emerald-200 p-4 flex flex-col items-center gap-3 text-center">
+          {answerVisual && <LearnVisual view={answerVisual.view} data={answerVisual.data} />}
           <p className="font-bold text-emerald-700">{answer}</p>
         </div>
         <button className={PRIMARY_BUTTON} onClick={() => beginStage("DISCOVER")}>

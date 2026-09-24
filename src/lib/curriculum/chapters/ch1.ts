@@ -17,13 +17,23 @@ export const ch1: ChapterDef = {
       workedExample: {
         problem: "The King asks for the number 347. Let's build it with blocks.",
         steps: [
-          "347 has 3 digits, and each digit lives in its own place: hundreds, tens, and ones.",
-          "The first digit is 3, and it's in the hundreds place — so grab 3 hundred-blocks.",
-          "The next digit is 4, in the tens place — grab 4 ten-rods.",
-          "The last digit is 7, in the ones place — grab 7 one-cubes.",
-          "Put them all together: 3 hundreds + 4 tens + 7 ones makes 347.",
+          { text: "347 has 3 digits, and each digit lives in its own place: hundreds, tens, and ones." },
+          {
+            text: "The first digit is 3, and it's in the hundreds place — so grab 3 hundred-blocks.",
+            visual: { view: "placeValueBlocks", data: { hundreds: 3, tens: 0, ones: 0 } },
+          },
+          {
+            text: "The next digit is 4, in the tens place — grab 4 ten-rods.",
+            visual: { view: "placeValueBlocks", data: { hundreds: 3, tens: 4, ones: 0 } },
+          },
+          {
+            text: "The last digit is 7, in the ones place — grab 7 one-cubes.",
+            visual: { view: "placeValueBlocks", data: { hundreds: 3, tens: 4, ones: 7 } },
+          },
+          { text: "Put them all together: 3 hundreds + 4 tens + 7 ones makes 347." },
         ],
         answer: "347 = 3 hundreds, 4 tens, 7 ones.",
+        answerVisual: { view: "placeValueBlocks", data: { hundreds: 3, tens: 4, ones: 7 } },
       },
       concepts: [
         {
@@ -57,13 +67,20 @@ export const ch1: ChapterDef = {
       workedExample: {
         problem: "Write 582 as a sum of hundreds, tens, and ones.",
         steps: [
-          "Look at each digit and name its place: 5 is hundreds, 8 is tens, 2 is ones.",
-          "The 5 stands for 5 hundreds, which is worth 500.",
-          "The 8 stands for 8 tens, which is worth 80.",
-          "The 2 stands for 2 ones, which is worth 2.",
-          "Add them back up to check your work: 500 + 80 + 2 = 582. ✓",
+          {
+            text: "Look at each digit and name its place: 5 is hundreds, 8 is tens, 2 is ones.",
+            visual: { view: "placeValueBlocks", data: { hundreds: 5, tens: 8, ones: 2 } },
+          },
+          { text: "The 5 stands for 5 hundreds, which is worth 500.", visual: { view: "equals", data: { left: "5 hundreds", right: 500 } } },
+          { text: "The 8 stands for 8 tens, which is worth 80.", visual: { view: "equals", data: { left: "8 tens", right: 80 } } },
+          { text: "The 2 stands for 2 ones, which is worth 2.", visual: { view: "equals", data: { left: "2 ones", right: 2 } } },
+          {
+            text: "Add them back up to check your work: 500 + 80 + 2 = 582. ✓",
+            visual: { view: "equals", data: { left: "500 + 80 + 2", right: 582 } },
+          },
         ],
         answer: "582 = 500 + 80 + 2",
+        answerVisual: { view: "equals", data: { left: 582, right: "500 + 80 + 2" } },
       },
       concepts: [
         {
@@ -97,13 +114,26 @@ export const ch1: ChapterDef = {
       workedExample: {
         problem: "Chest A holds 428 coins. Chest B holds 419 coins. Which chest has more?",
         steps: [
-          "Line up both numbers by place value: hundreds, tens, ones.",
-          "Compare the hundreds first: both have 4 hundreds — that's a tie, so keep looking.",
-          "Compare the tens next: 428 has 2 tens, but 419 has only 1 ten. 2 tens beats 1 ten!",
-          "Since the tens place already decided it, you don't even need to check the ones.",
-          "428 is greater than 419, so Chest A has more coins.",
+          {
+            text: "Line up both numbers by place value: hundreds, tens, ones.",
+            visual: { view: "compareNumbers", data: { a: 428, b: 419, symbol: "?" } },
+          },
+          {
+            text: "Compare the hundreds first: both have 4 hundreds — that's a tie, so keep looking.",
+            visual: { view: "equals", data: { left: "4 hundreds", right: "4 hundreds" } },
+          },
+          {
+            text: "Compare the tens next: 428 has 2 tens, but 419 has only 1 ten. 2 tens beats 1 ten!",
+            visual: { view: "compareNumbers", data: { a: 2, b: 1, symbol: ">" } },
+          },
+          { text: "Since the tens place already decided it, you don't even need to check the ones." },
+          {
+            text: "428 is greater than 419, so Chest A has more coins.",
+            visual: { view: "compareNumbers", data: { a: 428, b: 419, symbol: ">" } },
+          },
         ],
         answer: "428 > 419 — Chest A wins.",
+        answerVisual: { view: "compareNumbers", data: { a: 428, b: 419, symbol: ">" } },
       },
       concepts: [
         {
@@ -158,13 +188,23 @@ export const ch1: ChapterDef = {
       workedExample: {
         problem: "Line up these parade floats from least to greatest: 612, 589, 601.",
         steps: [
-          "Compare the numbers two at a time, starting with the hundreds place.",
-          "589 has 5 hundreds, while 612 and 601 both have 6 hundreds — so 589 is the smallest, right away.",
-          "Now compare 612 and 601: both have 6 hundreds, but 612 has 1 ten and 601 has 0 tens.",
-          "0 tens is less than 1 ten, so 601 comes before 612.",
-          "Putting it all together: 589, then 601, then 612.",
+          { text: "Compare the numbers two at a time, starting with the hundreds place." },
+          {
+            text: "589 has 5 hundreds, while 612 and 601 both have 6 hundreds — so 589 is the smallest, right away.",
+            visual: { view: "compareNumbers", data: { a: 589, b: 612, symbol: "<" } },
+          },
+          {
+            text: "Now compare 612 and 601: both have 6 hundreds, but 612 has 1 ten and 601 has 0 tens.",
+            visual: { view: "compareNumbers", data: { a: 601, b: 612, symbol: "<" } },
+          },
+          { text: "0 tens is less than 1 ten, so 601 comes before 612." },
+          {
+            text: "Putting it all together: 589, then 601, then 612.",
+            visual: { view: "sortedNumbers", data: { values: [589, 601, 612] } },
+          },
         ],
         answer: "589, 601, 612 (least to greatest)",
+        answerVisual: { view: "sortedNumbers", data: { values: [589, 601, 612] } },
       },
       concepts: [
         {
@@ -198,12 +238,19 @@ export const ch1: ChapterDef = {
       workedExample: {
         problem: "The path reads 320, 330, 340, 350, ___. What's the next stone?",
         steps: [
-          "Look at how much each number grows compared to the one right before it.",
-          "330 − 320 = 10, and 340 − 330 = 10, and 350 − 340 = 10 — it grows by 10 every single time.",
-          "So the rule for this path is 'add 10 each time.'",
-          "Apply the rule to the last number: 350 + 10 = 360.",
+          {
+            text: "Look at how much each number grows compared to the one right before it.",
+            visual: { view: "sortedNumbers", data: { values: [320, 330, 340, 350] } },
+          },
+          {
+            text: "330 − 320 = 10, and 340 − 330 = 10, and 350 − 340 = 10 — it grows by 10 every single time.",
+            visual: { view: "equals", data: { left: "330 − 320", right: 10 } },
+          },
+          { text: "So the rule for this path is 'add 10 each time.'" },
+          { text: "Apply the rule to the last number: 350 + 10 = 360.", visual: { view: "equals", data: { left: "350 + 10", right: 360 } } },
         ],
         answer: "The next stone is 360.",
+        answerVisual: { view: "sortedNumbers", data: { values: [320, 330, 340, 350, 360] } },
       },
       concepts: [
         {
@@ -237,10 +284,22 @@ export const ch1: ChapterDef = {
       workedExample: {
         problem: "Quick recap: every skill in the Number Kingdom uses the same core idea. What is it?",
         steps: [
-          "Building a number? Break it into hundreds, tens, and ones blocks first.",
-          "Comparing two numbers? Check the hundreds digit first, then tens, then ones — stop as soon as one is bigger.",
-          "Ordering a group of numbers? Compare them two at a time, the same way, until they're all lined up.",
-          "Spotting a pattern? Find how much each number changes by, then keep repeating that change.",
+          {
+            text: "Building a number? Break it into hundreds, tens, and ones blocks first.",
+            visual: { view: "placeValueBlocks", data: { hundreds: 3, tens: 4, ones: 7 } },
+          },
+          {
+            text: "Comparing two numbers? Check the hundreds digit first, then tens, then ones — stop as soon as one is bigger.",
+            visual: { view: "compareNumbers", data: { a: 428, b: 419, symbol: ">" } },
+          },
+          {
+            text: "Ordering a group of numbers? Compare them two at a time, the same way, until they're all lined up.",
+            visual: { view: "sortedNumbers", data: { values: [589, 601, 612] } },
+          },
+          {
+            text: "Spotting a pattern? Find how much each number changes by, then keep repeating that change.",
+            visual: { view: "sortedNumbers", data: { values: [320, 330, 340, 350, 360] } },
+          },
         ],
         answer: "Place value is the strategy behind every question in this chapter!",
       },

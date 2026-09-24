@@ -16,12 +16,22 @@ export const ch6: ChapterDef = {
       workedExample: {
         problem: "3 forest teams each collect 4 acorns. How many acorns in all?",
         steps: [
-          "There are 3 equal groups, and each group has 4 acorns.",
-          "You could add: 4 + 4 + 4 = 12.",
-          "Multiplication is a faster way to write the same thing: 3 groups of 4 is 3 × 4.",
-          "3 × 4 = 12.",
+          {
+            text: "There are 3 equal groups, and each group has 4 acorns.",
+            visual: { view: "equalGroups", data: { groups: 3, perGroup: 4 } },
+          },
+          { text: "You could add: 4 + 4 + 4 = 12." },
+          {
+            text: "Multiplication is a faster way to write the same thing: 3 groups of 4 is 3 × 4.",
+            visual: { view: "barModelMultiplication", data: { groups: 3, perGroup: 4, unit: "acorns" } },
+          },
+          {
+            text: "3 × 4 = 12.",
+            visual: { view: "equation", data: { left: 3, op: "x", right: 4, result: 12 } },
+          },
         ],
         answer: "The teams collected 12 acorns in all.",
+        answerVisual: { view: "equation", data: { left: 3, op: "x", right: 4, result: 12 } },
       },
       concepts: [
         {
@@ -55,12 +65,22 @@ export const ch6: ChapterDef = {
       workedExample: {
         problem: "The gardeners plant vegetables in 3 rows of 5. How many plants in all?",
         steps: [
-          "An array is just equal groups arranged in neat rows and columns.",
-          "Here there are 3 rows, and each row has 5 plants.",
-          "Rows × columns gives the total: 3 × 5.",
-          "3 × 5 = 15.",
+          {
+            text: "An array is just equal groups arranged in neat rows and columns.",
+            visual: { view: "equalGroups", data: { groups: 3, perGroup: 5, itemIcon: "flower" } },
+          },
+          {
+            text: "Here there are 3 rows, and each row has 5 plants — the very same total, just lined up in a grid.",
+            visual: { view: "arrayGrid", data: { rows: 3, cols: 5, itemIcon: "flower" } },
+          },
+          { text: "Rows × columns gives the total: 3 × 5." },
+          {
+            text: "3 × 5 = 15.",
+            visual: { view: "equation", data: { left: 3, op: "x", right: 5, result: 15 } },
+          },
         ],
         answer: "There are 15 plants in all.",
+        answerVisual: { view: "equation", data: { left: 3, op: "x", right: 5, result: 15 } },
       },
       concepts: [
         {
@@ -94,12 +114,22 @@ export const ch6: ChapterDef = {
       workedExample: {
         problem: "12 berries are shared equally among 3 dens. How many berries does each den get?",
         steps: [
-          "You know the total (12 berries) and the number of groups (3 dens).",
-          "The question is: how many go in each group?",
-          "That's what division finds: 12 ÷ 3.",
-          "12 ÷ 3 = 4.",
+          { text: "You know the total (12 berries) and the number of groups (3 dens)." },
+          {
+            text: "The question is: how many go in each group?",
+            visual: { view: "barModelDivision", data: { total: 12, groups: 3, mode: "partitive" } },
+          },
+          {
+            text: "That's what division finds: 12 ÷ 3.",
+            visual: { view: "equation", data: { left: 12, op: "/", right: 3, result: "?" } },
+          },
+          {
+            text: "12 ÷ 3 = 4.",
+            visual: { view: "equalGroups", data: { groups: 3, perGroup: 4, itemIcon: "grape" } },
+          },
         ],
         answer: "Each den gets 4 berries.",
+        answerVisual: { view: "equation", data: { left: 12, op: "/", right: 3, result: 4 } },
       },
       concepts: [
         {
@@ -133,12 +163,22 @@ export const ch6: ChapterDef = {
       workedExample: {
         problem: "There are 12 berries. Each basket holds 4 berries. How many baskets can we fill?",
         steps: [
-          "This time you know the total (12 berries) and the size of each group (4 per basket).",
-          "The question is: how many groups can you make?",
-          "That's also division: 12 ÷ 4.",
-          "12 ÷ 4 = 3.",
+          {
+            text: "This time you know the total (12 berries) and the size of each group (4 per basket).",
+            visual: { view: "barModelDivision", data: { total: 12, perGroup: 4, mode: "measurement" } },
+          },
+          { text: "The question is: how many groups can you make?" },
+          {
+            text: "That's also division: 12 ÷ 4.",
+            visual: { view: "equation", data: { left: 12, op: "/", right: 4, result: "?" } },
+          },
+          {
+            text: "12 ÷ 4 = 3.",
+            visual: { view: "equalGroups", data: { groups: 3, perGroup: 4, itemIcon: "grape" } },
+          },
         ],
         answer: "You can fill 3 baskets.",
+        answerVisual: { view: "equation", data: { left: 12, op: "/", right: 4, result: 3 } },
       },
       concepts: [
         {
@@ -172,10 +212,19 @@ export const ch6: ChapterDef = {
       workedExample: {
         problem: "You know 3 × 4 = 12. What is 12 ÷ 3? What is 12 ÷ 4?",
         steps: [
-          "Multiplication and division are inverses — they use the same three numbers, just asked differently.",
-          "3 × 4 = 12 means 3 groups of 4 make 12.",
-          "So 12 ÷ 3 asks 'how many in each of 3 groups?' — the answer is 4.",
-          "And 12 ÷ 4 asks 'how many groups of 4?' — the answer is 3.",
+          { text: "Multiplication and division are inverses — they use the same three numbers, just asked differently." },
+          {
+            text: "3 × 4 = 12 means 3 groups of 4 make 12.",
+            visual: { view: "equation", data: { left: 3, op: "x", right: 4, result: 12 } },
+          },
+          {
+            text: "So 12 ÷ 3 asks 'how many in each of 3 groups?' — the answer is 4.",
+            visual: { view: "equation", data: { left: 12, op: "/", right: 3, result: 4 } },
+          },
+          {
+            text: "And 12 ÷ 4 asks 'how many groups of 4?' — the answer is 3.",
+            visual: { view: "equation", data: { left: 12, op: "/", right: 4, result: 3 } },
+          },
         ],
         answer: "12 ÷ 3 = 4, and 12 ÷ 4 = 3.",
       },
@@ -211,12 +260,25 @@ export const ch6: ChapterDef = {
       workedExample: {
         problem: "Quick recap: how are multiplication and division connected?",
         steps: [
-          "Multiplication combines equal groups into a total: groups × size = total.",
-          "Sharing division finds the size of each group when you know the total and the number of groups.",
-          "Grouping division finds the number of groups when you know the total and the group size.",
-          "All three use the same three numbers — just asking a different one of them.",
+          {
+            text: "Multiplication combines equal groups into a total: groups × size = total.",
+            visual: { view: "equalGroups", data: { groups: 3, perGroup: 4 } },
+          },
+          {
+            text: "Sharing division finds the size of each group when you know the total and the number of groups.",
+            visual: { view: "barModelDivision", data: { total: 12, groups: 3, mode: "partitive" } },
+          },
+          {
+            text: "Grouping division finds the number of groups when you know the total and the group size.",
+            visual: { view: "barModelDivision", data: { total: 12, perGroup: 4, mode: "measurement" } },
+          },
+          {
+            text: "All three use the same three numbers — just asking a different one of them.",
+            visual: { view: "arrayGrid", data: { rows: 3, cols: 4 } },
+          },
         ],
         answer: "Multiplication and division are two sides of the same equal-groups idea.",
+        answerVisual: { view: "equation", data: { left: 3, op: "x", right: 4, result: 12 } },
       },
       concepts: [
         {

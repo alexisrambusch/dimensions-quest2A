@@ -16,12 +16,19 @@ export const ch5: ChapterDef = {
       workedExample: {
         problem: "Would you weigh a paperclip in grams or kilograms? What about a bicycle?",
         steps: [
-          "Grams are for light things — a paperclip weighs about 1 gram.",
-          "Kilograms are for heavier things — about the weight of a liter bottle of water, or more.",
-          "A paperclip is very light, so grams make sense for it.",
-          "A bicycle is much heavier, so kilograms make more sense there.",
+          { text: "Grams are for light things — a paperclip weighs about 1 gram." },
+          { text: "Kilograms are for heavier things — about the weight of a liter bottle of water, or more." },
+          {
+            text: "A paperclip is very light, so grams make sense for it.",
+            visual: { view: "scaleBalance", data: { leftLabel: "Paperclip", leftIcon: "paperclip", rightLabel: "Book", rightIcon: "book", heavier: "right" } },
+          },
+          {
+            text: "A bicycle is much heavier, so kilograms make more sense there.",
+            visual: { view: "scaleBalance", data: { leftLabel: "Paperclip", leftIcon: "paperclip", rightLabel: "Bicycle", rightIcon: "bike", heavier: "right" } },
+          },
         ],
         answer: "Paperclip → grams. Bicycle → kilograms.",
+        answerVisual: { view: "scaleBalance", data: { leftLabel: "Paperclip (grams)", leftIcon: "paperclip", rightLabel: "Bicycle (kilograms)", rightIcon: "bike", heavier: "right" } },
       },
       concepts: [
         {
@@ -54,12 +61,16 @@ export const ch5: ChapterDef = {
       workedExample: {
         problem: "A toy box balances exactly against these weights: 100 g, 20 g, 20 g, and 5 g. How much does the toy box weigh?",
         steps: [
-          "When a scale balances, both sides weigh the same amount.",
-          "To find the toy box's weight, add up all the weights on the other side.",
-          "Add them one at a time: 100 + 20 = 120.",
-          "120 + 20 = 140, then 140 + 5 = 145.",
+          {
+            text: "When a scale balances, both sides weigh the same amount.",
+            visual: { view: "scaleBalance", data: { leftLabel: "Toy box", leftIcon: "cube", rightLabel: "100g + 20g + 20g + 5g", rightIcon: "scale", heavier: "equal" } },
+          },
+          { text: "To find the toy box's weight, add up all the weights on the other side." },
+          { text: "Add them one at a time: 100 + 20 = 120.", visual: { view: "equals", data: { left: "100 + 20", right: 120 } } },
+          { text: "120 + 20 = 140, then 140 + 5 = 145.", visual: { view: "equals", data: { left: "140 + 5", right: 145 } } },
         ],
         answer: "The toy box weighs 145 g.",
+        answerVisual: { view: "equals", data: { left: "Toy box", right: "145 g" } },
       },
       concepts: [
         {
@@ -93,11 +104,21 @@ export const ch5: ChapterDef = {
       workedExample: {
         problem: "Would you weigh a strawberry in ounces or pounds? What about a cat?",
         steps: [
-          "Ounces are for light things, just like grams. Pounds are for heavier things, like kilograms.",
-          "A strawberry is light, so ounces make sense for it.",
-          "A cat weighs around 9 pounds — much more than 1 pound — so pounds make more sense there.",
+          {
+            text: "Ounces are for light things, just like grams. Pounds are for heavier things, like kilograms.",
+            visual: { view: "equals", data: { left: "1 lb", right: "16 oz" } },
+          },
+          {
+            text: "A strawberry is light, so ounces make sense for it.",
+            visual: { view: "scaleBalance", data: { leftLabel: "Strawberry", leftIcon: "strawberry", rightLabel: "Cat", rightIcon: "cat", heavier: "right" } },
+          },
+          {
+            text: "A cat weighs around 9 pounds — much more than 1 pound — so pounds make more sense there.",
+            visual: { view: "compareNumbers", data: { a: "9 lb", b: "1 lb", symbol: ">" } },
+          },
         ],
         answer: "Strawberry → ounces. Cat → pounds.",
+        answerVisual: { view: "scaleBalance", data: { leftLabel: "Strawberry (ounces)", leftIcon: "strawberry", rightLabel: "Cat (pounds)", rightIcon: "cat", heavier: "right" } },
       },
       concepts: [
         {
@@ -144,10 +165,19 @@ export const ch5: ChapterDef = {
       workedExample: {
         problem: "Quick recap: how do you decide a unit, and how do you find an unknown weight?",
         steps: [
-          "Light objects use small units (grams or ounces); heavy objects use big units (kilograms or pounds).",
-          "To estimate, compare the object to a familiar benchmark like 1 kilogram or 1 pound.",
-          "If a scale balances, add up all the known weights on one side to find the total.",
-          "If one weight is missing, subtract the known weights from the total to find it.",
+          {
+            text: "Light objects use small units (grams or ounces); heavy objects use big units (kilograms or pounds).",
+            visual: { view: "scaleBalance", data: { leftLabel: "Paperclip", leftIcon: "paperclip", rightLabel: "Bicycle", rightIcon: "bike", heavier: "right" } },
+          },
+          {
+            text: "To estimate, compare the object to a familiar benchmark like 1 kilogram or 1 pound.",
+            visual: { view: "equals", data: { left: "1 kg", right: "1000 g" } },
+          },
+          {
+            text: "If a scale balances, add up all the known weights on one side to find the total.",
+            visual: { view: "equals", data: { left: "100 + 20 + 20 + 5", right: 145 } },
+          },
+          { text: "If one weight is missing, subtract the known weights from the total to find it." },
         ],
         answer: "Pick the right-sized unit, compare to a benchmark, and add or subtract the known weights.",
       },
