@@ -230,6 +230,43 @@ export const multDivChooseOperation: Generator = {
   },
 };
 
+/** "N × factor is ___ more than (N-1) × factor" or the inverse — relates neighboring rows of a times table instead of recalling each in isolation. */
+export const multRelateProduct: Generator = {
+  id: "mult.relateproduct",
+  generate(seed, difficulty, params): GeneratedInstance {
+    const factor = params.factor as number;
+    const rng = seededRng(seed);
+    const [lo, hi] = difficultyRange(difficulty);
+    const a = randInt(rng, Math.max(lo, 2), Math.max(hi, 3));
+    const askDelta = rng() < 0.5;
+    if (askDelta) {
+      return {
+        prompt: {
+          view: "numericAnswer",
+          kind: "FILL_IN_BLANK",
+          stage: "ABSTRACT",
+          text: `${a} × ${factor} is ___ more than ${a - 1} × ${factor}.`,
+          data: {},
+        },
+        answer: { value: factor, explanation: `Each extra group of ${factor} adds ${factor}, so ${a} × ${factor} is ${factor} more than ${a - 1} × ${factor}.` },
+        meta: { a, factor },
+      };
+    }
+    return {
+      prompt: {
+        view: "numericAnswer",
+        kind: "FILL_IN_BLANK",
+        stage: "ABSTRACT",
+        text: `${a} × ${factor} is ${factor} more than ___ × ${factor}.`,
+        data: {},
+      },
+      answer: { value: a - 1, explanation: `${a} × ${factor} is one more group of ${factor} than ${a - 1} × ${factor}.` },
+      meta: { a, factor },
+    };
+  },
+  validate: (response, answer) => validateNumeric(response, answer),
+};
+
 export const multiplicationGenerators = [
   multTable,
   multArray,
@@ -238,4 +275,5 @@ export const multiplicationGenerators = [
   multFindMistake,
   multCommutativeClaim,
   multDivChooseOperation,
+  multRelateProduct,
 ];

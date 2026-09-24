@@ -14,6 +14,16 @@ export const ch7: ChapterDef = {
       type: "STANDARD",
       objective: "Build the multiplication table of 5 and investigate how the product changes as the number of groups of 5 increases or decreases.",
       missionBriefing: "The Realm's ×5 tower needs building, one group of 5 at a time. Watch how the total grows!",
+      workedExample: {
+        problem: "There are 5 gems in each chest. How many gems are in 3 chests?",
+        steps: [
+          "1 chest has 5 gems.",
+          "2 chests have 5 + 5 = 10 gems.",
+          "3 chests have 10 + 5 = 15 gems — each new chest adds another 5.",
+          "That's the same as 3 × 5.",
+        ],
+        answer: "3 × 5 = 15 gems.",
+      },
       concepts: [
         {
           title: "Building the ×5 Table",
@@ -28,6 +38,8 @@ export const ch7: ChapterDef = {
               questions: [
                 { code: "ch7.mult5.table.q1", kind: "ARRAY_VISUAL", stage: "CONCRETE", generatorId: "mult.table", params: { factor: 5 }, difficulty: 1 },
                 { code: "ch7.mult5.table.q2", kind: "ARRAY_VISUAL", stage: "CONCRETE", generatorId: "mult.table", params: { factor: 5 }, difficulty: 2 },
+                { code: "ch7.mult5.table.q3", kind: "ARRAY_VISUAL", stage: "CONCRETE", generatorId: "mult.table", params: { factor: 5 }, difficulty: 3 },
+                { code: "ch7.mult5.table.q4", kind: "FIND_THE_MISTAKE", stage: "ABSTRACT", generatorId: "mult.findmistake", params: { factor: 5 }, difficulty: 2 },
               ],
             },
           ],
@@ -40,6 +52,15 @@ export const ch7: ChapterDef = {
       type: "STANDARD",
       objective: "Learn a × 5 and 5 × a for a = 1-9, and the commutative relationship between them.",
       missionBriefing: "Realm scouts need instant recall of ×5 facts in either order — practice both!",
+      workedExample: {
+        problem: "What is 5 × 7? What is 7 × 5?",
+        steps: [
+          "Count by 5s seven times: 5, 10, 15, 20, 25, 30, 35.",
+          "So 5 × 7 = 35.",
+          "Multiplication works the same in either order, so 7 × 5 gives the same product.",
+        ],
+        answer: "5 × 7 = 35 and 7 × 5 = 35.",
+      },
       concepts: [
         {
           title: "×5 Facts, Both Orders",
@@ -55,6 +76,8 @@ export const ch7: ChapterDef = {
                 { code: "ch7.mult5.facts.q1", kind: "FILL_IN_BLANK", stage: "ABSTRACT", generatorId: "mult.fact", params: { factor: 5 }, difficulty: 2 },
                 { code: "ch7.mult5.facts.q2", kind: "WORD_PROBLEM", stage: "PICTORIAL", generatorId: "mult.wordproblem", params: { factor: 5 }, difficulty: 2 },
                 { code: "ch7.mult5.facts.q3", kind: "FIND_THE_MISTAKE", stage: "ABSTRACT", generatorId: "mult.findmistake", params: { factor: 5 }, difficulty: 2 },
+                { code: "ch7.mult5.facts.q4", kind: "FIND_THE_MISTAKE", stage: "ABSTRACT", generatorId: "mult.commutativeclaim", params: { factor: 5 }, difficulty: 3 },
+                { code: "ch7.mult5.facts.q5", kind: "FILL_IN_BLANK", stage: "ABSTRACT", generatorId: "mult.relateproduct", params: { factor: 5 }, difficulty: 3 },
               ],
             },
           ],
@@ -67,6 +90,14 @@ export const ch7: ChapterDef = {
       type: "PRACTICE",
       objective: "Practice multiplication facts of 5.",
       missionBriefing: "Time to prove your ×5 mastery with a Realm training round.",
+      workedExample: {
+        problem: "A vendor sells crystals in bags of 5. If someone buys 6 bags, how many crystals do they get?",
+        steps: [
+          "6 bags of 5 crystals is 6 × 5.",
+          "Count by 5s six times: 5, 10, 15, 20, 25, 30.",
+        ],
+        answer: "6 × 5 = 30 crystals.",
+      },
       concepts: [
         {
           title: "×5 Practice",
@@ -81,6 +112,8 @@ export const ch7: ChapterDef = {
               questions: [
                 { code: "ch7.mult5.practice.q1", kind: "FILL_IN_BLANK", stage: "ABSTRACT", generatorId: "mult.fact", params: { factor: 5 }, difficulty: 3 },
                 { code: "ch7.mult5.practice.q2", kind: "WORD_PROBLEM", stage: "PICTORIAL", generatorId: "mult.wordproblem", params: { factor: 5 }, difficulty: 3 },
+                { code: "ch7.mult5.practice.q3", kind: "FIND_THE_MISTAKE", stage: "ABSTRACT", generatorId: "mult.findmistake", params: { factor: 5 }, difficulty: 4 },
+                { code: "ch7.mult5.practice.q4", kind: "FILL_IN_BLANK", stage: "ABSTRACT", generatorId: "mult.relateproduct", params: { factor: 5 }, difficulty: 4 },
               ],
             },
           ],
@@ -93,6 +126,16 @@ export const ch7: ChapterDef = {
       type: "STANDARD",
       objective: "Build the multiplication table of 2 and investigate how the product changes as the number of groups of 2 increases or decreases.",
       missionBriefing: "Now build the Realm's ×2 tower, one pair at a time.",
+      workedExample: {
+        problem: "There are 2 wings on each dragon. How many wings do 4 dragons have?",
+        steps: [
+          "1 dragon has 2 wings.",
+          "2 dragons have 2 + 2 = 4 wings.",
+          "Each new dragon adds another 2 wings — that's doubling the number of dragons.",
+          "4 dragons: 4 × 2.",
+        ],
+        answer: "4 × 2 = 8 wings.",
+      },
       concepts: [
         {
           title: "Building the ×2 Table",
@@ -107,6 +150,8 @@ export const ch7: ChapterDef = {
               questions: [
                 { code: "ch7.mult2.table.q1", kind: "ARRAY_VISUAL", stage: "CONCRETE", generatorId: "mult.table", params: { factor: 2 }, difficulty: 1 },
                 { code: "ch7.mult2.table.q2", kind: "ARRAY_VISUAL", stage: "CONCRETE", generatorId: "mult.table", params: { factor: 2 }, difficulty: 2 },
+                { code: "ch7.mult2.table.q3", kind: "ARRAY_VISUAL", stage: "CONCRETE", generatorId: "mult.table", params: { factor: 2 }, difficulty: 3 },
+                { code: "ch7.mult2.table.q4", kind: "FIND_THE_MISTAKE", stage: "ABSTRACT", generatorId: "mult.findmistake", params: { factor: 2 }, difficulty: 2 },
               ],
             },
           ],
@@ -119,6 +164,15 @@ export const ch7: ChapterDef = {
       type: "STANDARD",
       objective: "Learn a × 2 and 2 × a for a = 1-9.",
       missionBriefing: "Realm scouts now need instant recall of ×2 facts in either order.",
+      workedExample: {
+        problem: "What is 2 × 8? What is 8 × 2?",
+        steps: [
+          "×2 is the same as doubling — double 8 to get 2 × 8.",
+          "8 + 8 = 16, so 2 × 8 = 16.",
+          "Order doesn't matter, so 8 × 2 gives the same product.",
+        ],
+        answer: "2 × 8 = 16 and 8 × 2 = 16.",
+      },
       concepts: [
         {
           title: "×2 Facts, Both Orders",
@@ -134,6 +188,8 @@ export const ch7: ChapterDef = {
                 { code: "ch7.mult2.facts.q1", kind: "FILL_IN_BLANK", stage: "ABSTRACT", generatorId: "mult.fact", params: { factor: 2 }, difficulty: 2 },
                 { code: "ch7.mult2.facts.q2", kind: "WORD_PROBLEM", stage: "PICTORIAL", generatorId: "mult.wordproblem", params: { factor: 2 }, difficulty: 2 },
                 { code: "ch7.mult2.facts.q3", kind: "FIND_THE_MISTAKE", stage: "ABSTRACT", generatorId: "mult.findmistake", params: { factor: 2 }, difficulty: 2 },
+                { code: "ch7.mult2.facts.q4", kind: "FIND_THE_MISTAKE", stage: "ABSTRACT", generatorId: "mult.commutativeclaim", params: { factor: 2 }, difficulty: 3 },
+                { code: "ch7.mult2.facts.q5", kind: "FILL_IN_BLANK", stage: "ABSTRACT", generatorId: "mult.relateproduct", params: { factor: 2 }, difficulty: 3 },
               ],
             },
           ],
@@ -146,6 +202,14 @@ export const ch7: ChapterDef = {
       type: "PRACTICE",
       objective: "Practice multiplication facts of 2.",
       missionBriefing: "Prove your ×2 mastery with another Realm training round.",
+      workedExample: {
+        problem: "A stable has 2 horses per stall. There are 7 stalls. How many horses in all?",
+        steps: [
+          "7 stalls of 2 horses is 7 × 2.",
+          "Double 7: 7 + 7 = 14.",
+        ],
+        answer: "7 × 2 = 14 horses.",
+      },
       concepts: [
         {
           title: "×2 Practice",
@@ -160,6 +224,8 @@ export const ch7: ChapterDef = {
               questions: [
                 { code: "ch7.mult2.practice.q1", kind: "FILL_IN_BLANK", stage: "ABSTRACT", generatorId: "mult.fact", params: { factor: 2 }, difficulty: 3 },
                 { code: "ch7.mult2.practice.q2", kind: "WORD_PROBLEM", stage: "PICTORIAL", generatorId: "mult.wordproblem", params: { factor: 2 }, difficulty: 3 },
+                { code: "ch7.mult2.practice.q3", kind: "FIND_THE_MISTAKE", stage: "ABSTRACT", generatorId: "mult.findmistake", params: { factor: 2 }, difficulty: 4 },
+                { code: "ch7.mult2.practice.q4", kind: "FILL_IN_BLANK", stage: "ABSTRACT", generatorId: "mult.relateproduct", params: { factor: 2 }, difficulty: 4 },
               ],
             },
           ],
@@ -172,6 +238,15 @@ export const ch7: ChapterDef = {
       type: "STANDARD",
       objective: "Build the multiplication table of 10 and learn a × 10 and 10 × a for a = 1-9, emphasizing the place-value pattern.",
       missionBriefing: "Build the tallest tower yet — the Realm's ×10 tower — and notice the pattern in the ones place!",
+      workedExample: {
+        problem: "There are 10 coins in each pouch. How many coins are in 6 pouches?",
+        steps: [
+          "Count by 10s six times: 10, 20, 30, 40, 50, 60.",
+          "Notice the pattern: the ones digit is always 0, and the tens digit matches the number of pouches.",
+          "That's the same as 6 × 10.",
+        ],
+        answer: "6 × 10 = 60 coins.",
+      },
       concepts: [
         {
           title: "Building the ×10 Table",
@@ -186,6 +261,8 @@ export const ch7: ChapterDef = {
               questions: [
                 { code: "ch7.mult10.table.q1", kind: "ARRAY_VISUAL", stage: "CONCRETE", generatorId: "mult.table", params: { factor: 10 }, difficulty: 1 },
                 { code: "ch7.mult10.table.q2", kind: "ARRAY_VISUAL", stage: "CONCRETE", generatorId: "mult.table", params: { factor: 10 }, difficulty: 2 },
+                { code: "ch7.mult10.table.q3", kind: "ARRAY_VISUAL", stage: "CONCRETE", generatorId: "mult.table", params: { factor: 10 }, difficulty: 3 },
+                { code: "ch7.mult10.table.q4", kind: "FIND_THE_MISTAKE", stage: "ABSTRACT", generatorId: "mult.findmistake", params: { factor: 10 }, difficulty: 2 },
               ],
             },
             {
@@ -197,6 +274,8 @@ export const ch7: ChapterDef = {
               questions: [
                 { code: "ch7.mult10.facts.q1", kind: "FILL_IN_BLANK", stage: "ABSTRACT", generatorId: "mult.fact", params: { factor: 10 }, difficulty: 2 },
                 { code: "ch7.mult10.facts.q2", kind: "WORD_PROBLEM", stage: "PICTORIAL", generatorId: "mult.wordproblem", params: { factor: 10 }, difficulty: 2 },
+                { code: "ch7.mult10.facts.q3", kind: "FIND_THE_MISTAKE", stage: "ABSTRACT", generatorId: "mult.findmistake", params: { factor: 10 }, difficulty: 3 },
+                { code: "ch7.mult10.facts.q4", kind: "FILL_IN_BLANK", stage: "ABSTRACT", generatorId: "mult.relateproduct", params: { factor: 10 }, difficulty: 3 },
               ],
             },
           ],
@@ -209,6 +288,14 @@ export const ch7: ChapterDef = {
       type: "STANDARD",
       objective: "Relate division facts for 2 to multiplication facts for 2, and learn division facts for 2.",
       missionBriefing: "The Realm's ×2 facts hold the key to their matching ÷2 facts. Discover the connection!",
+      workedExample: {
+        problem: "You know 2 × 6 = 12. So what is 12 ÷ 2?",
+        steps: [
+          "2 × 6 = 12 means 6 groups of 2 make 12.",
+          "12 ÷ 2 asks 'how many groups of 2 fit in 12?' — that's the same fact, asked backward.",
+        ],
+        answer: "12 ÷ 2 = 6.",
+      },
       concepts: [
         {
           title: "÷2 from ×2",
@@ -223,6 +310,8 @@ export const ch7: ChapterDef = {
               questions: [
                 { code: "ch7.div2.q1", kind: "FILL_IN_BLANK", stage: "PICTORIAL", generatorId: "div.frommult", params: { factor: 2 }, difficulty: 2 },
                 { code: "ch7.div2.q2", kind: "FILL_IN_BLANK", stage: "ABSTRACT", generatorId: "div.fact", params: { factor: 2 }, difficulty: 3 },
+                { code: "ch7.div2.q3", kind: "WORD_PROBLEM", stage: "PICTORIAL", generatorId: "div.wordproblem.partitive", params: { factor: 2 }, difficulty: 3 },
+                { code: "ch7.div2.q4", kind: "FIND_THE_MISTAKE", stage: "ABSTRACT", generatorId: "div.findmistake", params: { factor: 2 }, difficulty: 3 },
               ],
             },
           ],
@@ -235,6 +324,15 @@ export const ch7: ChapterDef = {
       type: "STANDARD",
       objective: "Teach division facts for 5 and 10, and the relationship between multiplication and division.",
       missionBriefing: "Now unlock the ÷5 and ÷10 facts using what you already know about ×5 and ×10.",
+      workedExample: {
+        problem: "You know 5 × 7 = 35 and 10 × 7 = 70. What are 35 ÷ 5 and 70 ÷ 10?",
+        steps: [
+          "5 × 7 = 35 means 7 groups of 5 make 35, so 35 ÷ 5 undoes that: 7.",
+          "10 × 7 = 70 means 7 groups of 10 make 70, so 70 ÷ 10 undoes that: 7.",
+          "Once you know the multiplication fact, the division fact comes for free.",
+        ],
+        answer: "35 ÷ 5 = 7, and 70 ÷ 10 = 7.",
+      },
       concepts: [
         {
           title: "÷5 from ×5",
@@ -249,6 +347,8 @@ export const ch7: ChapterDef = {
               questions: [
                 { code: "ch7.div5.q1", kind: "FILL_IN_BLANK", stage: "PICTORIAL", generatorId: "div.frommult", params: { factor: 5 }, difficulty: 2 },
                 { code: "ch7.div5.q2", kind: "FILL_IN_BLANK", stage: "ABSTRACT", generatorId: "div.fact", params: { factor: 5 }, difficulty: 3 },
+                { code: "ch7.div5.q3", kind: "WORD_PROBLEM", stage: "PICTORIAL", generatorId: "div.wordproblem.measurement", params: { factor: 5 }, difficulty: 3 },
+                { code: "ch7.div5.q4", kind: "FIND_THE_MISTAKE", stage: "ABSTRACT", generatorId: "div.findmistake", params: { factor: 5 }, difficulty: 3 },
               ],
             },
           ],
@@ -266,6 +366,8 @@ export const ch7: ChapterDef = {
               questions: [
                 { code: "ch7.div10.q1", kind: "FILL_IN_BLANK", stage: "PICTORIAL", generatorId: "div.frommult", params: { factor: 10 }, difficulty: 2 },
                 { code: "ch7.div10.q2", kind: "FILL_IN_BLANK", stage: "ABSTRACT", generatorId: "div.fact", params: { factor: 10 }, difficulty: 3 },
+                { code: "ch7.div10.q3", kind: "WORD_PROBLEM", stage: "PICTORIAL", generatorId: "div.wordproblem.partitive", params: { factor: 10 }, difficulty: 3 },
+                { code: "ch7.div10.q4", kind: "FIND_THE_MISTAKE", stage: "ABSTRACT", generatorId: "div.findmistake", params: { factor: 10 }, difficulty: 3 },
               ],
             },
           ],
@@ -278,6 +380,15 @@ export const ch7: ChapterDef = {
       type: "PRACTICE",
       objective: "Mixed multiplication/division practice: ×2, ×5, ×10, ÷2, ÷5, ÷10.",
       missionBriefing: "The ultimate Realm training round — every fact you've learned, all mixed together.",
+      workedExample: {
+        problem: "Is 40 ÷ 5 the same fact family as 5 × 8? Solve both.",
+        steps: [
+          "5 × 8 = 40, since 8 groups of 5 make 40.",
+          "40 ÷ 5 asks the same fact backward: how many groups of 5 make 40?",
+          "Recognizing the fact family means you don't have to solve each one from scratch.",
+        ],
+        answer: "Yes — 5 × 8 = 40 and 40 ÷ 5 = 8 are the same fact family.",
+      },
       concepts: [
         {
           title: "Mixed Fact Practice",
@@ -292,6 +403,8 @@ export const ch7: ChapterDef = {
               questions: [
                 { code: "ch7.mixed.practice.q1", kind: "FILL_IN_BLANK", stage: "ABSTRACT", generatorId: "mixed.factdrill", params: { factors: [2, 5, 10], ops: ["x", "d"] }, difficulty: 3 },
                 { code: "ch7.mixed.practice.q2", kind: "FILL_IN_BLANK", stage: "ABSTRACT", generatorId: "mixed.factdrill", params: { factors: [2, 5, 10], ops: ["x", "d"] }, difficulty: 4 },
+                { code: "ch7.mixed.practice.q3", kind: "FILL_IN_BLANK", stage: "ABSTRACT", generatorId: "mixed.factdrill", params: { factors: [2, 5, 10], ops: ["x", "d"] }, difficulty: 5 },
+                { code: "ch7.mixed.practice.q4", kind: "MULTIPLE_CHOICE", stage: "ABSTRACT", generatorId: "multdiv.chooseoperation", params: { factor: 5 }, difficulty: 3 },
               ],
             },
           ],
@@ -304,6 +417,15 @@ export const ch7: ChapterDef = {
       type: "STANDARD",
       objective: "Solve one-step word problems involving multiplication or division by 2, 5, or 10 using bar models and equal-group reasoning.",
       missionBriefing: "Real Realm quests await — use bar models to solve each one-step story problem.",
+      workedExample: {
+        problem: "A baker makes 5 muffins in each tray. She bakes 9 trays. How many muffins in all?",
+        steps: [
+          "You know the number of groups (9 trays) and the size of each group (5 muffins).",
+          "That means multiply: 9 × 5.",
+          "9 × 5 = 45.",
+        ],
+        answer: "The baker makes 45 muffins in all.",
+      },
       concepts: [
         {
           title: "One-Step Word Problems",
@@ -319,6 +441,8 @@ export const ch7: ChapterDef = {
                 { code: "ch7.wordproblems.q1", kind: "WORD_PROBLEM", stage: "PICTORIAL", generatorId: "mult.wordproblem", params: { factor: 5 }, difficulty: 3 },
                 { code: "ch7.wordproblems.q2", kind: "WORD_PROBLEM", stage: "PICTORIAL", generatorId: "div.wordproblem.partitive", params: { factor: 2 }, difficulty: 3 },
                 { code: "ch7.wordproblems.q3", kind: "WORD_PROBLEM", stage: "PICTORIAL", generatorId: "div.wordproblem.measurement", params: { factor: 10 }, difficulty: 3 },
+                { code: "ch7.wordproblems.q4", kind: "WORD_PROBLEM", stage: "PICTORIAL", generatorId: "mult.wordproblem", params: { factor: 10 }, difficulty: 4 },
+                { code: "ch7.wordproblems.q5", kind: "MULTIPLE_CHOICE", stage: "ABSTRACT", generatorId: "multdiv.chooseoperation", params: { factor: 10 }, difficulty: 4 },
               ],
             },
           ],
@@ -331,6 +455,16 @@ export const ch7: ChapterDef = {
       type: "REVIEW",
       objective: "Review the complete chapter: ×2/×5/×10 tables and facts, ÷2/÷5/÷10, and word problems.",
       missionBriefing: "The Realm's final challenge — show everything you've mastered about 2s, 5s, and 10s!",
+      workedExample: {
+        problem: "Quick recap: what strategies unlock the ×2, ×5, ×10 facts and their division partners?",
+        steps: [
+          "×2 is doubling — add the number to itself.",
+          "×5 counts up by 5s — 5, 10, 15, 20...",
+          "×10 shifts every digit up a place value, leaving a 0 in the ones place.",
+          "Every multiplication fact has a matching division fact — same three numbers, asked backward.",
+        ],
+        answer: "Doubling for ×2, skip-counting for ×5, place-value shifting for ×10 — and division just undoes whichever one you used.",
+      },
       concepts: [
         {
           title: "Full Chapter Review",
@@ -347,6 +481,10 @@ export const ch7: ChapterDef = {
                 { code: "ch7.review.q2", kind: "WORD_PROBLEM", stage: "PICTORIAL", generatorId: "mult.wordproblem", params: { factor: 2 }, difficulty: 3 },
                 { code: "ch7.review.q3", kind: "WORD_PROBLEM", stage: "PICTORIAL", generatorId: "div.wordproblem.partitive", params: { factor: 5 }, difficulty: 3 },
                 { code: "ch7.review.q4", kind: "FIND_THE_MISTAKE", stage: "ABSTRACT", generatorId: "mult.findmistake", params: { factor: 10 }, difficulty: 3 },
+                { code: "ch7.review.q5", kind: "FIND_THE_MISTAKE", stage: "ABSTRACT", generatorId: "div.findmistake", params: { factor: 5 }, difficulty: 4 },
+                { code: "ch7.review.q6", kind: "FIND_THE_MISTAKE", stage: "ABSTRACT", generatorId: "mult.commutativeclaim", params: { factor: 10 }, difficulty: 4 },
+                { code: "ch7.review.q7", kind: "FILL_IN_BLANK", stage: "ABSTRACT", generatorId: "mult.relateproduct", params: { factor: 5 }, difficulty: 4 },
+                { code: "ch7.review.q8", kind: "MULTIPLE_CHOICE", stage: "ABSTRACT", generatorId: "multdiv.chooseoperation", params: { factor: 10 }, difficulty: 4 },
               ],
             },
           ],
