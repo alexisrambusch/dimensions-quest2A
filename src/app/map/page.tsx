@@ -6,6 +6,8 @@ import { getChapterAssessments } from "@/lib/actions/assessment";
 import { icon } from "@/components/manipulatives/icons";
 import { CARD } from "@/components/ui";
 
+export const dynamic = "force-dynamic";
+
 const WORLD_ICONS: Record<string, string> = {
   castle: "🏰",
   valley: "🌾",

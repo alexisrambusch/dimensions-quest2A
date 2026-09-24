@@ -3,6 +3,8 @@ import { getActiveStudent } from "@/lib/actions/students";
 import { prisma } from "@/lib/prisma";
 import { AssessmentRunner } from "@/components/lesson/AssessmentRunner";
 
+export const dynamic = "force-dynamic";
+
 export default async function AssessmentPage({ params }: { params: Promise<{ code: string }> }) {
   const { code } = await params;
   const student = await getActiveStudent();

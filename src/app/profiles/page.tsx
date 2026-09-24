@@ -4,6 +4,12 @@ import { CARD, PRIMARY_BUTTON } from "@/components/ui";
 
 const AVATAR_OPTIONS = ["fox", "dog", "star", "crown"];
 
+// This page reads from the database but has no cookies()/headers() call, so
+// Next.js has no automatic signal to treat it as dynamic — without this it
+// gets statically prerendered at *build* time, querying whatever (or no)
+// database is reachable then rather than the real one at request time.
+export const dynamic = "force-dynamic";
+
 export default async function ProfilesPage() {
   const students = await listStudents();
 

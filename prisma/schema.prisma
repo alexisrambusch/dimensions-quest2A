@@ -1,6 +1,7 @@
 // Singapore Math learning app — curriculum, mastery, and progress data model.
-// SQLite for zero-config local dev; schema is plain relational Prisma and
-// migrates to Postgres/Supabase later by swapping the datasource provider.
+// PostgreSQL-backed (works with Vercel Postgres, Neon, Supabase, or any
+// standard Postgres connection string) so it runs on Vercel's serverless
+// functions, which have no persistent local filesystem for SQLite to use.
 
 generator client {
   provider = "prisma-client"
@@ -8,7 +9,7 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
 }
 
 // ── People ──────────────────────────────────────────────────────────────

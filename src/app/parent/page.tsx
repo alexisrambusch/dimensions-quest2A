@@ -7,6 +7,8 @@ import { ParentPinGate } from "@/components/ParentPinGate";
 import { icon } from "@/components/manipulatives/icons";
 import { CARD } from "@/components/ui";
 
+export const dynamic = "force-dynamic";
+
 function ProgressBar({ percent }: { percent: number }) {
   const color = percent >= 80 ? "bg-emerald-500" : percent >= 50 ? "bg-amber-500" : "bg-rose-400";
   return (
