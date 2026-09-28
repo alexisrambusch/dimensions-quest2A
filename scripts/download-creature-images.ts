@@ -59,12 +59,14 @@ const WIKI_TITLES: Record<string, string[]> = {
   camel: ["Dromedary"],
   desert_tortoise: ["Desert_tortoise"],
   roadrunner: ["Greater_roadrunner"],
-  rattlesnake: ["Sidewinder", "Sidewinder_(snake)"],
+  rattlesnake: ["Sidewinder_(snake)", "Crotalus_cerastes", "Sidewinder"],
   beaver: ["Beaver", "North_American_beaver"],
   river_otter: ["North_American_river_otter"],
   black_bear: ["American_black_bear"],
   hippo: ["Hippopotamus"],
   rhino: ["Rhinoceros"],
+  polar_bear: ["Polar_bear"],
+  yak: ["Yak", "Domestic_yak", "Wild_yak"],
 };
 
 function titleCandidates(code: string, name: string): string[] {
