@@ -16,16 +16,18 @@ export function PlaceValueBuilder({ target, onBuilt }: Props) {
   const [ones, setOnes] = useState(0);
   const built = hundreds * 100 + tens * 10 + ones;
 
-  const targetH = Math.floor(target / 100);
-  const targetT = Math.floor((target % 100) / 10);
-  const targetO = target % 10;
-  const complete = hundreds === targetH && tens === targetT && ones === targetO;
-
+  // Report the built value continuously as it changes (right or wrong) — no
+  // confirm step, since a button that only enables once the blocks happen to
+  // match the target would itself reveal correctness before "Check my answer."
   function adjust(place: "h" | "t" | "o", delta: number) {
-    if (place === "h") setHundreds((v) => Math.max(0, Math.min(9, v + delta)));
-    if (place === "t") setTens((v) => Math.max(0, Math.min(9, v + delta)));
-    if (place === "o") setOnes((v) => Math.max(0, Math.min(9, v + delta)));
-    onBuilt(undefined); // any change resets the "confirmed" answer until they hit Confirm
+    const nextH = place === "h" ? Math.max(0, Math.min(9, hundreds + delta)) : hundreds;
+    const nextT = place === "t" ? Math.max(0, Math.min(9, tens + delta)) : tens;
+    const nextO = place === "o" ? Math.max(0, Math.min(9, ones + delta)) : ones;
+    setHundreds(nextH);
+    setTens(nextT);
+    setOnes(nextO);
+    const nextBuilt = nextH * 100 + nextT * 10 + nextO;
+    onBuilt(nextBuilt > 0 ? nextBuilt : undefined);
   }
 
   const columns: Array<{ key: "h" | "t" | "o"; label: string; count: number; blockClass: string; blockSize: string }> = [
@@ -57,14 +59,7 @@ export function PlaceValueBuilder({ target, onBuilt }: Props) {
         ))}
       </div>
       <div className="text-3xl font-black text-blue-700 tabular-nums">{built}</div>
-      <button
-        type="button"
-        disabled={!complete}
-        onClick={() => onBuilt(built)}
-        className="rounded-2xl bg-blue-600 disabled:bg-slate-200 disabled:text-slate-400 text-white font-bold px-6 py-3 shadow-md"
-      >
-        {complete ? "That's my number!" : `Build ${target} to continue`}
-      </button>
+      <p className="text-sm text-slate-500">Build {target}, then tap &quot;Check my answer&quot; below.</p>
     </div>
   );
 }
