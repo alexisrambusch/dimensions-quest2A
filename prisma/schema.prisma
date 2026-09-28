@@ -339,17 +339,32 @@ model StudentAchievement {
 // a mystery capsule for a weighted-random creature — never real-world IP).
 enum CreatureRarity {
   COMMON
+  UNCOMMON
   RARE
   LEGENDARY
 }
 
+enum CreatureHabitat {
+  FOREST
+  GRASSLAND
+  OCEAN
+  ARCTIC
+  DESERT
+  RAINFOREST
+  MOUNTAIN
+  WETLAND
+}
+
 model Creature {
-  id          String         @id @default(cuid())
-  code        String         @unique
+  id          String          @id @default(cuid())
+  code        String          @unique
   name        String
   description String
   icon        String
   rarity      CreatureRarity
+  habitat     CreatureHabitat
+  // Local path under /public (e.g. "/creatures/red_fox.jpg"); null falls back to the emoji icon.
+  imagePath   String?
 
   studentCreatures StudentCreature[]
 }

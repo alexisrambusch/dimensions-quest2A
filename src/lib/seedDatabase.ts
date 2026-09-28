@@ -186,8 +186,8 @@ export async function seedDatabase(prisma: PrismaClient): Promise<string[]> {
   for (const c of CREATURES) {
     await prisma.creature.upsert({
       where: { code: c.code },
-      update: { name: c.name, description: c.description, icon: c.icon, rarity: c.rarity },
-      create: { code: c.code, name: c.name, description: c.description, icon: c.icon, rarity: c.rarity },
+      update: { name: c.name, description: c.description, icon: c.icon, rarity: c.rarity, habitat: c.habitat, imagePath: c.imagePath },
+      create: { code: c.code, name: c.name, description: c.description, icon: c.icon, rarity: c.rarity, habitat: c.habitat, imagePath: c.imagePath },
     });
   }
   // Drop any previously-seeded creatures that fell out of the roster, as long as nobody has collected one yet.

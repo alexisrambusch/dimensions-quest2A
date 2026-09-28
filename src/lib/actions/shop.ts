@@ -1,7 +1,7 @@
 "use server";
 
 import { prisma } from "@/lib/prisma";
-import { CREATURES, RARITY_WEIGHTS, type CreatureDef, type CreatureRarity } from "@/lib/gamification/creatures";
+import { CREATURES, RARITY_WEIGHTS, type CreatureDef, type CreatureRarity, type CreatureHabitat } from "@/lib/gamification/creatures";
 import { ORB_COST } from "@/lib/gamification/shopConfig";
 
 export interface ShopCreatureEntry {
@@ -10,6 +10,8 @@ export interface ShopCreatureEntry {
   description: string;
   icon: string;
   rarity: CreatureRarity;
+  habitat: CreatureHabitat;
+  imagePath: string | null;
   owned: boolean;
   count: number;
 }
@@ -35,6 +37,8 @@ export async function getShopState(studentId: string): Promise<ShopState> {
       description: c.description,
       icon: c.icon,
       rarity: c.rarity,
+      habitat: c.habitat,
+      imagePath: c.imagePath,
       owned: ownedByCode.has(c.code),
       count: ownedByCode.get(c.code) ?? 0,
     })),
@@ -57,7 +61,7 @@ function pickRandomCreature(): CreatureDef {
 }
 
 export interface OpenOrbResult {
-  creature: { code: string; name: string; description: string; icon: string; rarity: CreatureRarity };
+  creature: { code: string; name: string; description: string; icon: string; rarity: CreatureRarity; habitat: CreatureHabitat; imagePath: string | null };
   isNew: boolean;
   coinsRemaining: number;
 }
@@ -93,6 +97,8 @@ export async function openMysteryOrb(studentId: string): Promise<OpenOrbResult |
       description: picked.description,
       icon: picked.icon,
       rarity: picked.rarity,
+      habitat: picked.habitat,
+      imagePath: picked.imagePath,
     },
     isNew: !existing,
     coinsRemaining: updated.coins,
