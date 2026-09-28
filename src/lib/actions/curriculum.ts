@@ -31,6 +31,21 @@ export async function getMissionMap(studentId: string): Promise<MapChapter[]> {
   const progress = await prisma.lessonProgress.findMany({ where: { studentId } });
   const progressByLesson = new Map(progress.map((p) => [p.lessonId, p]));
 
+  // A chapter only counts as done — and unlocks the next one — once the
+  // student has scored 100% on at least one of its two tests, not just
+  // finished every lesson.
+  const assessments = await prisma.assessment.findMany({
+    include: { attempts: { where: { studentId, completedAt: { not: null } } } },
+  });
+  const chapterHasPerfectScore = new Set<string>();
+  for (const a of assessments) {
+    const passed = a.attempts.some((att) => {
+      const s = JSON.parse(att.scoreJson) as { correct?: number; total?: number };
+      return !!s.total && s.correct === s.total;
+    });
+    if (passed) chapterHasPerfectScore.add(a.chapterId);
+  }
+
   const result: MapChapter[] = [];
   let previousChapterComplete = true;
 
@@ -54,7 +69,8 @@ export async function getMissionMap(studentId: string): Promise<MapChapter[]> {
       previousLessonComplete = status === "COMPLETE";
     }
 
-    const chapterComplete = lessons.length > 0 && lessons.every((l) => l.status === "COMPLETE");
+    const allLessonsComplete = lessons.length > 0 && lessons.every((l) => l.status === "COMPLETE");
+    const chapterComplete = allLessonsComplete && chapterHasPerfectScore.has(chapter.id);
     result.push({
       code: chapter.code,
       title: chapter.title,

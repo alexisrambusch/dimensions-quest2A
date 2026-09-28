@@ -113,11 +113,15 @@ export default async function MissionMapPage() {
                   <Link
                     key={a.code}
                     href={`/assessment/${a.code}`}
-                    className="inline-flex items-center gap-1.5 rounded-xl border-2 border-amber-300 bg-amber-50 text-amber-800 px-3 py-2 text-sm font-semibold hover:border-amber-500"
+                    className={`inline-flex items-center gap-1.5 rounded-xl border-2 px-3 py-2 text-sm font-semibold ${
+                      a.passed
+                        ? "border-emerald-400 bg-emerald-50 text-emerald-800 hover:border-emerald-500"
+                        : "border-amber-300 bg-amber-50 text-amber-800 hover:border-amber-500"
+                    }`}
                   >
-                    📝 {a.title}
+                    {a.passed ? "✅" : "📝"} {a.title}
                     {a.bestScore && (
-                      <span className="text-xs font-bold text-amber-600">
+                      <span className={`text-xs font-bold ${a.passed ? "text-emerald-600" : "text-amber-600"}`}>
                         (best {a.bestScore.correct}/{a.bestScore.total})
                       </span>
                     )}
@@ -125,6 +129,13 @@ export default async function MissionMapPage() {
                 ))}
               </div>
             )}
+            {chapter.status === "IN_PROGRESS" &&
+              chapter.lessons.every((l) => l.status === "COMPLETE") &&
+              !(assessmentsMap.get(chapter.code) ?? []).some((a) => a.passed) && (
+                <p className="text-xs text-amber-600 font-semibold pt-1 border-t border-slate-100">
+                  Score 100% on Test A or Test B above to unlock the next chapter.
+                </p>
+              )}
           </section>
         ))}
       </div>

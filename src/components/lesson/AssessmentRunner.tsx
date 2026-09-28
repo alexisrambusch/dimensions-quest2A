@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import clsx from "clsx";
 import {
   startAssessment,
@@ -114,7 +115,27 @@ export function AssessmentRunner({ assessmentCode, studentId, title, description
         <h1 className="text-2xl font-black text-center text-slate-800">
           You got {result.correct} of {result.total} ({pct}%)!
         </h1>
-        {pct >= 80 && <p className="text-center text-emerald-600 font-semibold">Excellent work! 🌟</p>}
+        {result.passed ? (
+          <p className="text-center text-emerald-600 font-semibold">Perfect score! 🌟 The next chapter is unlocked.</p>
+        ) : (
+          <div className="rounded-xl bg-amber-50 border border-amber-200 p-3 text-center text-sm text-amber-800">
+            A perfect score on Test A or Test B unlocks the next chapter. Review the sections below, then come back and try again!
+          </div>
+        )}
+        {!result.passed && result.reviewSections.length > 0 && (
+          <div className="rounded-xl bg-blue-50 border border-blue-100 p-4 flex flex-col gap-2">
+            <p className="font-bold text-blue-800 text-sm">Sections to review:</p>
+            {result.reviewSections.map((s) => (
+              <Link
+                key={s.lessonCode}
+                href={`/lesson/${s.lessonCode}`}
+                className="text-sm font-semibold text-blue-700 hover:text-blue-900 underline underline-offset-2"
+              >
+                {s.lessonTitle}
+              </Link>
+            ))}
+          </div>
+        )}
         {result.leveledUp && (
           <div className="rounded-xl bg-amber-50 border border-amber-300 p-3 text-center font-bold text-amber-700">
             🎉 Level Up! You&apos;re now Level {result.newLevel}!

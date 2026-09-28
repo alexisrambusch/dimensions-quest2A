@@ -108,6 +108,12 @@ export function LessonRunner({
   const [loadingQuestion, setLoadingQuestion] = useState(false);
   const [matchingBoard, setMatchingBoard] = useState<MatchingGameBoard | null>(null);
   const servedAtRef = useRef<number>(Date.now());
+  // A replay of an already-completed lesson (for review/practice) shouldn't
+  // rewrite the persisted phase/completed flag — that would temporarily
+  // re-lock this lesson (and anything chained after it) on the mission map
+  // while the student is just practicing. A ref (not state) avoids a stale
+  // closure inside beginStage on the very first call from handlePracticeAgain.
+  const practiceModeRef = useRef(false);
   const matchingFactor = getMatchingGameFactor(runtime.lesson.code);
 
   const loadQuestion = useCallback(
@@ -148,7 +154,9 @@ export function LessonRunner({
   async function beginStage(next: Stage) {
     setStage(next);
     setAnsweredInStage(0);
-    await setLessonPhase(studentId, runtime.lesson.id, next as LessonPhase);
+    if (!practiceModeRef.current) {
+      await setLessonPhase(studentId, runtime.lesson.id, next as LessonPhase);
+    }
     if (next === "GAME" && matchingFactor !== undefined) {
       await loadMatchingGame();
     } else if (next !== "BRIEFING" && next !== "LEARN" && next !== "COMPLETE") {
@@ -244,6 +252,25 @@ export function LessonRunner({
     servedAtRef.current = Date.now();
   }
 
+  /** Replay this lesson for review — fresh, regenerated questions (nextQuestionForLesson always mints a new seed), without disturbing the persisted completed/phase state that the mission map's unlock chain depends on. */
+  async function handlePracticeAgain() {
+    practiceModeRef.current = true;
+    setAskedCodes([]);
+    setAnsweredInStage(0);
+    setLessonXp(0);
+    setLessonCoins(0);
+    setLeveledUp(false);
+    setNewLevel(null);
+    setBadges([]);
+    setFeedback(null);
+    setHintLevel(0);
+    setHintTexts([]);
+    setAttemptsOnQuestion(0);
+    const newSessionId = await startSession(studentId, runtime.lesson.id);
+    setSessionId(newSessionId);
+    await beginStage(runtime.lesson.workedExample ? "LEARN" : "DISCOVER");
+  }
+
   // ---- Screens ----
 
   if (stage === "BRIEFING") {
@@ -331,6 +358,9 @@ export function LessonRunner({
         )}
         <button className={PRIMARY_BUTTON} onClick={() => router.push("/map")}>
           Back to the Map
+        </button>
+        <button className={clsx(SECONDARY_BUTTON, "!py-2 text-sm")} onClick={handlePracticeAgain}>
+          🔁 Practice This Mission Again
         </button>
       </div>
     );

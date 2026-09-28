@@ -14,6 +14,7 @@ export interface AssessmentSummary {
   style: "TEST_A" | "TEST_B";
   questionCount: number;
   bestScore: { correct: number; total: number } | null;
+  passed: boolean;
 }
 
 /** All assessments for a chapter, with the student's best past score if any. */
@@ -43,6 +44,7 @@ export async function getChapterAssessments(chapterCode: string, studentId: stri
       style: a.style,
       questionCount: questionCodes.length,
       bestScore: best,
+      passed: best !== null && best.correct === best.total,
     };
   });
 }
@@ -111,6 +113,8 @@ export interface AssessmentResult {
   leveledUp: boolean;
   newLevel: number;
   newBadges: Array<{ code: string; title: string; icon: string }>;
+  passed: boolean;
+  reviewSections: Array<{ lessonCode: string; lessonTitle: string }>;
 }
 
 /** Grade every response at once (a real test: no hints, no mid-test feedback) and record results. */
@@ -134,6 +138,7 @@ export async function submitAssessment(
 
   const perQuestion: AssessmentResult["perQuestion"] = [];
   let correctCount = 0;
+  const missedSkillIds = new Set<string>();
 
   for (const a of answers) {
     const params = JSON.parse(a.paramsJson);
@@ -150,6 +155,7 @@ export async function submitAssessment(
           hintLevelUsed: 0,
           independent: true,
         });
+        if (!result.correct) missedSkillIds.add(skill.id);
       }
     }
     for (const factKey of instance.answer.facts ?? []) {
@@ -173,6 +179,27 @@ export async function submitAssessment(
   const xpResult = await awardXp(prisma, studentId, xpAwarded, `Assessment: ${correctCount}/${total}`);
   const badgeResult = await checkAndAwardAchievements(prisma, studentId);
 
+  // Map every missed question back to the lesson that teaches its skill, so
+  // the results screen can tell the student exactly what to go review —
+  // not just their raw score.
+  let reviewSections: AssessmentResult["reviewSections"] = [];
+  if (missedSkillIds.size > 0) {
+    const skillsWithLesson = await prisma.skill.findMany({
+      where: { id: { in: [...missedSkillIds] } },
+      include: { concept: { include: { lesson: true } } },
+    });
+    const byLessonCode = new Map<string, { lessonCode: string; lessonTitle: string; order: number }>();
+    for (const s of skillsWithLesson) {
+      const lesson = s.concept.lesson;
+      if (!byLessonCode.has(lesson.code)) {
+        byLessonCode.set(lesson.code, { lessonCode: lesson.code, lessonTitle: lesson.title, order: lesson.order });
+      }
+    }
+    reviewSections = [...byLessonCode.values()]
+      .sort((a, b) => a.order - b.order)
+      .map(({ lessonCode, lessonTitle }) => ({ lessonCode, lessonTitle }));
+  }
+
   return {
     correct: correctCount,
     total,
@@ -182,5 +209,7 @@ export async function submitAssessment(
     leveledUp: xpResult.leveledUp || badgeResult.leveledUp,
     newLevel: badgeResult.newLevel,
     newBadges: badgeResult.newBadges,
+    passed: correctCount === total,
+    reviewSections,
   };
 }
