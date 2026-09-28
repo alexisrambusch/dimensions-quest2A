@@ -1,1 +1,8 @@
-{}
+{
+  "red_fox": "/creatures/red_fox.jpg",
+  "squirrel": "/creatures/squirrel.jpg",
+  "owl": "/creatures/owl.jpg",
+  "raccoon": "/creatures/raccoon.jpg",
+  "black_bear": "/creatures/black_bear.jpg",
+  "white_tailed_deer": "/creatures/white_tailed_deer.jpg"
+}

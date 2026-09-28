@@ -12,7 +12,12 @@
 // can take a while; progress is saved after every creature, so it's safe to
 // stop and resume.
 //
-// Usage: npx tsx scripts/download-creature-images.ts
+// Node's built-in fetch does NOT read HTTPS_PROXY/HTTP_PROXY by default (curl
+// does, which is why the proxy can look "working" while this script still
+// fails) — it needs NODE_USE_ENV_PROXY=1 set before the process starts, which
+// `npm run creatures:images` already does.
+//
+// Usage: npm run creatures:images
 
 import { writeFile, mkdir, readFile } from "node:fs/promises";
 import path from "node:path";

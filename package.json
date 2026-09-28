@@ -9,7 +9,7 @@
     "start": "next start",
     "lint": "eslint",
     "db:seed": "tsx scripts/seed.ts",
-    "creatures:images": "tsx scripts/download-creature-images.ts",
+    "creatures:images": "NODE_USE_ENV_PROXY=1 tsx scripts/download-creature-images.ts",
     "db:migrate": "prisma migrate dev",
     "db:studio": "prisma studio"
   },
