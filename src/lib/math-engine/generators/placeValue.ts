@@ -209,7 +209,7 @@ export const skipCountPattern: Generator = {
         view: "numberSequence",
         kind: "FILL_IN_BLANK",
         stage: "PICTORIAL",
-        text: `What number is missing? Counting by ${step}s.`,
+        text: `What number is missing?`,
         data: { shown, step },
       },
       answer: {
