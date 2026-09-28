@@ -1,5 +1,5 @@
 import type { Generator, GeneratedInstance, ValidationResult } from "../types";
-import { seededRng, randInt } from "../random";
+import { seededRng, randInt, pick } from "../random";
 import { pickContext } from "../contexts";
 import { validateNumeric } from "../numeric";
 
@@ -300,6 +300,322 @@ export const addSubExtremePair: Generator = {
   validate: (response, answer) => validateNumeric(response, answer),
 };
 
+/** Replace one digit of an addend or the sum with a blank inside a fully-worked column addition — targets place-value understanding of the algorithm itself, not just the final total. */
+export const additionMissingDigit: Generator = {
+  id: "addition.missingdigit",
+  generate(seed, difficulty): GeneratedInstance {
+    const rng = seededRng(seed);
+    const max = difficulty <= 1 ? 99 : difficulty <= 3 ? 499 : 899;
+    const a = randInt(rng, 10, max);
+    const b = randInt(rng, 10, max);
+    const sum = a + b;
+    const aStr = String(a);
+    const bStr = String(b);
+    const sumStr = String(sum);
+    const target = pick(rng, ["a", "b", "sum"] as const);
+    const targetStr = target === "a" ? aStr : target === "b" ? bStr : sumStr;
+    const position = randInt(rng, 0, targetStr.length - 1);
+    const digit = Number(targetStr[position]);
+    const masked = targetStr.slice(0, position) + "_" + targetStr.slice(position + 1);
+    const displayA = target === "a" ? masked : aStr;
+    const displayB = target === "b" ? masked : bStr;
+    const displaySum = target === "sum" ? masked : sumStr;
+    return {
+      prompt: {
+        view: "numericAnswer",
+        kind: "FILL_IN_BLANK",
+        stage: "ABSTRACT",
+        text: `In this addition, one digit is hidden: ${displayA} + ${displayB} = ${displaySum}. What digit is hidden?`,
+        data: {},
+      },
+      answer: {
+        value: digit,
+        explanation: `${aStr} + ${bStr} = ${sumStr}, so the hidden digit is ${digit}.`,
+      },
+      meta: { a, b, sum, target, position },
+    };
+  },
+  validate: (response, answer) => validateNumeric(response, answer),
+};
+
+/** Fact triangle: whole = part + part, with any one of the three corners (including the whole) hidden — unlike the number-bond generator, which only ever hides a part, this sometimes turns the problem into addition instead of subtraction. */
+export const addSubFactTriangle: Generator = {
+  id: "addsub.facttriangle",
+  generate(seed, difficulty): GeneratedInstance {
+    const rng = seededRng(seed);
+    const max = difficulty <= 1 ? 20 : difficulty <= 3 ? 100 : 1000;
+    const part1 = randInt(rng, 1, max - 1);
+    const part2 = randInt(rng, 1, max - part1);
+    const whole = part1 + part2;
+    const hiddenCorner = pick(rng, ["whole", "part1", "part2"] as const);
+
+    if (hiddenCorner === "whole") {
+      return {
+        prompt: {
+          view: "numericAnswer",
+          kind: "FILL_IN_BLANK",
+          stage: "ABSTRACT",
+          text: `In this fact triangle, two corners are ${part1} and ${part2} — they join to make the third corner. What is the missing corner?`,
+          data: {},
+        },
+        answer: {
+          value: whole,
+          explanation: `${part1} + ${part2} = ${whole}, so the missing corner is ${whole}. That also means ${whole} − ${part1} = ${part2} and ${whole} − ${part2} = ${part1}.`,
+        },
+        meta: { whole, part1, part2, hiddenCorner },
+      };
+    }
+
+    const knownPart = hiddenCorner === "part1" ? part2 : part1;
+    const missingPart = hiddenCorner === "part1" ? part1 : part2;
+    return {
+      prompt: {
+        view: "numericAnswer",
+        kind: "FILL_IN_BLANK",
+        stage: "ABSTRACT",
+        text: `In this fact triangle, the whole is ${whole} and one corner is ${knownPart}. What is the missing corner?`,
+        data: {},
+      },
+      answer: {
+        value: missingPart,
+        explanation: `${whole} − ${knownPart} = ${missingPart}. Check: ${knownPart} + ${missingPart} = ${whole}.`,
+      },
+      meta: { whole, part1, part2, hiddenCorner },
+    };
+  },
+  validate: (response, answer) => validateNumeric(response, answer),
+};
+
+interface PartWholeReasoningScenario {
+  wholeNoun: string;
+  verb: string;
+  part1Label: string;
+  part2Label: string;
+  format: (n: number) => string;
+}
+
+const partWholeReasoningScenarios: PartWholeReasoningScenario[] = [
+  { wholeNoun: "total amount of money", verb: "earned", part1Label: "raking leaves", part2Label: "washing cars", format: (n) => `$${n}` },
+  { wholeNoun: "total distance", verb: "walked", part1Label: "on the trail before lunch", part2Label: "on the trail after lunch", format: (n) => `${n} km` },
+  { wholeNoun: "total number of stickers", verb: "collected", part1Label: "at the school fair", part2Label: "from a cousin", format: (n) => `${n} stickers` },
+  { wholeNoun: "total number of pages", verb: "read", part1Label: "on Monday evening", part2Label: "on Tuesday evening", format: (n) => `${n} pages` },
+];
+
+const PART_WHOLE_REASONING_NAMES = ["Ravi", "Sofia", "Malik", "Elena", "Theo", "Amara", "Priya", "Kofi"];
+
+/** Part-whole word problem that makes the whole-vs-part decision explicit before computing — the final answer is still just a number, but the explanation names which quantity is the whole and which is a part. */
+export const addSubPartWholeReasoning: Generator = {
+  id: "addsub.partwholereasoning",
+  generate(seed, difficulty, params): GeneratedInstance {
+    const rng = seededRng(seed);
+    const opParam = (params.op as "add" | "sub" | undefined) ?? (rng() < 0.5 ? "add" : "sub");
+    const max = difficulty <= 1 ? 40 : difficulty <= 3 ? 200 : 800;
+    const scenario = pick(rng, partWholeReasoningScenarios);
+    const name = pick(rng, PART_WHOLE_REASONING_NAMES);
+    const part1 = randInt(rng, 5, max);
+    const part2 = randInt(rng, 5, max);
+    const whole = part1 + part2;
+
+    if (opParam === "add") {
+      const text = `${name} ${scenario.verb} ${scenario.format(part1)} ${scenario.part1Label} and ${scenario.format(part2)} ${scenario.part2Label}. Before you compute, decide: is ${name}'s ${scenario.wholeNoun} the whole, or just one part of it? Then find ${name}'s ${scenario.wholeNoun}.`;
+      return {
+        prompt: {
+          view: "barModelPartWhole",
+          kind: "WORD_PROBLEM",
+          stage: "PICTORIAL",
+          text,
+          data: { part1, part2, unit: scenario.wholeNoun },
+        },
+        answer: {
+          value: whole,
+          explanation: `${name}'s ${scenario.wholeNoun} is the whole. Both parts are known, so add them: ${scenario.format(part1)} + ${scenario.format(part2)} = ${scenario.format(whole)}.`,
+        },
+        meta: { a: part1, b: part2, op: "+", type: "partwhole-reasoning" },
+      };
+    }
+
+    const text = `${name} ${scenario.verb} ${scenario.format(whole)} in all: ${scenario.format(part1)} ${scenario.part1Label}, and the rest ${scenario.part2Label}. Before you compute, decide: is the amount ${scenario.part2Label} the whole, or just one part of the total? Then find how much that is.`;
+    return {
+      prompt: {
+        view: "barModelPartWhole",
+        kind: "WORD_PROBLEM",
+        stage: "PICTORIAL",
+        text,
+        data: { whole, known: part1, unit: scenario.wholeNoun },
+      },
+      answer: {
+        value: part2,
+        explanation: `The amount ${scenario.part2Label} is a part, not the whole — the whole (${scenario.format(whole)}) is already given. Subtract the known part: ${scenario.format(whole)} − ${scenario.format(part1)} = ${scenario.format(part2)}.`,
+      },
+      meta: { a: whole, b: part1, op: "-", type: "partwhole-reasoning" },
+    };
+  },
+  validate: (response, answer) => validateNumeric(response, answer),
+};
+
+function maskTensDigit(n: number): string {
+  const s = String(n);
+  const idx = s.length - 2;
+  return s.slice(0, idx) + "_" + s.slice(idx + 1);
+}
+
+/**
+ * Missing digit inside a fully-worked column addition/subtraction that is constructed to
+ * force a carry/borrow across the hidden digit's column — so recovering it means reasoning
+ * about the regroup (via the whole-number relationship a+b=result), not just column-matching
+ * the visible digits, which would silently give the wrong digit here on purpose.
+ */
+export const addSubHiddenDigitRegroup: Generator = {
+  id: "addsub.hiddendigitregroup",
+  generate(seed, difficulty, params): GeneratedInstance {
+    const rng = seededRng(seed);
+    const opParam = (params.op as "add" | "sub" | undefined) ?? (rng() < 0.5 ? "add" : "sub");
+    const acrossZero = (params.acrossZero as boolean | undefined) ?? false;
+    const threeDigit = difficulty >= 3 || acrossZero;
+
+    let a: number;
+    let b: number;
+
+    if (opParam === "add") {
+      const aOnes = randInt(rng, 1, 9);
+      const aTens = randInt(rng, 1, 9);
+      const aHundreds = threeDigit ? randInt(rng, 1, 8) : 0;
+      a = aHundreds * 100 + aTens * 10 + aOnes;
+      const bOnes = randInt(rng, 10 - aOnes, 9); // guarantees aOnes + bOnes >= 10: a carry out of the ones column
+      const bTens = randInt(rng, 1, 9);
+      const bHundreds = threeDigit ? randInt(rng, 0, 8) : 0;
+      b = bHundreds * 100 + bTens * 10 + bOnes;
+    } else if (acrossZero) {
+      const aHundreds = randInt(rng, 2, 9);
+      const aOnes = randInt(rng, 0, 8);
+      a = aHundreds * 100 + aOnes; // tens digit is 0 — the hardest borrow case
+      const bOnes = randInt(rng, aOnes + 1, 9); // guarantees a borrow out of the ones column
+      const bTens = randInt(rng, 1, 9);
+      const bHundreds = randInt(rng, 0, aHundreds - 1);
+      b = bHundreds * 100 + bTens * 10 + bOnes;
+    } else {
+      const aTens = randInt(rng, 2, 9);
+      const bOnes = randInt(rng, 1, 9);
+      const aOnes = randInt(rng, 0, bOnes - 1); // guarantees a borrow out of the ones column
+      const bTens = randInt(rng, 1, aTens - 1); // stays strictly below aTens so a > b regardless of hundreds
+      const aHundreds = threeDigit ? randInt(rng, 1, 8) : 0;
+      const bHundreds = threeDigit ? randInt(rng, 0, aHundreds) : 0;
+      a = aHundreds * 100 + aTens * 10 + aOnes;
+      b = bHundreds * 100 + bTens * 10 + bOnes;
+    }
+
+    const result = opParam === "add" ? a + b : a - b;
+    const hiddenOperand: "a" | "b" = rng() < 0.5 ? "a" : "b";
+    const hiddenNumber = hiddenOperand === "a" ? a : b;
+    const hiddenDigit = Math.floor(hiddenNumber / 10) % 10;
+    const shownA = hiddenOperand === "a" ? maskTensDigit(a) : String(a);
+    const shownB = hiddenOperand === "b" ? maskTensDigit(b) : String(b);
+    const symbol = opParam === "add" ? "+" : "−";
+    const verb = opParam === "add" ? "addition" : "subtraction";
+    const regroupPhrase =
+      opParam === "add"
+        ? "the ones column carries a 1 into the tens column"
+        : "the ones column has to borrow a ten, which changes the tens column";
+
+    return {
+      prompt: {
+        view: "numericAnswer",
+        kind: "FILL_IN_BLANK",
+        stage: "ABSTRACT",
+        text: `In this ${verb}, one digit is hidden: ${shownA} ${symbol} ${shownB} = ${result}. What digit is hidden?`,
+        data: {},
+      },
+      answer: {
+        value: hiddenDigit,
+        explanation: `${a} ${symbol} ${b} = ${result}, and ${regroupPhrase}, so you can't just match the visible digits column by column — the hidden tens digit of ${hiddenNumber} must be ${hiddenDigit}.`,
+      },
+      meta: { a, b, op: opParam, hiddenOperand, hiddenDigit },
+    };
+  },
+  validate: (response, answer) => validateNumeric(response, answer),
+};
+
+/**
+ * Conceptual true/false about *why* regrouping happens — the carry/borrow mechanism itself —
+ * rather than whether a computed sum or difference is correct. Several original templates are
+ * mixed so both the wording and the true/false split vary across seeds.
+ */
+export const addSubRegroupConcept: Generator = {
+  id: "addsub.regroupconcept",
+  generate(seed): GeneratedInstance {
+    const rng = seededRng(seed);
+    type Claim = { text: string; isTrue: boolean; explanation: string };
+    const templates: Array<() => Claim> = [
+      () => {
+        const wantTrue = rng() < 0.5;
+        const onesA = wantTrue ? randInt(rng, 0, 8) : randInt(rng, 1, 9);
+        const onesB = wantTrue ? randInt(rng, onesA + 1, 9) : randInt(rng, 0, onesA);
+        const needsRegroup = onesA < onesB;
+        return {
+          text: `To subtract ${onesB} ones from ${onesA} ones, you first need to regroup 1 ten as 10 ones. Is that true?`,
+          isTrue: needsRegroup,
+          explanation: needsRegroup
+            ? `${onesA} is less than ${onesB}, so there aren't enough ones — you must regroup a ten first.`
+            : `${onesA} is already at least ${onesB}, so you can subtract the ones directly with no regrouping.`,
+        };
+      },
+      () => {
+        const wantTrue = rng() < 0.5;
+        const onesA = wantTrue ? randInt(rng, 5, 9) : randInt(rng, 0, 4);
+        const onesB = wantTrue ? randInt(rng, 10 - onesA, 9) : randInt(rng, 0, Math.max(0, 8 - onesA));
+        const sum = onesA + onesB;
+        const carries = sum >= 10;
+        return {
+          text: `${onesA} ones plus ${onesB} ones makes ${sum}. That means a 1 gets carried into the tens column. Is that true?`,
+          isTrue: carries,
+          explanation: carries
+            ? `${sum} is 10 or more, so 1 ten gets carried into the tens column and ${sum - 10} ones stay behind.`
+            : `${sum} is less than 10, so no carrying is needed — the ones column is done as is.`,
+        };
+      },
+      () =>
+        rng() < 0.5
+          ? {
+              text: `When the tens digit is 0 and a subtraction needs to regroup, you must first regroup a hundred into 10 tens before you can regroup one of those tens into 10 ones. Is that true?`,
+              isTrue: true,
+              explanation: `With no tens to regroup from, you first break a hundred into 10 tens, then you can break one of those tens into 10 ones.`,
+            }
+          : {
+              text: `When the tens digit is 0 and a subtraction needs to regroup, you can regroup straight from the hundreds digit into the ones column, skipping the tens column entirely. Is that true?`,
+              isTrue: false,
+              explanation: `Regrouping only ever moves between neighboring places. A hundred becomes 10 tens first, and only then can one of those tens become 10 ones.`,
+            },
+      () =>
+        rng() < 0.5
+          ? {
+              text: `A ten that gets regrouped into the ones column is worth 10 ones. Is that true?`,
+              isTrue: true,
+              explanation: `1 ten always equals 10 ones, no matter which column it moves from.`,
+            }
+          : {
+              text: `A ten that gets regrouped into the ones column is worth 100 ones. Is that true?`,
+              isTrue: false,
+              explanation: `1 ten is worth 10 ones, not 100 — 100 is the value of a hundred, not a ten.`,
+            },
+    ];
+    const { text, isTrue, explanation } = pick(rng, templates)();
+    return {
+      prompt: {
+        view: "findMistake",
+        kind: "FIND_THE_MISTAKE",
+        stage: "ABSTRACT",
+        text,
+        data: {},
+      },
+      answer: { value: isTrue, explanation },
+      meta: { isTrue },
+    };
+  },
+  validate(response, answer): ValidationResult {
+    return { correct: response === answer.value };
+  },
+};
+
 export const additionSubtractionGenerators = [
   numberBondMissingPart,
   additionWithin1000,
@@ -309,4 +625,9 @@ export const additionSubtractionGenerators = [
   addSubFindMistake,
   addSubTwoStep,
   addSubExtremePair,
+  additionMissingDigit,
+  addSubFactTriangle,
+  addSubPartWholeReasoning,
+  addSubHiddenDigitRegroup,
+  addSubRegroupConcept,
 ];

@@ -260,6 +260,202 @@ export const weightCompareObjects: Generator = {
   validate: (response, answer) => validateNumeric(response, answer),
 };
 
+function joinWithAnd(items: string[]): string {
+  if (items.length === 1) return items[0];
+  if (items.length === 2) return `${items[0]} and ${items[1]}`;
+  return `${items.slice(0, -1).join(", ")}, and ${items[items.length - 1]}`;
+}
+
+const COUNT_WORDS = ["one", "two", "three", "four"];
+
+const BALANCE_PIECE_OBJECTS = ["toy robot", "gift box", "science kit", "model boat", "puzzle box"];
+
+/**
+ * Sum several *named, grouped* weight pieces ("two 20 g weights, three 1 g
+ * weights") to find a total mass — the workbook's balance-scale-with-labeled-
+ * pieces style, distinct from weightSumBlocks' flat list of single weights.
+ */
+export const weightBalancePieces: Generator = {
+  id: "weight.balancepieces",
+  generate(seed, difficulty, params): GeneratedInstance {
+    const rng = seededRng(seed);
+    const system = (params.system as UnitSystem | undefined) ?? "metric";
+    const unitLabel = system === "metric" ? "g" : "lb";
+    const values = system === "metric" ? GRAM_BLOCK_VALUES : POUND_BLOCK_VALUES;
+    const denomCount = difficulty <= 2 ? 2 : difficulty <= 4 ? 3 : 4;
+    const chosenValues = shuffle([...values], rng).slice(0, denomCount);
+    const maxCount = difficulty <= 3 ? 3 : 4;
+    const pieces = chosenValues.map((value) => ({ value, count: randInt(rng, 1, maxCount) }));
+    const total = pieces.reduce((sum, p) => sum + p.value * p.count, 0);
+    const obj = pick(rng, BALANCE_PIECE_OBJECTS);
+    const massWord = system === "metric" ? "mass" : "weight";
+    const phrases = pieces.map((p) => {
+      const word = COUNT_WORDS[p.count - 1] ?? String(p.count);
+      const noun = p.count === 1 ? "weight" : "weights";
+      return `${word} ${p.value} ${unitLabel} ${noun}`;
+    });
+    const text = `A balance shows ${article(obj)} ${obj} balanced against ${joinWithAnd(phrases)}. What is the ${obj}'s ${massWord}, in ${unitLabel === "g" ? "grams" : "pounds"}?`;
+    const explanation = `${pieces.map((p) => `(${p.count} × ${p.value})`).join(" + ")} = ${total} ${unitLabel}.`;
+    return {
+      prompt: {
+        view: "numericAnswer",
+        kind: "WORD_PROBLEM",
+        stage: "ABSTRACT",
+        text,
+        data: {},
+      },
+      answer: { value: total, explanation },
+      meta: { pieces, total },
+    };
+  },
+  validate: (response, answer) => validateNumeric(response, answer),
+};
+
+const BALANCE_COMPLETE_OBJECTS = ["puppy", "sandbag", "gift basket", "watermelon", "toy chest"];
+
+/**
+ * "How much more is needed to balance?" — one pan already holds an object of
+ * known weight, the other holds a partial pile of weights; find the gap.
+ */
+export const weightBalanceComplete: Generator = {
+  id: "weight.balancecomplete",
+  generate(seed, difficulty, params): GeneratedInstance {
+    const rng = seededRng(seed);
+    const system = (params.system as UnitSystem | undefined) ?? "metric";
+    const unitLabel = system === "metric" ? "g" : "lb";
+    const unitWord = unitLabel === "g" ? "grams" : "pounds";
+    const obj = pick(rng, BALANCE_COMPLETE_OBJECTS);
+    let objectWeight: number;
+    let currentWeight: number;
+    if (system === "metric") {
+      const [lo, hi] = difficulty <= 2 ? [40, 200] : difficulty <= 4 ? [100, 800] : [300, 2000];
+      objectWeight = randInt(rng, lo, hi);
+      currentWeight = randInt(rng, Math.max(5, Math.floor(lo / 4)), objectWeight - 5);
+    } else {
+      const [lo, hi] = difficulty <= 2 ? [3, 20] : difficulty <= 4 ? [5, 40] : [10, 80];
+      objectWeight = randInt(rng, lo, hi);
+      currentWeight = randInt(rng, 1, objectWeight - 1);
+    }
+    const needed = objectWeight - currentWeight;
+    const text = `One pan holds ${article(obj)} ${obj} that weighs ${objectWeight} ${unitLabel}. The other pan currently holds ${currentWeight} ${unitLabel} of weights. How many more ${unitWord} need to be added to balance the scale?`;
+    return {
+      prompt: {
+        view: "numericAnswer",
+        kind: "WORD_PROBLEM",
+        stage: "ABSTRACT",
+        text,
+        data: {},
+      },
+      answer: { value: needed, explanation: `${objectWeight} − ${currentWeight} = ${needed} ${unitLabel}.` },
+      meta: { objectWeight, currentWeight, needed },
+    };
+  },
+  validate: (response, answer) => validateNumeric(response, answer),
+};
+
+const TRIO_OBJECTS_METRIC = ["mango", "kiwi", "papaya", "starfruit", "guava", "fig"];
+const TRIO_OBJECTS_CUSTOMARY = ["pumpkin", "cabbage", "melon", "squash", "eggplant"];
+
+/**
+ * Three-unknown balance logic puzzle (challenge tier): three named objects,
+ * every pairwise sum of two of them is given, find the third. Ground truth
+ * weights are generated first and the three sums are derived from them, so
+ * the elimination formula always reconstructs the original — guaranteeing a
+ * unique, positive, whole-number answer.
+ */
+export const weightThreeUnknown: Generator = {
+  id: "weight.threeunknown",
+  generate(seed, difficulty, params): GeneratedInstance {
+    const rng = seededRng(seed);
+    const system = (params.system as UnitSystem | undefined) ?? "metric";
+    const unitLabel = system === "metric" ? "g" : "lb";
+    const unitWord = unitLabel === "g" ? "grams" : "pounds";
+    const bank = system === "metric" ? TRIO_OBJECTS_METRIC : TRIO_OBJECTS_CUSTOMARY;
+    const objects = shuffle([...bank], rng).slice(0, 3);
+    const [lo, hi] = system === "metric" ? (difficulty <= 4 ? [15, 150] : [20, 400]) : difficulty <= 4 ? [2, 15] : [3, 25];
+    const w = [randInt(rng, lo, hi), randInt(rng, lo, hi), randInt(rng, lo, hi)];
+    // S[0] = w0+w1 (between objects 0,1); S[1] = w1+w2 (between 1,2); S[2] = w0+w2 (between 0,2)
+    const s01 = w[0] + w[1];
+    const s12 = w[1] + w[2];
+    const s02 = w[0] + w[2];
+    const target = randInt(rng, 0, 2);
+    let answerValue: number;
+    if (target === 0) answerValue = (s01 + s02 - s12) / 2;
+    else if (target === 1) answerValue = (s01 + s12 - s02) / 2;
+    else answerValue = (s12 + s02 - s01) / 2;
+    const text = `On a balance scale: the ${objects[0]} and the ${objects[1]} together weigh the same as ${s01} ${unitLabel}. The ${objects[1]} and the ${objects[2]} together weigh the same as ${s12} ${unitLabel}. The ${objects[0]} and the ${objects[2]} together weigh the same as ${s02} ${unitLabel}. How much does the ${objects[target]} weigh, in ${unitWord}?`;
+    const explanation = `${objects[0]}+${objects[1]}=${s01}, ${objects[1]}+${objects[2]}=${s12}, ${objects[0]}+${objects[2]}=${s02}. Solving the system gives ${objects[target]} = ${answerValue} ${unitLabel}.`;
+    return {
+      prompt: {
+        view: "numericAnswer",
+        kind: "WORD_PROBLEM",
+        stage: "ABSTRACT",
+        text,
+        data: {},
+      },
+      answer: { value: answerValue, explanation },
+      meta: { objects, weights: w, s01, s12, s02, target },
+    };
+  },
+  validate: (response, answer) => validateNumeric(response, answer),
+};
+
+const GRAMS_PER_KG = 1000;
+const OUNCES_PER_LB = 16;
+const MIXED_COMPARE_OBJECTS = ["backpack", "watermelon", "suitcase", "bag of rice", "toolbox", "pumpkin", "sack of potatoes", "gift basket"];
+
+/** "Which is heavier?" comparing two objects given in *different* units, forcing a conversion before comparing. */
+export const weightMixedUnitCompare: Generator = {
+  id: "weight.mixedunitcompare",
+  generate(seed, difficulty, params): GeneratedInstance {
+    const rng = seededRng(seed);
+    const system = (params.system as UnitSystem | undefined) ?? "metric";
+    const objA = pick(rng, MIXED_COMPARE_OBJECTS);
+    let objB = pick(rng, MIXED_COMPARE_OBJECTS);
+    while (objB === objA) objB = pick(rng, MIXED_COMPARE_OBJECTS);
+    const sign = pick(rng, [1, -1]);
+    let bigVal: number;
+    let smallVal: number;
+    let bigUnit: string;
+    let smallUnit: string;
+    let perUnit: number;
+    if (system === "metric") {
+      bigUnit = "kg";
+      smallUnit = "g";
+      perUnit = GRAMS_PER_KG;
+      bigVal = randInt(rng, 1, 9);
+      const gap = difficulty <= 2 ? randInt(rng, 500, 3000) : difficulty <= 4 ? randInt(rng, 100, 800) : randInt(rng, 10, 200);
+      smallVal = Math.max(50, bigVal * perUnit + sign * gap);
+    } else {
+      bigUnit = "lb";
+      smallUnit = "oz";
+      perUnit = OUNCES_PER_LB;
+      bigVal = randInt(rng, 1, 9);
+      const gap = difficulty <= 2 ? randInt(rng, 8, 40) : difficulty <= 4 ? randInt(rng, 2, 15) : randInt(rng, 1, 6);
+      smallVal = Math.max(1, bigVal * perUnit + sign * gap);
+    }
+    const bigEquivalent = bigVal * perUnit;
+    const heavier = smallVal > bigEquivalent ? objB : objA;
+    const lighter = smallVal > bigEquivalent ? objA : objB;
+    const text = `${capitalizedArticle(objA)} ${objA} weighs ${bigVal} ${bigUnit}. ${capitalizedArticle(objB)} ${objB} weighs ${smallVal} ${smallUnit}. Which is heavier?`;
+    const explanation = `${bigVal} ${bigUnit} = ${bigEquivalent} ${smallUnit}. Since ${smallVal > bigEquivalent ? `${smallVal} > ${bigEquivalent}` : `${bigEquivalent} > ${smallVal}`}, the ${heavier} is heavier than the ${lighter}.`;
+    return {
+      prompt: {
+        view: "chooseUnit",
+        kind: "MULTIPLE_CHOICE",
+        stage: "ABSTRACT",
+        text,
+        data: { choices: [objA, objB] },
+      },
+      answer: { value: heavier, explanation },
+      meta: { objA, objB, bigVal, smallVal, bigUnit, smallUnit },
+    };
+  },
+  validate(response, answer): ValidationResult {
+    return { correct: response === answer.value };
+  },
+};
+
 export const weightGenerators = [
   weightChooseUnit,
   weightEstimate,
@@ -267,4 +463,8 @@ export const weightGenerators = [
   weightSumBlocks,
   weightMissingBalance,
   weightCompareObjects,
+  weightBalancePieces,
+  weightBalanceComplete,
+  weightThreeUnknown,
+  weightMixedUnitCompare,
 ];

@@ -1,5 +1,5 @@
 import type { Generator, GeneratedInstance, ValidationResult } from "../types";
-import { seededRng, randInt, pick } from "../random";
+import { seededRng, randInt, pick, shuffle } from "../random";
 import { pickContext } from "../contexts";
 import { multFactKey } from "../facts";
 import { validateNumeric } from "../numeric";
@@ -267,6 +267,204 @@ export const multRelateProduct: Generator = {
   validate: (response, answer) => validateNumeric(response, answer),
 };
 
+/** Evaluate x <op> y for the four basic operator symbols used across the app ("+","-","x","/"). */
+function applyOperatorSymbol(x: number, y: number, op: string): number {
+  switch (op) {
+    case "+":
+      return x + y;
+    case "-":
+      return x - y;
+    case "x":
+      return x * y;
+    case "/":
+      return y === 0 ? NaN : x / y;
+    default:
+      return NaN;
+  }
+}
+
+const OPERATOR_SYMBOLS = ["+", "-", "x", "/"] as const;
+
+/** "Choose the missing operator" — reasons about which of +, -, x, / makes an equation true, without being told the operation. */
+export const multChooseOperator: Generator = {
+  id: "mult.chooseoperator",
+  generate(seed, difficulty, params): GeneratedInstance {
+    const factor = params.factor as number;
+    const rng = seededRng(seed);
+    const [lo, hi] = difficultyRange(difficulty);
+
+    let x = 0;
+    let y = factor;
+    let z = 0;
+    let correctOp: "x" | "/" = "x";
+    for (let attempt = 0; attempt < 30; attempt++) {
+      const a = randInt(rng, Math.max(lo, 2), hi);
+      const useDivision = rng() < 0.5;
+      if (useDivision) {
+        x = a * factor;
+        y = factor;
+        z = a;
+        correctOp = "/";
+      } else {
+        x = a;
+        y = factor;
+        z = a * factor;
+        correctOp = "x";
+      }
+      const matches = OPERATOR_SYMBOLS.filter((op) => applyOperatorSymbol(x, y, op) === z);
+      if (matches.length === 1 && matches[0] === correctOp) break;
+    }
+
+    const choices = shuffle(rng, [...OPERATOR_SYMBOLS]);
+    return {
+      prompt: {
+        view: "chooseUnit",
+        kind: "MULTIPLE_CHOICE",
+        stage: "ABSTRACT",
+        text: `${x} ? ${y} = ${z} — does the ? need to be +, -, x, or /?`,
+        data: { choices },
+      },
+      answer: {
+        value: correctOp,
+        explanation:
+          correctOp === "x"
+            ? `${x} × ${y} = ${z}, so the missing operator is ×. The other operators don't give ${z}.`
+            : `${x} ÷ ${y} = ${z}, so the missing operator is ÷. The other operators don't give ${z}.`,
+      },
+      meta: { x, y, z, correctOp },
+    };
+  },
+  validate(response, answer): ValidationResult {
+    return { correct: response === answer.value };
+  },
+};
+
+/** Two-step "function machine" chain — applies two operations in sequence, one of them the chapter's ×N fact. */
+export const multFunctionMachine: Generator = {
+  id: "mult.functionmachine",
+  generate(seed, difficulty, params): GeneratedInstance {
+    const factor = params.factor as number;
+    const rng = seededRng(seed);
+    const [, hi] = difficultyRange(difficulty);
+    const start = randInt(rng, 1, Math.min(hi, 9));
+    const multiplyFirst = rng() < 0.5;
+    const kMax = difficulty <= 2 ? 5 : difficulty <= 4 ? 10 : 15;
+    const isAdd = rng() < 0.5;
+    let k = randInt(rng, 1, kMax);
+
+    let result: number;
+    let step1: string;
+    let step2: string;
+    let factForFact: number;
+
+    if (multiplyFirst) {
+      const afterStep1 = start * factor;
+      if (!isAdd && k > afterStep1) k = randInt(rng, 1, afterStep1);
+      result = isAdd ? afterStep1 + k : afterStep1 - k;
+      step1 = `Multiply by ${factor}`;
+      step2 = isAdd ? `add ${k}` : `subtract ${k}`;
+      factForFact = start;
+    } else {
+      if (!isAdd && k > start) k = randInt(rng, 1, start);
+      const afterStep1 = isAdd ? start + k : start - k;
+      result = afterStep1 * factor;
+      step1 = isAdd ? `Add ${k}` : `Subtract ${k}`;
+      step2 = `multiply by ${factor}`;
+      factForFact = afterStep1;
+    }
+
+    return {
+      prompt: {
+        view: "numericAnswer",
+        kind: "FILL_IN_BLANK",
+        stage: "ABSTRACT",
+        text: `Start with ${start}. ${step1}. Then ${step2}. What is the result?`,
+        data: {},
+      },
+      answer: {
+        value: result,
+        explanation: `Start with ${start}, then ${step1.toLowerCase()} and ${step2}, giving ${result}.`,
+        facts: [multFactKey(factForFact, factor)],
+      },
+      meta: { start, factor, multiplyFirst, isAdd, k, result },
+    };
+  },
+  validate: (response, answer) => validateNumeric(response, answer),
+};
+
+/** "Solve for the symbol" — a stand-in shape hides a repeated addend; find its value, then use it in a ×N fact. */
+export const multSolveForSymbol: Generator = {
+  id: "mult.solveforsymbol",
+  generate(seed, difficulty, params): GeneratedInstance {
+    const factor = params.factor as number;
+    const rng = seededRng(seed);
+    const [lo, hi] = difficultyRange(difficulty);
+    const symbolValue = randInt(rng, Math.max(lo, 1), Math.min(hi, 9));
+    const copies = randInt(rng, 2, difficulty <= 2 ? 3 : 4);
+    const total = symbolValue * copies;
+    const symbol = pick(rng, ["▲", "★", "●", "■"]);
+    const addends = Array(copies).fill(symbol).join(" + ");
+    const answerValue = symbolValue * factor;
+    return {
+      prompt: {
+        view: "numericAnswer",
+        kind: "FILL_IN_BLANK",
+        stage: "ABSTRACT",
+        text: `If ${addends} = ${total}, what does ${symbol} × ${factor} equal?`,
+        data: { symbol },
+      },
+      answer: {
+        value: answerValue,
+        explanation: `${addends} = ${total} means ${copies} × ${symbol} = ${total}, so ${symbol} = ${symbolValue}. Then ${symbol} × ${factor} = ${symbolValue} × ${factor} = ${answerValue}.`,
+        facts: [multFactKey(symbolValue, factor)],
+      },
+      meta: { symbolValue, copies, total, factor, symbol },
+    };
+  },
+  validate: (response, answer) => validateNumeric(response, answer),
+};
+
+/** True/false comparison of two products, reasoned by scaling rather than computing both in full. */
+export const multCompareTrueFalse: Generator = {
+  id: "mult.comparetruefalse",
+  generate(seed, difficulty, params): GeneratedInstance {
+    const factor = params.factor as number;
+    const rng = seededRng(seed);
+    const [lo, hi] = difficultyRange(difficulty);
+    const a = randInt(rng, Math.max(lo, 1), hi);
+    const b = randInt(rng, Math.max(lo, 1), hi);
+    const otherFactors = [2, 5, 10].filter((f) => f !== factor);
+    const factor2 = rng() < 0.6 ? factor : pick(rng, otherFactors);
+    const p1 = a * factor;
+    const p2 = b * factor2;
+    const actual: "greater" | "less" | "equal" = p1 > p2 ? "greater" : p1 < p2 ? "less" : "equal";
+    const claimTrue = rng() < 0.5;
+    const claimed = claimTrue
+      ? actual
+      : pick(rng, (["greater", "less", "equal"] as const).filter((r) => r !== actual));
+    const relText = claimed === "greater" ? "greater than" : claimed === "less" ? "less than" : "equal to";
+    const actualText = actual === "greater" ? "greater than" : actual === "less" ? "less than" : "equal to";
+    const isTrue = claimed === actual;
+    return {
+      prompt: {
+        view: "findMistake",
+        kind: "FIND_THE_MISTAKE",
+        stage: "ABSTRACT",
+        text: `${a} × ${factor} is ${relText} ${b} × ${factor2}. True or false?`,
+        data: {},
+      },
+      answer: {
+        value: isTrue,
+        explanation: `${a} × ${factor} = ${p1} and ${b} × ${factor2} = ${p2}, so ${a} × ${factor} is ${actualText} ${b} × ${factor2}.`,
+      },
+      meta: { a, factor, b, factor2, p1, p2, actual, claimed },
+    };
+  },
+  validate(response, answer): ValidationResult {
+    return { correct: response === answer.value };
+  },
+};
+
 export const multiplicationGenerators = [
   multTable,
   multArray,
@@ -276,4 +474,8 @@ export const multiplicationGenerators = [
   multCommutativeClaim,
   multDivChooseOperation,
   multRelateProduct,
+  multChooseOperator,
+  multFunctionMachine,
+  multSolveForSymbol,
+  multCompareTrueFalse,
 ];

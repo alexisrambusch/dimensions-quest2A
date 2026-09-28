@@ -333,6 +333,231 @@ export const lengthDifference: Generator = {
   validate: (response, answer) => validateNumeric(response, answer),
 };
 
+const INCH_TO_CM = 2.54;
+
+function inchesChoicesForDifficulty(difficulty: number): number[] {
+  if (difficulty <= 1) return [1, 2, 3];
+  if (difficulty <= 3) return [2, 4, 6, 8];
+  return [6, 8, 10, 12];
+}
+
+/**
+ * "About how many centimeters is N inches — closer to X or Y?" Grounds the
+ * ~2.5 cm-per-inch relationship in estimation/reasoning rather than exact
+ * conversion arithmetic.
+ */
+export const lengthUnitEquivalence: Generator = {
+  id: "length.unitequivalence",
+  generate(seed, difficulty, _params): GeneratedInstance {
+    const rng = seededRng(seed);
+    const inches = pick(rng, inchesChoicesForDifficulty(difficulty));
+    const actualCm = inches * INCH_TO_CM;
+    const step = inches <= 2 ? 1 : inches <= 6 ? 2 : 5;
+    const low = Math.floor(actualCm / step) * step;
+    const high = low + step;
+    const correctIsLow = actualCm - low < high - actualCm;
+    const correctValue = correctIsLow ? low : high;
+    const plural = inches === 1 ? "" : "es";
+    const choices = shuffle([`${low} cm`, `${high} cm`], rng);
+    const text = correctIsLow
+      ? `${inches} inch${plural} is a little more than how many centimeters — ${low} cm or ${high} cm?`
+      : `About how many centimeters is ${inches} inch${plural} — is it closer to ${low} cm or ${high} cm?`;
+    return {
+      prompt: {
+        view: "chooseUnit",
+        kind: "MULTIPLE_CHOICE",
+        stage: "ABSTRACT",
+        text,
+        data: { choices },
+      },
+      answer: {
+        value: `${correctValue} cm`,
+        explanation: `1 inch is about 2.5 cm, so ${inches} inch${plural} is about ${actualCm.toFixed(1)} cm — closer to ${correctValue} cm.`,
+      },
+      meta: { inches, actualCm, low, high, correctValue },
+    };
+  },
+  validate(response, answer): ValidationResult {
+    return { correct: response === answer.value };
+  },
+};
+
+const TRANSITIVE_NAME_POOL = ["Maya", "Theo", "Priya", "Diego", "Nora", "Sam", "Elena", "Lucas", "Amara", "Jun"];
+const TRANSITIVE_CATEGORIES = ["ribbon", "rope", "scarf", "string", "garden hose"];
+
+function transitiveEntityCount(difficulty: number, rng: () => number): number {
+  if (difficulty <= 2) return 3;
+  return pick(rng, [3, 4]);
+}
+
+/**
+ * Transitive-comparison logic puzzle: a chain of relative-length clues (each
+ * true by construction, since it's read directly off a random strict rank
+ * order) pins down a single, unambiguous longest/shortest answer.
+ */
+export const lengthTransitiveCompare: Generator = {
+  id: "length.transitivecompare",
+  generate(seed, difficulty, _params): GeneratedInstance {
+    const rng = seededRng(seed);
+    const k = transitiveEntityCount(difficulty, rng);
+    const category = pick(rng, TRANSITIVE_CATEGORIES);
+    // names[0] is defined as the longest, names[k-1] as the shortest — the
+    // shuffle itself *is* the random rank assignment, so ranks are always a
+    // strict total order with no ties.
+    const names = shuffle(TRANSITIVE_NAME_POOL, rng).slice(0, k);
+    const entities = names.map((n) => `${n}'s ${category}`);
+    const clues: string[] = [`${entities[1]} is shorter than ${entities[0]} but longer than ${entities[2]}.`];
+    for (let i = 3; i < k; i++) {
+      clues.push(`${entities[i]} is shorter than ${entities[i - 1]}.`);
+    }
+    const askLongest = rng() < 0.5;
+    const answerName = askLongest ? names[0] : names[k - 1];
+    const questionText = askLongest ? `Whose ${category} is the longest?` : `Whose ${category} is the shortest?`;
+    const choices = shuffle(names, rng);
+    return {
+      prompt: {
+        view: "chooseUnit",
+        kind: "MULTIPLE_CHOICE",
+        stage: "ABSTRACT",
+        text: `${clues.join(" ")} ${questionText}`,
+        data: { choices },
+      },
+      answer: {
+        value: answerName,
+        explanation: `Putting the clues in order from longest to shortest: ${names.join(" > ")}. So ${answerName}'s ${category} is the ${askLongest ? "longest" : "shortest"}.`,
+      },
+      meta: { names, category, askLongest },
+    };
+  },
+  validate(response, answer): ValidationResult {
+    return { correct: response === answer.value };
+  },
+};
+
+function precisionMarkForDifficulty(difficulty: number, rng: () => number): number {
+  const maxMark = difficulty <= 2 ? 8 : difficulty <= 4 ? 12 : 16;
+  return randInt(rng, 2, maxMark);
+}
+
+/**
+ * True/false check on what a ruler reading actually tells you: a line that
+ * doesn't land right on a mark can't be reported as an exact whole number
+ * with full confidence.
+ */
+export const lengthMeasurementPrecision: Generator = {
+  id: "length.measureprecision",
+  generate(seed, difficulty, params): GeneratedInstance {
+    const rng = seededRng(seed);
+    const unit = (params.unit as "cm" | "in" | undefined) ?? "cm";
+    const L = precisionMarkForDifficulty(difficulty, rng);
+    const scenario = pick(rng, ["nearLower", "nearUpper", "halfway"] as const);
+
+    let positionText: string;
+    let claimed: number;
+    let value: boolean;
+    let explanation: string;
+
+    if (scenario === "halfway") {
+      positionText = `right at the halfway point between the ${L} ${unit} and ${L + 1} ${unit} marks`;
+      claimed = pick(rng, [L, L + 1]);
+      value = true;
+      explanation = `The end sits exactly halfway between ${L} and ${L + 1} ${unit}, so the true length is about ${L}.5 ${unit} — not exactly ${claimed} ${unit}. A reading that lands right between two marks can't be reported as one exact whole mark.`;
+    } else {
+      const nearLow = scenario === "nearLower";
+      const nearestMark = nearLow ? L : L + 1;
+      positionText = nearLow
+        ? `just a little past the ${L} ${unit} mark`
+        : `just a little before the ${L + 1} ${unit} mark`;
+      claimed = pick(rng, [L, L + 1]);
+      const claimMatches = claimed === nearestMark;
+      value = !claimMatches;
+      explanation = claimMatches
+        ? `The end sits ${positionText}, so rounding to the nearest mark, ${claimed} ${unit} is a reasonable reading.`
+        : `The end sits ${positionText}, so the nearest mark is ${nearestMark} ${unit}, not ${claimed} ${unit} — that reading doesn't match where the line actually ends.`;
+    }
+
+    return {
+      prompt: {
+        view: "findMistake",
+        kind: "FIND_THE_MISTAKE",
+        stage: "ABSTRACT",
+        text: `A line's end sits ${positionText}. Someone says it measures exactly ${claimed} ${unit}. Could they be wrong?`,
+        data: {},
+      },
+      answer: { value, explanation },
+      meta: { L, unit, scenario, claimed },
+    };
+  },
+  validate(response, answer): ValidationResult {
+    return { correct: response === answer.value };
+  },
+};
+
+const SPACED_OBJECTS: { singular: string; plural: string }[] = [
+  { singular: "lamp post", plural: "lamp posts" },
+  { singular: "tree", plural: "trees" },
+  { singular: "fence post", plural: "fence posts" },
+  { singular: "flag", plural: "flags" },
+  { singular: "mailbox", plural: "mailboxes" },
+];
+
+function spacingRangeForDifficulty(difficulty: number): [number, number] {
+  if (difficulty <= 1) return [1, 4];
+  if (difficulty <= 3) return [2, 8];
+  return [3, 15];
+}
+
+/**
+ * Evenly spaced objects along a line — relate the gap between neighbors to
+ * the total span across all of them, in either direction.
+ */
+export const lengthEvenSpacing: Generator = {
+  id: "length.evenspacing",
+  generate(seed, difficulty, params): GeneratedInstance {
+    const rng = seededRng(seed);
+    const unit = (params.unit as "m" | "ft" | undefined) ?? "m";
+    const [lo, hi] = spacingRangeForDifficulty(difficulty);
+    const spacing = randInt(rng, lo, hi);
+    const postCount = randInt(rng, 4, 7);
+    const gaps = postCount - 1;
+    const total = gaps * spacing;
+    const obj = pick(rng, SPACED_OBJECTS);
+    const askSpacing = rng() < 0.5;
+
+    if (askSpacing) {
+      return {
+        prompt: {
+          view: "numericAnswer",
+          kind: "WORD_PROBLEM",
+          stage: "ABSTRACT",
+          text: `${postCount} ${obj.plural} stand in a row, evenly spaced. The distance from the first ${obj.singular} to the last ${obj.singular} is ${total} ${unit}. How far apart are two neighboring ${obj.plural}?`,
+          data: {},
+        },
+        answer: {
+          value: spacing,
+          explanation: `${postCount} ${obj.plural} in a row make ${gaps} equal gaps. ${total} ÷ ${gaps} = ${spacing} ${unit}.`,
+        },
+        meta: { postCount, spacing, total, unit },
+      };
+    }
+    return {
+      prompt: {
+        view: "numericAnswer",
+        kind: "WORD_PROBLEM",
+        stage: "ABSTRACT",
+        text: `${postCount} ${obj.plural} stand in a row, spaced ${spacing} ${unit} apart from each other. How far is it from the first ${obj.singular} to the last ${obj.singular}?`,
+        data: {},
+      },
+      answer: {
+        value: total,
+        explanation: `${postCount} ${obj.plural} in a row make ${gaps} equal gaps of ${spacing} ${unit} each. ${gaps} × ${spacing} = ${total} ${unit}.`,
+      },
+      meta: { postCount, spacing, total, unit },
+    };
+  },
+  validate: (response, answer) => validateNumeric(response, answer),
+};
+
 export const lengthGenerators = [
   lengthChooseUnit,
   lengthEstimateThenMeasure,
@@ -341,4 +566,8 @@ export const lengthGenerators = [
   lengthRulerFindMistake,
   lengthCompareThree,
   lengthDifference,
+  lengthUnitEquivalence,
+  lengthTransitiveCompare,
+  lengthMeasurementPrecision,
+  lengthEvenSpacing,
 ];
