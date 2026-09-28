@@ -24,7 +24,7 @@ const TOOLS = [
 ] as const;
 
 // The toolbox is only useful while a student is actually answering questions.
-const SHOWN_PREFIXES = ["/lesson/", "/assessment/"];
+const SHOWN_PREFIXES = ["/lesson/", "/assessment/", "/practice/"];
 
 export function Toolbox() {
   const pathname = usePathname();

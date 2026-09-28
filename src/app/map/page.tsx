@@ -59,6 +59,9 @@ export default async function MissionMapPage() {
           </div>
         </div>
         <div className="flex gap-3">
+          <Link href="/practice" className="text-sm font-semibold text-slate-500 hover:text-blue-700 self-center">
+            Practice &amp; Games
+          </Link>
           <Link href="/trophies" className="text-sm font-semibold text-slate-500 hover:text-blue-700 self-center">
             Trophy Case
           </Link>
