@@ -52,7 +52,7 @@ function StaticNumberLine({ min, max, step, value }: { min: number; max: number;
         </div>
       ))}
       <div
-        className="absolute top-7 h-4 w-4 -mt-[7px] rounded-full bg-violet-600 border-2 border-white shadow-md"
+        className="absolute top-7 h-4 w-4 -mt-[7px] rounded-full bg-blue-600 border-2 border-white shadow-md"
         style={{ left: `${toPercent(value)}%`, transform: "translateX(-50%)" }}
       />
     </div>
@@ -63,7 +63,7 @@ function StaticNumberBond({ whole, part1, part2 }: { whole: number; part1: numbe
   return (
     <div className="flex flex-col items-center gap-3">
       <div className="flex flex-col items-center">
-        <div className="h-14 w-14 rounded-full bg-violet-600 text-white flex items-center justify-center text-xl font-black shadow-md">{whole}</div>
+        <div className="h-14 w-14 rounded-full bg-blue-600 text-white flex items-center justify-center text-xl font-black shadow-md">{whole}</div>
         <svg width="140" height="44" className="-mt-1">
           <line x1="70" y1="0" x2="18" y2="44" stroke="#60a5fa" strokeWidth="3" />
           <line x1="70" y1="0" x2="122" y2="44" stroke="#60a5fa" strokeWidth="3" />
@@ -106,7 +106,7 @@ function StaticRuler({
               {t % 5 === 0 && <span className="text-[9px] text-slate-500 -mt-0.5">{t}</span>}
             </div>
           ))}
-          <div className="absolute top-0 h-full w-0.5 bg-violet-600" style={{ left: actualLength * pxPerUnit }} />
+          <div className="absolute top-0 h-full w-0.5 bg-blue-600" style={{ left: actualLength * pxPerUnit }} />
         </div>
       </div>
       <p className="text-xs text-slate-500">
@@ -121,7 +121,7 @@ function StaticSortedNumbers({ values }: { values: number[] }) {
     <div className="flex items-center gap-2 flex-wrap justify-center">
       {values.map((v, i) => (
         <div key={i} className="flex items-center gap-2">
-          <div className="min-w-12 h-12 rounded-xl bg-violet-100 border-2 border-violet-400 flex items-center justify-center text-lg font-bold text-violet-800">
+          <div className="min-w-12 h-12 rounded-xl bg-blue-100 border-2 border-blue-400 flex items-center justify-center text-lg font-bold text-blue-800">
             {v}
           </div>
           {i < values.length - 1 && <span className="text-slate-400">→</span>}
@@ -135,7 +135,7 @@ function StaticCompareNumbers({ a, b, symbol }: { a: number | string; b: number 
   return (
     <div className="flex items-center gap-3 text-2xl font-black text-slate-800">
       <span>{a}</span>
-      <span className="text-violet-600">{symbol}</span>
+      <span className="text-blue-600">{symbol}</span>
       <span>{b}</span>
     </div>
   );

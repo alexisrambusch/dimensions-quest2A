@@ -16,7 +16,7 @@ export function HomeButton() {
     <Link
       href="/map"
       aria-label="Back to quest map"
-      className="fixed bottom-4 right-4 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-b from-violet-500 to-violet-600 text-white shadow-lg shadow-violet-300/50 active:scale-90 transition-transform touch-manipulation"
+      className="fixed bottom-4 right-4 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-b from-blue-500 to-blue-600 text-white shadow-lg shadow-blue-300/50 active:scale-90 transition-transform touch-manipulation"
     >
       <Home size={24} strokeWidth={2.25} />
     </Link>

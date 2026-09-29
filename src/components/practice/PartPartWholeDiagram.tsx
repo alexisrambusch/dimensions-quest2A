@@ -31,7 +31,7 @@ export function PartPartWholeDiagram({ whole, partA, value, onChange, status }: 
         <line x1={WHOLE_POS.x} y1={WHOLE_POS.y + 20} x2={RIGHT_POS.x} y2={RIGHT_POS.y - 18} stroke="#cbd5e1" strokeWidth={3} />
       </svg>
       <div
-        className="absolute rounded-full bg-violet-100 border-2 border-violet-400 flex items-center justify-center font-black text-violet-800 text-lg"
+        className="absolute rounded-full bg-blue-100 border-2 border-blue-400 flex items-center justify-center font-black text-blue-800 text-lg"
         style={{ left: WHOLE_POS.x - 22, top: WHOLE_POS.y - 22, width: 44, height: 44 }}
       >
         {whole}
@@ -48,7 +48,7 @@ export function PartPartWholeDiagram({ whole, partA, value, onChange, status }: 
         value={value}
         onChange={(e) => onChange(e.target.value)}
         aria-label="Missing part"
-        className={`absolute rounded-full border-2 text-center font-black outline-none focus:border-violet-500 ${ringClass}`}
+        className={`absolute rounded-full border-2 text-center font-black outline-none focus:border-blue-500 ${ringClass}`}
         style={{ left: RIGHT_POS.x - 19, top: RIGHT_POS.y - 19, width: 38, height: 38 }}
       />
     </div>

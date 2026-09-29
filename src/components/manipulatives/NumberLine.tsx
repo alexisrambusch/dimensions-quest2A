@@ -47,13 +47,13 @@ export function NumberLine({ min, max, step, value, onChange }: Props) {
         ))}
         {hover !== null && value === undefined && (
           <div
-            className="absolute top-8 h-4 w-4 -mt-[7px] rounded-full bg-violet-200 border-2 border-violet-400"
+            className="absolute top-8 h-4 w-4 -mt-[7px] rounded-full bg-blue-200 border-2 border-blue-400"
             style={{ left: `${toPercent(hover)}%`, transform: "translateX(-50%)" }}
           />
         )}
         {value !== undefined && (
           <div
-            className="absolute top-8 h-5 w-5 -mt-[8.5px] rounded-full bg-violet-600 border-2 border-white shadow-md"
+            className="absolute top-8 h-5 w-5 -mt-[8.5px] rounded-full bg-blue-600 border-2 border-white shadow-md"
             style={{ left: `${toPercent(value)}%`, transform: "translateX(-50%)" }}
           />
         )}

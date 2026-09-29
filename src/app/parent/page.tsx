@@ -40,12 +40,12 @@ export default async function ParentDashboardPage() {
         <div className="flex items-center gap-3">
           <span className="text-4xl">{icon(data.student.avatarKey)}</span>
           <div>
-            <h1 className="text-2xl font-black text-violet-800">{data.student.name}&apos;s Progress</h1>
+            <h1 className="text-2xl font-black text-blue-800">{data.student.name}&apos;s Progress</h1>
             <p className="text-sm text-slate-500">Parent Dashboard</p>
           </div>
         </div>
         <div className="flex items-center gap-4">
-          <Link href="/map" className="text-sm font-semibold text-violet-600 hover:underline">
+          <Link href="/map" className="text-sm font-semibold text-blue-600 hover:underline">
             ← Back to quest map
           </Link>
           <form action={lockParentDashboard}>
@@ -58,13 +58,13 @@ export default async function ParentDashboardPage() {
 
       <section className={`${CARD} grid grid-cols-2 sm:grid-cols-4 gap-4 text-center`}>
         <div>
-          <p className="text-2xl font-black text-violet-700">
+          <p className="text-2xl font-black text-blue-700">
             {data.overall.chaptersCompleted}/{data.overall.chaptersTotal}
           </p>
           <p className="text-xs text-slate-500">Chapters complete</p>
         </div>
         <div>
-          <p className="text-2xl font-black text-violet-700">
+          <p className="text-2xl font-black text-blue-700">
             {data.overall.lessonsCompleted}/{data.overall.lessonsTotal}
           </p>
           <p className="text-xs text-slate-500">Lessons complete</p>
@@ -82,7 +82,7 @@ export default async function ParentDashboardPage() {
       <section className={`${CARD} flex flex-col gap-3`}>
         <h2 className="font-bold text-slate-800">What&apos;s really going on</h2>
         {data.insights.map((insight, i) => (
-          <p key={i} className="text-sm text-slate-600 bg-violet-50 border border-violet-100 rounded-lg px-3 py-2">
+          <p key={i} className="text-sm text-slate-600 bg-blue-50 border border-blue-100 rounded-lg px-3 py-2">
             {insight}
           </p>
         ))}

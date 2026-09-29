@@ -52,7 +52,7 @@ export function PartPartWholeClient() {
               onClick={() => pickWhole(n)}
               className={clsx(
                 "h-11 w-11 rounded-full font-black border-2 touch-manipulation",
-                n === whole ? "bg-violet-600 border-violet-600 text-white" : "bg-white border-slate-200 text-slate-600 hover:border-violet-300",
+                n === whole ? "bg-blue-600 border-blue-600 text-white" : "bg-white border-slate-200 text-slate-600 hover:border-blue-300",
               )}
             >
               {n}
@@ -63,7 +63,7 @@ export function PartPartWholeClient() {
 
       <div className={`${CARD} flex flex-col gap-4`}>
         <p className="text-sm text-slate-500">
-          Find every pair of parts that makes <span className="font-bold text-violet-700">{whole}</span>. Fill in the missing part for each pair.
+          Find every pair of parts that makes <span className="font-bold text-blue-700">{whole}</span>. Fill in the missing part for each pair.
         </p>
 
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-y-4 gap-x-2 place-items-center">

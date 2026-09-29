@@ -12,7 +12,7 @@ import { playPop, playLevelUp } from "@/lib/sound";
 const RARITY_CARD_STYLE: Record<string, string> = {
   COMMON: "border-slate-300 bg-slate-50",
   UNCOMMON: "border-emerald-300 bg-emerald-50",
-  RARE: "border-violet-300 bg-violet-50",
+  RARE: "border-blue-300 bg-blue-50",
   LEGENDARY: "border-amber-400 bg-amber-50",
 };
 
@@ -26,7 +26,7 @@ const RARITY_LABEL: Record<string, string> = {
 const RARITY_TEXT_STYLE: Record<string, string> = {
   COMMON: "text-slate-500",
   UNCOMMON: "text-emerald-600",
-  RARE: "text-violet-600",
+  RARE: "text-blue-600",
   LEGENDARY: "text-amber-600",
 };
 
@@ -103,7 +103,7 @@ export function ShopClient({ studentId, initial }: { studentId: string; initial:
             onClick={() => setHabitatFilter("ALL")}
             className={clsx(
               "shrink-0 rounded-full px-3 py-1.5 text-xs font-bold border-2 touch-manipulation",
-              habitatFilter === "ALL" ? "bg-violet-600 border-violet-600 text-white" : "bg-white border-slate-200 text-slate-600 hover:border-violet-300",
+              habitatFilter === "ALL" ? "bg-blue-600 border-blue-600 text-white" : "bg-white border-slate-200 text-slate-600 hover:border-blue-300",
             )}
           >
             All regions
@@ -115,7 +115,7 @@ export function ShopClient({ studentId, initial }: { studentId: string; initial:
               onClick={() => setHabitatFilter(h)}
               className={clsx(
                 "shrink-0 rounded-full px-3 py-1.5 text-xs font-bold border-2 touch-manipulation whitespace-nowrap",
-                habitatFilter === h ? "bg-violet-600 border-violet-600 text-white" : "bg-white border-slate-200 text-slate-600 hover:border-violet-300",
+                habitatFilter === h ? "bg-blue-600 border-blue-600 text-white" : "bg-white border-slate-200 text-slate-600 hover:border-blue-300",
               )}
             >
               {HABITAT_ICONS[h]} {HABITAT_LABELS[h]}
@@ -172,7 +172,7 @@ export function ShopClient({ studentId, initial }: { studentId: string; initial:
           >
             {reveal.context !== "view" && reveal.creature.rarity === "LEGENDARY" && <ConfettiBurst />}
             {reveal.context !== "view" && (
-              <p className="text-xs font-bold uppercase tracking-wide text-violet-400">
+              <p className="text-xs font-bold uppercase tracking-wide text-blue-400">
                 {reveal.context === "new" ? "New Creature!" : "Another one joined the group!"}
               </p>
             )}
@@ -195,7 +195,7 @@ export function ShopClient({ studentId, initial }: { studentId: string; initial:
         </div>
       )}
 
-      <Link href="/map" className="text-sm font-semibold text-slate-500 hover:text-violet-700 text-center">
+      <Link href="/map" className="text-sm font-semibold text-slate-500 hover:text-blue-700 text-center">
         ← Back to quest map
       </Link>
     </div>

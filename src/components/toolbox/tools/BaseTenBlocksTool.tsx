@@ -45,7 +45,7 @@ export function BaseTenBlocksTool() {
           </div>
         ))}
       </div>
-      <div className="text-3xl font-black text-violet-700 tabular-nums">{built}</div>
+      <div className="text-3xl font-black text-blue-700 tabular-nums">{built}</div>
       <button
         type="button"
         className={clsx(SECONDARY_BUTTON, "!min-h-10 !py-2 !px-4 text-sm")}

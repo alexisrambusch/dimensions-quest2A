@@ -29,7 +29,7 @@ export function SortNumbers({ values, onChange }: Props) {
     <div className="flex flex-col items-center gap-4">
       <div className="flex gap-2 min-h-14">
         {placed.map((v, i) => (
-          <div key={i} className="min-w-14 h-14 rounded-xl bg-violet-100 border-2 border-violet-400 flex items-center justify-center text-xl font-bold text-violet-800">
+          <div key={i} className="min-w-14 h-14 rounded-xl bg-blue-100 border-2 border-blue-400 flex items-center justify-center text-xl font-bold text-blue-800">
             {v}
           </div>
         ))}

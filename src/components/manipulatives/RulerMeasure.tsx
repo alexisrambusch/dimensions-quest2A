@@ -52,7 +52,7 @@ export function RulerMeasure({ object, icon: iconKey, actualLength, maxLength, u
           value={estimate}
           onChange={(e) => commitEstimate(Number(e.target.value))}
           placeholder={unit}
-          className="w-20 text-center text-lg font-bold rounded-lg border-2 border-slate-300 focus:border-violet-500 outline-none py-1"
+          className="w-20 text-center text-lg font-bold rounded-lg border-2 border-slate-300 focus:border-blue-500 outline-none py-1"
         />
         <span>{unitLabel}</span>
       </div>
@@ -82,13 +82,13 @@ export function RulerMeasure({ object, icon: iconKey, actualLength, maxLength, u
             </button>
           ))}
           {measured !== null && (
-            <div className="absolute top-0 h-full w-0.5 bg-violet-600" style={{ left: measured * pxPerUnit }} />
+            <div className="absolute top-0 h-full w-0.5 bg-blue-600" style={{ left: measured * pxPerUnit }} />
           )}
         </div>
       </div>
       <p className="text-sm text-slate-500">Tap the ruler where the {object} ends.</p>
       {measured !== null && (
-        <p className="text-sm font-semibold text-violet-700">
+        <p className="text-sm font-semibold text-blue-700">
           You measured {measured} {unitLabel}.
         </p>
       )}

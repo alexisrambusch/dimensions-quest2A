@@ -1,8 +1,8 @@
 @import "tailwindcss";
 
 :root {
-  --background: #fdf4ff;
-  --foreground: #1e1b4b;
+  --background: #eff6ff;
+  --foreground: #0c2340;
 }
 
 @theme inline {
@@ -13,7 +13,7 @@
 }
 
 body {
-  background: linear-gradient(180deg, #f5f3ff 0%, #fdf2f8 45%, #fff7ed 100%);
+  background: linear-gradient(180deg, #eff6ff 0%, #ecfeff 45%, #f0fdf4 100%);
   color: var(--foreground);
   font-family: var(--font-sans), Arial, Helvetica, sans-serif;
   min-height: 100dvh;

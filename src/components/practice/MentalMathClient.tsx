@@ -57,7 +57,7 @@ export function MentalMathClient() {
               onClick={() => pickCategory(c.key)}
               className={clsx(
                 "rounded-full px-3 py-1.5 text-sm font-bold border-2 touch-manipulation",
-                c.key === category ? "bg-violet-600 border-violet-600 text-white" : "bg-white border-slate-200 text-slate-600 hover:border-violet-300",
+                c.key === category ? "bg-blue-600 border-blue-600 text-white" : "bg-white border-slate-200 text-slate-600 hover:border-blue-300",
               )}
             >
               {c.label}
@@ -69,13 +69,13 @@ export function MentalMathClient() {
       <div className={`${CARD} flex flex-col items-center gap-5`}>
         <div className="flex gap-6 text-sm font-semibold text-slate-500">
           <span>
-            Streak: <span className="text-violet-700">{streak}</span>
+            Streak: <span className="text-blue-700">{streak}</span>
           </span>
           <span>
-            Best: <span className="text-violet-700">{best}</span>
+            Best: <span className="text-blue-700">{best}</span>
           </span>
           <span>
-            Score: <span className="text-violet-700">{correct}/{total}</span>
+            Score: <span className="text-blue-700">{correct}/{total}</span>
           </span>
         </div>
 
@@ -93,7 +93,7 @@ export function MentalMathClient() {
             "w-28 text-center text-2xl font-black rounded-xl border-2 outline-none py-2",
             feedback === "correct" && "border-emerald-500 bg-emerald-50 text-emerald-800",
             feedback === "wrong" && "border-rose-500 bg-rose-50 text-rose-800",
-            feedback === "idle" && "border-slate-300 focus:border-violet-500",
+            feedback === "idle" && "border-slate-300 focus:border-blue-500",
           )}
         />
 

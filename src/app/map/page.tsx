@@ -28,7 +28,7 @@ const WORLD_BACKDROP: Record<string, string> = {
   island: "bg-gradient-to-br from-cyan-100 via-cyan-50 to-white",
   factory: "bg-gradient-to-br from-orange-100 via-orange-50 to-white",
   forest: "bg-gradient-to-br from-emerald-100 via-emerald-50 to-white",
-  realm: "bg-gradient-to-br from-violet-100 via-violet-50 to-white",
+  realm: "bg-gradient-to-br from-blue-100 via-blue-50 to-white",
 };
 
 const WORLD_RING: Record<string, string> = {
@@ -38,7 +38,7 @@ const WORLD_RING: Record<string, string> = {
   island: "ring-cyan-200",
   factory: "ring-orange-200",
   forest: "ring-emerald-200",
-  realm: "ring-violet-200",
+  realm: "ring-blue-200",
 };
 
 /** A short glyph per lesson chip, standing in for "what kind of level is this" at a glance. */
@@ -61,31 +61,31 @@ export default async function MissionMapPage() {
     <main className="flex-1 p-6 max-w-4xl mx-auto w-full flex flex-col gap-6">
       <header className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <span className="animate-float-y flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-violet-200 to-fuchsia-100 text-4xl shadow-sm ring-2 ring-white">
+          <span className="animate-float-y flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-blue-200 to-cyan-100 text-4xl shadow-sm ring-2 ring-white">
             {icon(student.avatarKey)}
           </span>
           <div>
-            <h1 className="text-2xl font-black text-violet-800">{student.name}&apos;s Quest Map</h1>
-            <p className="text-sm text-violet-500 font-semibold">
+            <h1 className="text-2xl font-black text-blue-800">{student.name}&apos;s Quest Map</h1>
+            <p className="text-sm text-blue-500 font-semibold">
               Level {levelForXp(student.totalXp)} · {student.totalXp} XP · {student.coins} 🪙 · {student.streakDays} day streak
             </p>
           </div>
         </div>
         <div className="flex gap-3">
-          <Link href="/practice" className="text-sm font-semibold text-slate-500 hover:text-violet-700 self-center">
+          <Link href="/practice" className="text-sm font-semibold text-slate-500 hover:text-blue-700 self-center">
             Practice &amp; Games
           </Link>
-          <Link href="/trophies" className="text-sm font-semibold text-slate-500 hover:text-violet-700 self-center">
+          <Link href="/trophies" className="text-sm font-semibold text-slate-500 hover:text-blue-700 self-center">
             Trophy Case
           </Link>
-          <Link href="/shop" className="text-sm font-semibold text-slate-500 hover:text-violet-700 self-center">
+          <Link href="/shop" className="text-sm font-semibold text-slate-500 hover:text-blue-700 self-center">
             Shop
           </Link>
-          <Link href="/parent" className="text-sm font-semibold text-slate-500 hover:text-violet-700 self-center">
+          <Link href="/parent" className="text-sm font-semibold text-slate-500 hover:text-blue-700 self-center">
             Parent Dashboard
           </Link>
           <form action={switchProfileAction}>
-            <button type="submit" className="text-sm font-semibold text-slate-500 hover:text-violet-700">
+            <button type="submit" className="text-sm font-semibold text-slate-500 hover:text-blue-700">
               Switch profile
             </button>
           </form>

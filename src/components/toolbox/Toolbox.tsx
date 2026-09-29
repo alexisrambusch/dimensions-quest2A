@@ -57,7 +57,7 @@ export function Toolbox() {
                 type="button"
                 onClick={() => setOpen(false)}
                 aria-label="Close toolbox"
-                className="h-9 w-9 flex items-center justify-center rounded-full bg-violet-50 text-violet-500 active:scale-90 transition-transform touch-manipulation"
+                className="h-9 w-9 flex items-center justify-center rounded-full bg-blue-50 text-blue-500 active:scale-90 transition-transform touch-manipulation"
               >
                 <X size={18} strokeWidth={2.5} />
               </button>
@@ -71,7 +71,7 @@ export function Toolbox() {
                   onClick={() => setActiveKey(t.key)}
                   className={clsx(
                     "flex flex-col items-center gap-0.5 shrink-0 rounded-xl px-3 py-2 text-[10px] font-bold touch-manipulation transition-colors",
-                    t.key === activeKey ? "bg-violet-100 text-violet-700" : "bg-slate-50 text-slate-500 hover:bg-slate-100",
+                    t.key === activeKey ? "bg-blue-100 text-blue-700" : "bg-slate-50 text-slate-500 hover:bg-slate-100",
                   )}
                 >
                   <span className="text-xl leading-none">{t.icon}</span>

@@ -19,12 +19,12 @@ export default async function TrophyCasePage() {
     <main className="flex-1 p-6 max-w-3xl mx-auto w-full flex flex-col gap-6">
       <header className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-black text-violet-800">Trophy Case</h1>
+          <h1 className="text-2xl font-black text-blue-800">Trophy Case</h1>
           <p className="text-sm text-slate-500">
             {earnedCount} of {trophies.length} badges earned
           </p>
         </div>
-        <Link href="/map" className="text-sm font-semibold text-slate-500 hover:text-violet-700">
+        <Link href="/map" className="text-sm font-semibold text-slate-500 hover:text-blue-700">
           ← Back to quest map
         </Link>
       </header>
@@ -42,7 +42,7 @@ export default async function TrophyCasePage() {
             <span
               className={clsx(
                 "flex h-16 w-16 items-center justify-center rounded-full text-4xl shadow-sm",
-                t.earned ? "bg-gradient-to-br from-amber-100 to-violet-100 animate-pop-in" : "bg-slate-100",
+                t.earned ? "bg-gradient-to-br from-amber-100 to-blue-100 animate-pop-in" : "bg-slate-100",
               )}
             >
               {icon(t.icon)}

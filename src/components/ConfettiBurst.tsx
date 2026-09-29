@@ -1,4 +1,4 @@
-const COLORS = ["#a78bfa", "#fbbf24", "#fb7185", "#34d399", "#38bdf8", "#f472b6"];
+const COLORS = ["#60a5fa", "#fbbf24", "#fb7185", "#34d399", "#22d3ee", "#4ade80"];
 
 /** A short-lived scatter of falling confetti dots for big celebration moments (level-up, a legendary pull). Purely decorative — mount it once per celebration and let it play out. */
 export function ConfettiBurst({ count = 18 }: { count?: number }) {

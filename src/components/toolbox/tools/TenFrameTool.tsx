@@ -27,7 +27,7 @@ export function TenFrameTool() {
             onClick={() => toggle(i)}
             className={clsx(
               "h-9 w-9 rounded-md border-2 border-slate-300 touch-manipulation transition-colors flex items-center justify-center",
-              filled.has(i) ? "bg-violet-500 border-violet-600" : "bg-white hover:bg-slate-100",
+              filled.has(i) ? "bg-blue-500 border-blue-600" : "bg-white hover:bg-slate-100",
             )}
             aria-label={`Ten-frame cell ${i + 1}`}
           />
@@ -42,7 +42,7 @@ export function TenFrameTool() {
         {frame(0)}
         {frame(10)}
       </div>
-      <div className="text-2xl font-black text-violet-700 tabular-nums">{filled.size}</div>
+      <div className="text-2xl font-black text-blue-700 tabular-nums">{filled.size}</div>
       <button type="button" className={clsx(SECONDARY_BUTTON, "!min-h-10 !py-2 !px-4 text-sm")} onClick={() => setFilled(new Set())}>
         Clear
       </button>

@@ -34,7 +34,7 @@ export function PlaceValueCardsTool() {
           max={999}
           value={raw}
           onChange={(e) => setRaw(e.target.value)}
-          className="w-24 text-center text-lg font-bold rounded-lg border-2 border-slate-300 focus:border-violet-500 outline-none py-1"
+          className="w-24 text-center text-lg font-bold rounded-lg border-2 border-slate-300 focus:border-blue-500 outline-none py-1"
         />
       </div>
 

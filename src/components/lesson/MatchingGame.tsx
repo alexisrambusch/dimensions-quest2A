@@ -62,8 +62,8 @@ export function MatchingGame({ board, onComplete }: Props) {
                   "rounded-xl border-2 px-3 py-3 text-lg font-bold transition-colors",
                   isMatched && "bg-emerald-50 border-emerald-300 text-emerald-500 opacity-60",
                   !isMatched && isWrong && "bg-rose-50 border-rose-400 text-rose-700",
-                  !isMatched && !isWrong && isSelected && "bg-violet-100 border-violet-500 text-violet-800",
-                  !isMatched && !isWrong && !isSelected && "bg-white border-slate-200 text-slate-800 hover:border-violet-300",
+                  !isMatched && !isWrong && isSelected && "bg-blue-100 border-blue-500 text-blue-800",
+                  !isMatched && !isWrong && !isSelected && "bg-white border-slate-200 text-slate-800 hover:border-blue-300",
                 )}
               >
                 {p.factor} × {p.a}
@@ -86,7 +86,7 @@ export function MatchingGame({ board, onComplete }: Props) {
                   "rounded-xl border-2 px-3 py-3 text-lg font-bold transition-colors",
                   isMatched && "bg-emerald-50 border-emerald-300 text-emerald-500 opacity-60",
                   !isMatched && isWrong && "bg-rose-50 border-rose-400 text-rose-700",
-                  !isMatched && !isWrong && "bg-white border-slate-200 text-slate-800 hover:border-violet-300",
+                  !isMatched && !isWrong && "bg-white border-slate-200 text-slate-800 hover:border-blue-300",
                 )}
               >
                 {p.product}
