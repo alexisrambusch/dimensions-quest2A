@@ -30,7 +30,7 @@ export function GridPaperTool() {
             onClick={() => toggle(i)}
             className={clsx(
               "h-6 w-6 border border-slate-200 touch-manipulation transition-colors",
-              filled.has(i) ? "bg-blue-500" : "bg-white hover:bg-slate-50",
+              filled.has(i) ? "bg-violet-500" : "bg-white hover:bg-slate-50",
             )}
             aria-label={`Grid cell ${i + 1}`}
           />

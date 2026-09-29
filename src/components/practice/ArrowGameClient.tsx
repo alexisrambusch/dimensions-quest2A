@@ -34,7 +34,7 @@ export function ArrowGameClient() {
   }
 
   const highlights: Record<number, string> = {
-    [problem.start]: "bg-blue-600 text-white",
+    [problem.start]: "bg-violet-600 text-white",
     [problem.end]: "bg-emerald-500 text-white",
   };
 
@@ -42,7 +42,7 @@ export function ArrowGameClient() {
     <div className="flex flex-col gap-6">
       <div className={`${CARD} flex flex-col items-center gap-5`}>
         <p className="text-sm font-semibold text-slate-500">
-          Streak: <span className="text-blue-700">{streak}</span>
+          Streak: <span className="text-violet-700">{streak}</span>
         </p>
 
         <div className="text-3xl font-black text-slate-800 flex flex-wrap items-center justify-center gap-2 tabular-nums">
@@ -73,7 +73,7 @@ export function ArrowGameClient() {
             "w-28 text-center text-2xl font-black rounded-xl border-2 outline-none py-2",
             feedback === "correct" && "border-emerald-500 bg-emerald-50 text-emerald-800",
             feedback === "wrong" && "border-rose-500 bg-rose-50 text-rose-800",
-            feedback === "idle" && "border-slate-300 focus:border-blue-500",
+            feedback === "idle" && "border-slate-300 focus:border-violet-500",
           )}
         />
 

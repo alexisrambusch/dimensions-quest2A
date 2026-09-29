@@ -1,4 +1,5 @@
 import Link from "next/link";
+import clsx from "clsx";
 import { redirect } from "next/navigation";
 import { getActiveStudent, switchProfileAction } from "@/lib/actions/students";
 import { getMissionMap } from "@/lib/actions/curriculum";
@@ -21,13 +22,23 @@ const WORLD_ICONS: Record<string, string> = {
 };
 
 const WORLD_BACKDROP: Record<string, string> = {
-  castle: "bg-gradient-to-b from-indigo-50 to-white",
-  valley: "bg-gradient-to-b from-lime-50 to-white",
-  mountain: "bg-gradient-to-b from-slate-100 to-white",
-  island: "bg-gradient-to-b from-cyan-50 to-white",
-  factory: "bg-gradient-to-b from-orange-50 to-white",
-  forest: "bg-gradient-to-b from-emerald-50 to-white",
-  realm: "bg-gradient-to-b from-violet-50 to-white",
+  castle: "bg-gradient-to-br from-indigo-100 via-indigo-50 to-white",
+  valley: "bg-gradient-to-br from-lime-100 via-lime-50 to-white",
+  mountain: "bg-gradient-to-br from-slate-200 via-slate-50 to-white",
+  island: "bg-gradient-to-br from-cyan-100 via-cyan-50 to-white",
+  factory: "bg-gradient-to-br from-orange-100 via-orange-50 to-white",
+  forest: "bg-gradient-to-br from-emerald-100 via-emerald-50 to-white",
+  realm: "bg-gradient-to-br from-violet-100 via-violet-50 to-white",
+};
+
+const WORLD_RING: Record<string, string> = {
+  castle: "ring-indigo-200",
+  valley: "ring-lime-200",
+  mountain: "ring-slate-300",
+  island: "ring-cyan-200",
+  factory: "ring-orange-200",
+  forest: "ring-emerald-200",
+  realm: "ring-violet-200",
 };
 
 /** A short glyph per lesson chip, standing in for "what kind of level is this" at a glance. */
@@ -50,29 +61,31 @@ export default async function MissionMapPage() {
     <main className="flex-1 p-6 max-w-4xl mx-auto w-full flex flex-col gap-6">
       <header className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <span className="text-4xl">{icon(student.avatarKey)}</span>
+          <span className="animate-float-y flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-violet-200 to-fuchsia-100 text-4xl shadow-sm ring-2 ring-white">
+            {icon(student.avatarKey)}
+          </span>
           <div>
-            <h1 className="text-2xl font-black text-blue-800">{student.name}&apos;s Quest Map</h1>
-            <p className="text-sm text-blue-500 font-semibold">
+            <h1 className="text-2xl font-black text-violet-800">{student.name}&apos;s Quest Map</h1>
+            <p className="text-sm text-violet-500 font-semibold">
               Level {levelForXp(student.totalXp)} · {student.totalXp} XP · {student.coins} 🪙 · {student.streakDays} day streak
             </p>
           </div>
         </div>
         <div className="flex gap-3">
-          <Link href="/practice" className="text-sm font-semibold text-slate-500 hover:text-blue-700 self-center">
+          <Link href="/practice" className="text-sm font-semibold text-slate-500 hover:text-violet-700 self-center">
             Practice &amp; Games
           </Link>
-          <Link href="/trophies" className="text-sm font-semibold text-slate-500 hover:text-blue-700 self-center">
+          <Link href="/trophies" className="text-sm font-semibold text-slate-500 hover:text-violet-700 self-center">
             Trophy Case
           </Link>
-          <Link href="/shop" className="text-sm font-semibold text-slate-500 hover:text-blue-700 self-center">
+          <Link href="/shop" className="text-sm font-semibold text-slate-500 hover:text-violet-700 self-center">
             Shop
           </Link>
-          <Link href="/parent" className="text-sm font-semibold text-slate-500 hover:text-blue-700 self-center">
+          <Link href="/parent" className="text-sm font-semibold text-slate-500 hover:text-violet-700 self-center">
             Parent Dashboard
           </Link>
           <form action={switchProfileAction}>
-            <button type="submit" className="text-sm font-semibold text-slate-500 hover:text-blue-700">
+            <button type="submit" className="text-sm font-semibold text-slate-500 hover:text-violet-700">
               Switch profile
             </button>
           </form>
@@ -107,15 +120,26 @@ export default async function MissionMapPage() {
           return (
             <section
               key={chapter.code}
-              className={`${CARD} ${WORLD_BACKDROP[chapter.worldTheme] ?? ""} ${chapter.status === "LOCKED" ? "opacity-50" : ""} flex flex-col gap-4 overflow-hidden`}
+              className={clsx(
+                CARD,
+                WORLD_BACKDROP[chapter.worldTheme],
+                "ring-1",
+                WORLD_RING[chapter.worldTheme] ?? "ring-slate-100",
+                chapter.status === "LOCKED" && "opacity-50",
+                "flex flex-col gap-4 overflow-hidden",
+              )}
             >
               <div className="flex items-center gap-3">
-                <span className="text-3xl">{WORLD_ICONS[chapter.worldTheme] ?? "🔷"}</span>
+                <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/70 text-3xl shadow-sm">
+                  {WORLD_ICONS[chapter.worldTheme] ?? "🔷"}
+                </span>
                 <div>
                   <h2 className="text-lg font-black text-slate-800">{chapter.worldName}</h2>
                   <p className="text-xs text-slate-500">{chapter.title}</p>
                 </div>
-                {chapter.status === "COMPLETE" && <span className="ml-auto text-emerald-500 font-bold text-sm">Complete! 🎉</span>}
+                {chapter.status === "COMPLETE" && (
+                  <span className="animate-wiggle ml-auto text-emerald-500 font-bold text-sm">Complete! 🎉</span>
+                )}
               </div>
 
               <LevelPath nodes={nodes} />

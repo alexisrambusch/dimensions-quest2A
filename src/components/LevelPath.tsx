@@ -18,7 +18,7 @@ const SWING = 108; // how far each node swings left/right of center, in px
 
 const NODE_STYLE: Record<PathNode["status"], string> = {
   LOCKED: "bg-slate-200 border-slate-300 text-slate-400",
-  AVAILABLE: "bg-white border-blue-400 text-blue-600 shadow-md",
+  AVAILABLE: "bg-white border-violet-400 text-violet-600 shadow-md",
   IN_PROGRESS: "bg-amber-100 border-amber-400 text-amber-700 shadow-md",
   COMPLETE: "bg-emerald-100 border-emerald-500 text-emerald-700",
 };
@@ -83,7 +83,7 @@ export function LevelPath({ nodes }: { nodes: PathNode[] }) {
               <span
                 className={clsx(
                   "absolute inset-0 rounded-full border-2 animate-ping opacity-40",
-                  isAssessment ? "border-amber-400" : "border-blue-400",
+                  isAssessment ? "border-amber-400" : "border-violet-400",
                 )}
               />
             )}

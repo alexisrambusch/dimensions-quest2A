@@ -27,7 +27,7 @@ export function HundredChartTool() {
             onClick={() => toggle(n)}
             className={clsx(
               "h-8 w-8 rounded-md text-[11px] font-bold flex items-center justify-center touch-manipulation transition-colors",
-              highlighted.has(n) ? "bg-blue-600 text-white" : "bg-slate-50 text-slate-600 hover:bg-slate-100",
+              highlighted.has(n) ? "bg-violet-600 text-white" : "bg-slate-50 text-slate-600 hover:bg-slate-100",
             )}
           >
             {n}

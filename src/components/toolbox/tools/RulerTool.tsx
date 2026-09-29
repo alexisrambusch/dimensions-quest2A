@@ -21,7 +21,7 @@ export function RulerTool() {
             onClick={() => setUnit(u)}
             className={clsx(
               "rounded-full px-4 py-1.5 text-sm font-bold border-2 touch-manipulation",
-              unit === u ? "bg-blue-600 border-blue-600 text-white" : "bg-white border-slate-200 text-slate-600 hover:border-blue-300",
+              unit === u ? "bg-violet-600 border-violet-600 text-white" : "bg-white border-slate-200 text-slate-600 hover:border-violet-300",
             )}
           >
             {u === "cm" ? "Centimeters" : "Inches"}

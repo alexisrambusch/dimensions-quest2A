@@ -58,7 +58,7 @@ export function PlaceValueBuilder({ target, onBuilt }: Props) {
           </div>
         ))}
       </div>
-      <div className="text-3xl font-black text-blue-700 tabular-nums">{built}</div>
+      <div className="text-3xl font-black text-violet-700 tabular-nums">{built}</div>
       <p className="text-sm text-slate-500">Build {target}, then tap &quot;Check my answer&quot; below.</p>
     </div>
   );

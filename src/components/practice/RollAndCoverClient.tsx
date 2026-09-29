@@ -46,7 +46,7 @@ export function RollAndCoverClient() {
               onClick={() => switchMode(m)}
               className={clsx(
                 "rounded-full px-4 py-1.5 text-sm font-bold border-2 touch-manipulation",
-                m === mode ? "bg-blue-600 border-blue-600 text-white" : "bg-white border-slate-200 text-slate-600 hover:border-blue-300",
+                m === mode ? "bg-violet-600 border-violet-600 text-white" : "bg-white border-slate-200 text-slate-600 hover:border-violet-300",
               )}
             >
               {m === "multiply" ? "Multiply ×2 ×5 ×10" : "Divide ÷2 ÷5 ÷10"}
@@ -54,7 +54,7 @@ export function RollAndCoverClient() {
           ))}
         </div>
         <p className="text-sm font-semibold text-slate-500">
-          Covered: <span className="text-blue-700">{covered}</span> / {BOARD_SIZE}
+          Covered: <span className="text-violet-700">{covered}</span> / {BOARD_SIZE}
         </p>
       </div>
 
@@ -83,9 +83,9 @@ export function RollAndCoverClient() {
               aria-label={cell.covered ? "Covered" : `Cover ${cell.value}`}
               className={clsx(
                 "h-9 w-9 sm:h-10 sm:w-10 rounded-md text-xs sm:text-sm font-bold flex items-center justify-center touch-manipulation transition-colors",
-                cell.covered && "bg-blue-600 text-white",
+                cell.covered && "bg-violet-600 text-white",
                 !cell.covered && wrongId === cell.id && "bg-rose-200 text-rose-700",
-                !cell.covered && wrongId !== cell.id && "bg-white border-2 border-slate-200 text-slate-700 hover:border-blue-300",
+                !cell.covered && wrongId !== cell.id && "bg-white border-2 border-slate-200 text-slate-700 hover:border-violet-300",
               )}
             >
               {cell.covered ? "✓" : cell.value}

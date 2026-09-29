@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { usePathname } from "next/navigation";
 import clsx from "clsx";
+import { Wrench, X } from "lucide-react";
 import { HundredChartTool } from "./tools/HundredChartTool";
 import { PlaceValueCardsTool } from "./tools/PlaceValueCardsTool";
 import { BaseTenBlocksTool } from "./tools/BaseTenBlocksTool";
@@ -42,23 +43,23 @@ export function Toolbox() {
         type="button"
         onClick={() => setOpen(true)}
         aria-label="Open math toolbox"
-        className="fixed bottom-4 left-4 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-amber-500 text-2xl text-white shadow-lg active:scale-95 transition-transform touch-manipulation"
+        className="fixed bottom-4 left-4 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-b from-orange-400 to-amber-500 text-white shadow-lg shadow-amber-300/50 active:scale-90 transition-transform touch-manipulation"
       >
-        🧰
+        <Wrench size={24} strokeWidth={2.25} />
       </button>
 
       {open && (
         <div className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center bg-black/40 p-0 sm:p-4">
-          <div className="flex flex-col w-full sm:max-w-lg h-[88vh] sm:h-[80vh] bg-white rounded-t-3xl sm:rounded-3xl shadow-xl overflow-hidden">
+          <div className="flex flex-col w-full sm:max-w-lg h-[88vh] sm:h-[80vh] bg-white rounded-t-3xl sm:rounded-3xl shadow-xl overflow-hidden animate-bounce-in">
             <div className="flex items-center justify-between px-4 pt-4 pb-2 shrink-0">
               <h2 className="text-lg font-black text-slate-800">Toolbox</h2>
               <button
                 type="button"
                 onClick={() => setOpen(false)}
                 aria-label="Close toolbox"
-                className="h-9 w-9 flex items-center justify-center rounded-full bg-slate-100 text-slate-500 text-lg active:scale-95 touch-manipulation"
+                className="h-9 w-9 flex items-center justify-center rounded-full bg-violet-50 text-violet-500 active:scale-90 transition-transform touch-manipulation"
               >
-                ✕
+                <X size={18} strokeWidth={2.5} />
               </button>
             </div>
 
@@ -70,7 +71,7 @@ export function Toolbox() {
                   onClick={() => setActiveKey(t.key)}
                   className={clsx(
                     "flex flex-col items-center gap-0.5 shrink-0 rounded-xl px-3 py-2 text-[10px] font-bold touch-manipulation transition-colors",
-                    t.key === activeKey ? "bg-blue-100 text-blue-700" : "bg-slate-50 text-slate-500 hover:bg-slate-100",
+                    t.key === activeKey ? "bg-violet-100 text-violet-700" : "bg-slate-50 text-slate-500 hover:bg-slate-100",
                   )}
                 >
                   <span className="text-xl leading-none">{t.icon}</span>

@@ -31,7 +31,7 @@ export function NumberLineTool() {
             }}
             className={clsx(
               "rounded-full px-3 py-1.5 text-xs font-bold border-2 touch-manipulation",
-              i === rangeIdx ? "bg-blue-600 border-blue-600 text-white" : "bg-white border-slate-200 text-slate-600 hover:border-blue-300",
+              i === rangeIdx ? "bg-violet-600 border-violet-600 text-white" : "bg-white border-slate-200 text-slate-600 hover:border-violet-300",
             )}
           >
             {r.label}

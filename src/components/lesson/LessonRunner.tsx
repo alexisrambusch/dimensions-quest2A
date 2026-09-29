@@ -18,8 +18,10 @@ import { MatchingGame } from "./MatchingGame";
 import { startMatchingGame, completeMatchingGame, type MatchingGameBoard } from "@/lib/actions/matchingGame";
 import { getMatchingGameFactor } from "@/lib/curriculum/matchingGames";
 import { CARD, PRIMARY_BUTTON, SECONDARY_BUTTON } from "../ui";
+import { ConfettiBurst } from "../ConfettiBurst";
 import clsx from "clsx";
 import type { LessonPhase } from "@/generated/prisma/enums";
+import { playCorrect, playWrong, playLevelUp } from "@/lib/sound";
 
 interface SkillInfo {
   id: string;
@@ -176,6 +178,8 @@ export function LessonRunner({
       setNewLevel(res.newLevel);
     }
     if (res.newBadges.length) setBadges((b) => [...b, ...res.newBadges]);
+    if (res.leveledUp) playLevelUp();
+    else playCorrect();
     const idx = STAGE_ORDER.indexOf("GAME");
     await beginStage(STAGE_ORDER[idx + 1]);
   }
@@ -224,6 +228,9 @@ export function LessonRunner({
       setNewLevel(result.newLevel);
     }
     if (result.newBadges.length) setBadges((b) => [...b, ...result.newBadges]);
+    if (result.leveledUp) playLevelUp();
+    else if (result.correct) playCorrect();
+    else playWrong();
     setAttemptsOnQuestion((n) => n + 1);
     setFeedback(result);
   }
@@ -276,7 +283,7 @@ export function LessonRunner({
   if (stage === "BRIEFING") {
     return (
       <div className={`${CARD} max-w-lg mx-auto text-center flex flex-col gap-4`}>
-        <p className="text-xs font-bold uppercase tracking-wide text-blue-400">
+        <p className="text-xs font-bold uppercase tracking-wide text-violet-400">
           {runtime.lesson.worldName} · {runtime.lesson.chapterTitle}
         </p>
         <h1 className="text-2xl font-black text-slate-800">{runtime.lesson.title}</h1>
@@ -296,17 +303,17 @@ export function LessonRunner({
     return (
       <div className={`${CARD} max-w-lg mx-auto flex flex-col gap-5`}>
         <div>
-          <p className="text-xs font-bold uppercase tracking-wide text-blue-400">Learn It</p>
+          <p className="text-xs font-bold uppercase tracking-wide text-violet-400">Learn It</p>
           <p className="text-slate-600 mt-1">Let&apos;s think through one together before you try it yourself.</p>
         </div>
-        <div className="rounded-xl bg-blue-50 border border-blue-100 p-4">
-          <p className="font-bold text-blue-800">{problem}</p>
+        <div className="rounded-xl bg-violet-50 border border-violet-100 p-4">
+          <p className="font-bold text-violet-800">{problem}</p>
         </div>
         <ol className="flex flex-col gap-3">
           {steps.map((step, i) => (
             <li key={i} className="flex flex-col gap-2">
               <div className="flex gap-3 items-start">
-                <span className="shrink-0 h-6 w-6 rounded-full bg-blue-600 text-white text-xs font-black flex items-center justify-center">
+                <span className="shrink-0 h-6 w-6 rounded-full bg-violet-600 text-white text-xs font-black flex items-center justify-center">
                   {i + 1}
                 </span>
                 <span className="text-slate-700 text-sm pt-0.5">{step.text}</span>
@@ -332,7 +339,8 @@ export function LessonRunner({
 
   if (stage === "COMPLETE") {
     return (
-      <div className={`${CARD} max-w-lg mx-auto text-center flex flex-col gap-4`}>
+      <div className={`${CARD} animate-bounce-in relative max-w-lg mx-auto text-center flex flex-col gap-4`}>
+        {leveledUp && <ConfettiBurst />}
         <h1 className="text-3xl font-black text-emerald-600">
           {alreadyCompleted && lessonXp === 0 ? "Mission already complete! ⭐" : "Mission Complete! 🎉"}
         </h1>
@@ -372,12 +380,12 @@ export function LessonRunner({
     return (
       <div className={`${CARD} max-w-lg mx-auto flex flex-col gap-6`}>
         <div>
-          <p className="text-xs font-bold uppercase tracking-wide text-blue-400">{config.label}</p>
+          <p className="text-xs font-bold uppercase tracking-wide text-violet-400">{config.label}</p>
           <p className="text-slate-600 mt-1">{config.blurb}</p>
         </div>
         {runtime.concepts.map((c) => (
-          <div key={c.title} className="rounded-xl bg-blue-50 border border-blue-100 p-4">
-            <p className="font-bold text-blue-800">{c.title}</p>
+          <div key={c.title} className="rounded-xl bg-violet-50 border border-violet-100 p-4">
+            <p className="font-bold text-violet-800">{c.title}</p>
             <p className="text-slate-600 text-sm mt-1">{c.bigIdea}</p>
           </div>
         ))}
@@ -393,7 +401,7 @@ export function LessonRunner({
               }}
             />
             {feedback && (
-              <div className="rounded-xl bg-sky-50 border border-sky-200 p-4 text-center">
+              <div className="animate-pop-in rounded-xl bg-sky-50 border border-sky-200 p-4 text-center">
                 <p className="font-semibold text-sky-800">{feedback.explanation}</p>
                 <button className={clsx(PRIMARY_BUTTON, "mt-3")} onClick={handleNext}>
                   Got it — let's practice!
@@ -410,7 +418,7 @@ export function LessonRunner({
     return (
       <div className={`${CARD} max-w-lg mx-auto flex flex-col gap-5`}>
         <div>
-          <p className="text-xs font-bold uppercase tracking-wide text-blue-400">Fact Blast!</p>
+          <p className="text-xs font-bold uppercase tracking-wide text-violet-400">Fact Blast!</p>
           <p className="text-slate-500 text-sm">Match every ×{matchingFactor} equation to its answer.</p>
         </div>
         {loadingQuestion || !matchingBoard ? (
@@ -427,7 +435,7 @@ export function LessonRunner({
     <div className={`${CARD} max-w-lg mx-auto flex flex-col gap-5`}>
       <div className="flex items-center justify-between">
         <div>
-          <p className="text-xs font-bold uppercase tracking-wide text-blue-400">{config.label}</p>
+          <p className="text-xs font-bold uppercase tracking-wide text-violet-400">{config.label}</p>
           <p className="text-slate-500 text-sm">{config.blurb}</p>
         </div>
         <div className="flex gap-1">
@@ -467,7 +475,7 @@ export function LessonRunner({
               )}
             </>
           ) : !feedback.correct && canRetry() ? (
-            <div className="rounded-xl bg-rose-50 border border-rose-200 p-3 text-center text-rose-700 font-semibold flex flex-col items-center gap-2">
+            <div className="animate-shake-x rounded-xl bg-rose-50 border border-rose-200 p-3 text-center text-rose-700 font-semibold flex flex-col items-center gap-2">
               Not quite — want to try again, or use a hint?
               <div className="flex gap-2">
                 <button className={clsx(SECONDARY_BUTTON, "!py-2 text-sm")} onClick={handleTryAgain}>
@@ -491,25 +499,26 @@ export function LessonRunner({
           ) : (
             <div
               className={clsx(
-                "rounded-xl p-4 text-center",
+                "animate-pop-in relative rounded-xl p-4 text-center",
                 feedback.correct ? "bg-emerald-50 border border-emerald-200" : "bg-sky-50 border border-sky-200",
               )}
             >
+              {feedback.leveledUp && <ConfettiBurst />}
               <p className={clsx("font-bold text-lg", feedback.correct ? "text-emerald-700" : "text-sky-800")}>
                 {feedback.correct ? "Great work! ⭐" : "Let's see how it works:"}
               </p>
               <p className="text-slate-600 mt-1">{feedback.explanation}</p>
               {feedback.reteachSuggested && feedback.misconceptionDescription && (
-                <div className="mt-3 rounded-lg bg-blue-100 border border-blue-300 p-3 text-left text-sm text-blue-800">
+                <div className="mt-3 rounded-lg bg-violet-100 border border-violet-300 p-3 text-left text-sm text-violet-800">
                   <p className="font-bold">Let&apos;s look at this together:</p>
                   <p>{feedback.misconceptionDescription}</p>
                 </div>
               )}
-              <p className="text-xs text-blue-500 font-semibold mt-2">
+              <p className="text-xs text-violet-500 font-semibold mt-2">
                 +{feedback.xpAwarded} XP{feedback.coinsAwarded > 0 ? ` · +${feedback.coinsAwarded} 🪙` : ""}
               </p>
               {feedback.leveledUp && (
-                <p className="text-sm font-bold text-amber-700 mt-1">🎉 Level Up! You&apos;re now Level {feedback.newLevel}!</p>
+                <p className="animate-wiggle text-sm font-bold text-amber-700 mt-1">🎉 Level Up! You&apos;re now Level {feedback.newLevel}!</p>
               )}
               <button className={clsx(PRIMARY_BUTTON, "mt-3")} onClick={handleNext}>
                 Next

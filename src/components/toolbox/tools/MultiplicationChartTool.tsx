@@ -18,7 +18,7 @@ export function MultiplicationChartTool() {
           onClick={() => setSpotlight(null)}
           className={clsx(
             "rounded-full px-3 py-1.5 text-xs font-bold border-2 touch-manipulation",
-            spotlight === null ? "bg-blue-600 border-blue-600 text-white" : "bg-white border-slate-200 text-slate-600 hover:border-blue-300",
+            spotlight === null ? "bg-violet-600 border-violet-600 text-white" : "bg-white border-slate-200 text-slate-600 hover:border-violet-300",
           )}
         >
           All facts
@@ -30,7 +30,7 @@ export function MultiplicationChartTool() {
             onClick={() => setSpotlight(f)}
             className={clsx(
               "rounded-full px-3 py-1.5 text-xs font-bold border-2 touch-manipulation",
-              spotlight === f ? "bg-blue-600 border-blue-600 text-white" : "bg-white border-slate-200 text-slate-600 hover:border-blue-300",
+              spotlight === f ? "bg-violet-600 border-violet-600 text-white" : "bg-white border-slate-200 text-slate-600 hover:border-violet-300",
             )}
           >
             ×{f}
@@ -48,7 +48,7 @@ export function MultiplicationChartTool() {
                   key={c}
                   className={clsx(
                     "h-7 w-7 font-bold",
-                    spotlight === c ? "bg-blue-600 text-white" : "bg-slate-100 text-slate-600",
+                    spotlight === c ? "bg-violet-600 text-white" : "bg-slate-100 text-slate-600",
                   )}
                 >
                   {c}
@@ -62,7 +62,7 @@ export function MultiplicationChartTool() {
                 <th
                   className={clsx(
                     "h-7 w-7 font-bold",
-                    spotlight === r ? "bg-blue-600 text-white" : "bg-slate-100 text-slate-600",
+                    spotlight === r ? "bg-violet-600 text-white" : "bg-slate-100 text-slate-600",
                   )}
                 >
                   {r}

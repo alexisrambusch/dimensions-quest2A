@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { HomeButton } from "@/components/HomeButton";
 import { Toolbox } from "@/components/toolbox/Toolbox";
+import { BackgroundDecor } from "@/components/BackgroundDecor";
+import { SoundToggle } from "@/components/SoundToggle";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -26,7 +28,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
+        <BackgroundDecor />
         {children}
+        <SoundToggle />
         <HomeButton />
         <Toolbox />
       </body>

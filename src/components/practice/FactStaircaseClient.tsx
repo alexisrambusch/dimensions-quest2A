@@ -58,7 +58,7 @@ export function FactStaircaseClient() {
               onClick={() => switchTable(r, op)}
               className={clsx(
                 "rounded-full px-3 py-1.5 text-sm font-bold border-2 touch-manipulation",
-                r === range ? "bg-blue-600 border-blue-600 text-white" : "bg-white border-slate-200 text-slate-600 hover:border-blue-300",
+                r === range ? "bg-violet-600 border-violet-600 text-white" : "bg-white border-slate-200 text-slate-600 hover:border-violet-300",
               )}
             >
               Within {r}
@@ -75,7 +75,7 @@ export function FactStaircaseClient() {
               onClick={() => switchTable(range, o.key)}
               className={clsx(
                 "rounded-full px-3 py-1.5 text-sm font-bold border-2 touch-manipulation",
-                o.key === op ? "bg-blue-600 border-blue-600 text-white" : "bg-white border-slate-200 text-slate-600 hover:border-blue-300",
+                o.key === op ? "bg-violet-600 border-violet-600 text-white" : "bg-white border-slate-200 text-slate-600 hover:border-violet-300",
               )}
             >
               {o.label}
@@ -114,7 +114,7 @@ export function FactStaircaseClient() {
                     inputMode="numeric"
                     value={inputs[k] ?? ""}
                     onChange={(e) => setInput(k, e.target.value)}
-                    className="w-10 h-7 text-center text-sm font-bold rounded border border-slate-300 focus:border-blue-500 outline-none"
+                    className="w-10 h-7 text-center text-sm font-bold rounded border border-slate-300 focus:border-violet-500 outline-none"
                   />
                 </div>
               );

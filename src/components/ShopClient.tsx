@@ -6,11 +6,13 @@ import clsx from "clsx";
 import { openMysteryOrb, type ShopState, type ShopCreatureEntry } from "@/lib/actions/shop";
 import { HABITAT_ORDER, HABITAT_LABELS, HABITAT_ICONS, type CreatureHabitat } from "@/lib/gamification/creatures";
 import { CARD, PRIMARY_BUTTON } from "./ui";
+import { ConfettiBurst } from "./ConfettiBurst";
+import { playPop, playLevelUp } from "@/lib/sound";
 
 const RARITY_CARD_STYLE: Record<string, string> = {
   COMMON: "border-slate-300 bg-slate-50",
   UNCOMMON: "border-emerald-300 bg-emerald-50",
-  RARE: "border-blue-300 bg-blue-50",
+  RARE: "border-violet-300 bg-violet-50",
   LEGENDARY: "border-amber-400 bg-amber-50",
 };
 
@@ -24,7 +26,7 @@ const RARITY_LABEL: Record<string, string> = {
 const RARITY_TEXT_STYLE: Record<string, string> = {
   COMMON: "text-slate-500",
   UNCOMMON: "text-emerald-600",
-  RARE: "text-blue-600",
+  RARE: "text-violet-600",
   LEGENDARY: "text-amber-600",
 };
 
@@ -59,6 +61,8 @@ export function ShopClient({ studentId, initial }: { studentId: string; initial:
         coins: res.coinsRemaining,
         creatures: s.creatures.map((c) => (c.code === res.creature.code ? { ...c, owned: true, count: c.count + 1 } : c)),
       }));
+      if (res.creature.rarity === "LEGENDARY") playLevelUp();
+      else playPop();
       setReveal({
         creature: { ...res.creature, owned: true, count: 1 },
         context: res.isNew ? "new" : "duplicate",
@@ -99,7 +103,7 @@ export function ShopClient({ studentId, initial }: { studentId: string; initial:
             onClick={() => setHabitatFilter("ALL")}
             className={clsx(
               "shrink-0 rounded-full px-3 py-1.5 text-xs font-bold border-2 touch-manipulation",
-              habitatFilter === "ALL" ? "bg-blue-600 border-blue-600 text-white" : "bg-white border-slate-200 text-slate-600 hover:border-blue-300",
+              habitatFilter === "ALL" ? "bg-violet-600 border-violet-600 text-white" : "bg-white border-slate-200 text-slate-600 hover:border-violet-300",
             )}
           >
             All regions
@@ -111,7 +115,7 @@ export function ShopClient({ studentId, initial }: { studentId: string; initial:
               onClick={() => setHabitatFilter(h)}
               className={clsx(
                 "shrink-0 rounded-full px-3 py-1.5 text-xs font-bold border-2 touch-manipulation whitespace-nowrap",
-                habitatFilter === h ? "bg-blue-600 border-blue-600 text-white" : "bg-white border-slate-200 text-slate-600 hover:border-blue-300",
+                habitatFilter === h ? "bg-violet-600 border-violet-600 text-white" : "bg-white border-slate-200 text-slate-600 hover:border-violet-300",
               )}
             >
               {HABITAT_ICONS[h]} {HABITAT_LABELS[h]}
@@ -137,7 +141,9 @@ export function ShopClient({ studentId, initial }: { studentId: string; initial:
                     onClick={() => c.owned && setReveal({ creature: c, context: "view" })}
                     className={clsx(
                       "rounded-xl border-2 p-3 flex flex-col items-center gap-1 text-center touch-manipulation",
-                      c.owned ? `${RARITY_CARD_STYLE[c.rarity]} active:scale-95 transition-transform` : "border-slate-200 bg-slate-50 opacity-50 cursor-not-allowed",
+                      c.owned
+                        ? `${RARITY_CARD_STYLE[c.rarity]} active:scale-90 hover:-translate-y-0.5 transition-transform shadow-sm`
+                        : "border-slate-200 bg-slate-50 opacity-50 cursor-not-allowed",
                     )}
                   >
                     {c.owned ? (
@@ -161,11 +167,12 @@ export function ShopClient({ studentId, initial }: { studentId: string; initial:
           onClick={() => setReveal(null)}
         >
           <div
-            className={`${CARD} max-w-xs w-full flex flex-col items-center gap-3 text-center`}
+            className={`${CARD} animate-bounce-in relative max-w-xs w-full flex flex-col items-center gap-3 text-center`}
             onClick={(e) => e.stopPropagation()}
           >
+            {reveal.context !== "view" && reveal.creature.rarity === "LEGENDARY" && <ConfettiBurst />}
             {reveal.context !== "view" && (
-              <p className="text-xs font-bold uppercase tracking-wide text-blue-400">
+              <p className="text-xs font-bold uppercase tracking-wide text-violet-400">
                 {reveal.context === "new" ? "New Creature!" : "Another one joined the group!"}
               </p>
             )}
@@ -188,7 +195,7 @@ export function ShopClient({ studentId, initial }: { studentId: string; initial:
         </div>
       )}
 
-      <Link href="/map" className="text-sm font-semibold text-slate-500 hover:text-blue-700 text-center">
+      <Link href="/map" className="text-sm font-semibold text-slate-500 hover:text-violet-700 text-center">
         ← Back to quest map
       </Link>
     </div>
