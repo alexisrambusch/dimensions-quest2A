@@ -3,15 +3,49 @@ import { seededRng, randInt, pick } from "../random";
 import { pickContext } from "../contexts";
 import { validateNumeric } from "../numeric";
 
-/** Number bond: whole and one part known, find the missing part. */
+const NO_REGROUP_ATTEMPTS = 300;
+
+/** True if adding a+b never carries a 1 into the next place-value column. */
+function addsWithoutRegroup(a: number, b: number): boolean {
+  let x = a;
+  let y = b;
+  while (x > 0 || y > 0) {
+    if ((x % 10) + (y % 10) >= 10) return false;
+    x = Math.floor(x / 10);
+    y = Math.floor(y / 10);
+  }
+  return true;
+}
+
+/** True if subtracting a-b never borrows from the next place-value column. */
+function subtractsWithoutRegroup(a: number, b: number): boolean {
+  let x = a;
+  let y = b;
+  while (x > 0 || y > 0) {
+    if (x % 10 < y % 10) return false;
+    x = Math.floor(x / 10);
+    y = Math.floor(y / 10);
+  }
+  return true;
+}
+
+/** Number bond: whole and one part known, find the missing part. Splits are always
+ * place-value safe (no regrouping) — every consumer of this generator is a
+ * pre-regrouping lesson. */
 export const numberBondMissingPart: Generator = {
   id: "numberbond.missingpart",
   generate(seed, difficulty): GeneratedInstance {
     const rng = seededRng(seed);
     const max = difficulty <= 1 ? 20 : difficulty <= 3 ? 100 : 1000;
-    const whole = randInt(rng, 10, max);
-    const part1 = randInt(rng, 1, whole - 1);
-    const part2 = whole - part1;
+    let whole = 0;
+    let part1 = 0;
+    let part2 = 0;
+    for (let attempt = 0; attempt < NO_REGROUP_ATTEMPTS; attempt++) {
+      whole = randInt(rng, 10, max);
+      part1 = randInt(rng, 1, whole - 1);
+      part2 = whole - part1;
+      if (addsWithoutRegroup(part1, part2)) break;
+    }
     const hideFirst = rng() < 0.5;
     return {
       prompt: {
@@ -31,21 +65,30 @@ export const numberBondMissingPart: Generator = {
   validate: (response, answer) => validateNumeric(response, answer),
 };
 
-/** Addition within 1000, with regrouping surfaced for the visual place-value model. */
+/** Addition within 1000. `forceRegroup: true` guarantees a carry; `noRegroup: true`
+ * guarantees no column ever carries — used by pre-regrouping lessons. */
 export const additionWithin1000: Generator = {
   id: "addition.within1000",
   generate(seed, difficulty, params): GeneratedInstance {
     const rng = seededRng(seed);
     const forceRegroup = (params.forceRegroup as boolean | undefined) ?? false;
+    const noRegroup = (params.noRegroup as boolean | undefined) ?? false;
     const max = difficulty <= 1 ? 99 : difficulty <= 3 ? 499 : 899;
     let a = randInt(rng, 10, max);
     let b = randInt(rng, 10, max - 10);
-    const onesRegroup = (a % 10) + (b % 10) >= 10;
-    if (forceRegroup && !onesRegroup) {
-      // nudge b's ones digit up so ones column regroups
-      const bTens = Math.floor(b / 10) * 10;
-      const neededOnes = Math.max(0, 10 - (a % 10));
-      b = bTens + Math.min(9, neededOnes);
+    if (noRegroup) {
+      for (let attempt = 0; attempt < NO_REGROUP_ATTEMPTS && !addsWithoutRegroup(a, b); attempt++) {
+        a = randInt(rng, 10, max);
+        b = randInt(rng, 10, max - 10);
+      }
+    } else {
+      const onesRegroup = (a % 10) + (b % 10) >= 10;
+      if (forceRegroup && !onesRegroup) {
+        // nudge b's ones digit up so ones column regroups
+        const bTens = Math.floor(b / 10) * 10;
+        const neededOnes = Math.max(0, 10 - (a % 10));
+        b = bTens + Math.min(9, neededOnes);
+      }
     }
     const sum = a + b;
     return {
@@ -63,12 +106,14 @@ export const additionWithin1000: Generator = {
   validate: (response, answer) => validateNumeric(response, answer),
 };
 
-/** Subtraction within 1000, including across-zero borrow cases. */
+/** Subtraction within 1000. `acrossZero` constructs a borrow-through-zero minuend;
+ * `noRegroup: true` guarantees no column ever borrows — used by pre-regrouping lessons. */
 export const subtractionWithin1000: Generator = {
   id: "subtraction.within1000",
   generate(seed, difficulty, params): GeneratedInstance {
     const rng = seededRng(seed);
     const acrossZero = (params.acrossZero as boolean | undefined) ?? false;
+    const noRegroup = (params.noRegroup as boolean | undefined) ?? false;
     const max = difficulty <= 1 ? 99 : difficulty <= 3 ? 499 : 899;
     let a = randInt(rng, 20, max);
     if (acrossZero) {
@@ -77,7 +122,21 @@ export const subtractionWithin1000: Generator = {
       const ones = randInt(rng, 1, 9);
       a = hundreds * 100 + ones;
     }
-    const b = randInt(rng, 10, a - 1);
+    let b = randInt(rng, 10, a - 1);
+    if (noRegroup) {
+      // Re-draw `a` too, not just `b` — some minuends (e.g. round hundreds like
+      // 200) have only one or two valid no-borrow subtrahends in range, so
+      // retrying `b` alone against a fixed hard `a` can exhaust the attempt cap.
+      for (let attempt = 0; attempt < NO_REGROUP_ATTEMPTS && !subtractsWithoutRegroup(a, b); attempt++) {
+        a = randInt(rng, 20, max);
+        if (acrossZero) {
+          const hundreds = randInt(rng, 2, 9);
+          const ones = randInt(rng, 1, 9);
+          a = hundreds * 100 + ones;
+        }
+        b = randInt(rng, 10, a - 1);
+      }
+    }
     const diff = a - b;
     return {
       prompt: {
@@ -94,18 +153,26 @@ export const subtractionWithin1000: Generator = {
   validate: (response, answer) => validateNumeric(response, answer),
 };
 
-/** Addition/subtraction/comparison word problem with a bar model. */
+/** Addition/subtraction/comparison word problem with a bar model. `noRegroup: true`
+ * guarantees the underlying arithmetic never carries or borrows. */
 export const addSubWordProblem: Generator = {
   id: "addsub.wordproblem",
   generate(seed, difficulty, params): GeneratedInstance {
     const rng = seededRng(seed);
     const opParam = (params.op as "add" | "sub" | "compare" | undefined) ?? "add";
+    const noRegroup = (params.noRegroup as boolean | undefined) ?? false;
     const max = difficulty <= 1 ? 50 : difficulty <= 3 ? 200 : 900;
     const ctx = pickContext(rng);
 
     if (opParam === "compare") {
-      const smaller = randInt(rng, 5, max);
-      const more = randInt(rng, 1, max);
+      let smaller = randInt(rng, 5, max);
+      let more = randInt(rng, 1, max);
+      if (noRegroup) {
+        for (let attempt = 0; attempt < NO_REGROUP_ATTEMPTS && !addsWithoutRegroup(smaller, more); attempt++) {
+          smaller = randInt(rng, 5, max);
+          more = randInt(rng, 1, max);
+        }
+      }
       const larger = smaller + more;
       return {
         prompt: {
@@ -120,8 +187,14 @@ export const addSubWordProblem: Generator = {
       };
     }
 
-    const part1 = randInt(rng, 5, max);
-    const part2 = randInt(rng, 5, max);
+    let part1 = randInt(rng, 5, max);
+    let part2 = randInt(rng, 5, max);
+    if (noRegroup) {
+      for (let attempt = 0; attempt < NO_REGROUP_ATTEMPTS && !addsWithoutRegroup(part1, part2); attempt++) {
+        part1 = randInt(rng, 5, max);
+        part2 = randInt(rng, 5, max);
+      }
+    }
     const whole = part1 + part2;
     if (opParam === "add") {
       return {
@@ -152,22 +225,36 @@ export const addSubWordProblem: Generator = {
   validate: (response, answer) => validateNumeric(response, answer),
 };
 
-/** Find a missing addend/subtrahend/minuend instead of the result — the inverse-operation reasoning workbooks call "find the missing number." */
+/** Find a missing addend/subtrahend/minuend instead of the result — the inverse-operation reasoning workbooks call "find the missing number." `noRegroup: true` guarantees no column ever carries/borrows. */
 export const addSubMissingOperand: Generator = {
   id: "addsub.missingoperand",
   generate(seed, difficulty, params): GeneratedInstance {
     const rng = seededRng(seed);
     const opParam = (params.op as "add" | "sub" | undefined) ?? (rng() < 0.5 ? "add" : "sub");
+    const noRegroup = (params.noRegroup as boolean | undefined) ?? false;
     const max = difficulty <= 2 ? 99 : difficulty <= 4 ? 499 : 899;
     const missing = (params.missing as "a" | "b" | undefined) ?? (rng() < 0.5 ? "a" : "b");
     let a: number, b: number, result: number;
     if (opParam === "add") {
       a = randInt(rng, 10, max);
       b = randInt(rng, 10, max - 10);
+      if (noRegroup) {
+        for (let attempt = 0; attempt < NO_REGROUP_ATTEMPTS && !addsWithoutRegroup(a, b); attempt++) {
+          a = randInt(rng, 10, max);
+          b = randInt(rng, 10, max - 10);
+        }
+      }
       result = a + b;
     } else {
       a = randInt(rng, 20, max);
       b = randInt(rng, 10, a - 1);
+      if (noRegroup) {
+        // Re-draw `a` too, not just `b` — see subtractionWithin1000 for why.
+        for (let attempt = 0; attempt < NO_REGROUP_ATTEMPTS && !subtractsWithoutRegroup(a, b); attempt++) {
+          a = randInt(rng, 20, max);
+          b = randInt(rng, 10, a - 1);
+        }
+      }
       result = a - b;
     }
     const symbol = opParam === "add" ? "+" : "−";
@@ -187,15 +274,24 @@ export const addSubMissingOperand: Generator = {
   validate: (response, answer) => validateNumeric(response, answer),
 };
 
-/** "Is this addition/subtraction correct?" — seeded with the classic forgot-to-regroup slip so a right answer has to be checked, not just produced. */
+/** "Is this addition/subtraction correct?" — seeded with the classic forgot-to-regroup slip so a right answer has to be checked, not just produced. `noRegroup: true` keeps the underlying a/b column-safe (the shown wrong answer then falls back to a simple off-by-10 slip instead of a regroup-specific one). */
 export const addSubFindMistake: Generator = {
   id: "addsub.findmistake",
   generate(seed, difficulty, params): GeneratedInstance {
     const rng = seededRng(seed);
     const opParam = (params.op as "add" | "sub" | undefined) ?? (rng() < 0.5 ? "add" : "sub");
+    const noRegroup = (params.noRegroup as boolean | undefined) ?? false;
     const max = difficulty <= 2 ? 99 : difficulty <= 4 ? 499 : 899;
-    const a = randInt(rng, 20, max);
-    const b = opParam === "add" ? randInt(rng, 10, max) : randInt(rng, 10, a - 1);
+    let a = randInt(rng, 20, max);
+    let b = opParam === "add" ? randInt(rng, 10, max) : randInt(rng, 10, a - 1);
+    if (noRegroup) {
+      for (let attempt = 0; attempt < NO_REGROUP_ATTEMPTS; attempt++) {
+        const ok = opParam === "add" ? addsWithoutRegroup(a, b) : subtractsWithoutRegroup(a, b);
+        if (ok) break;
+        a = randInt(rng, 20, max);
+        b = opParam === "add" ? randInt(rng, 10, max) : randInt(rng, 10, a - 1);
+      }
+    }
     const correct = opParam === "add" ? a + b : a - b;
     const isTrue = rng() < 0.5;
     let shown = correct;
@@ -224,17 +320,27 @@ export const addSubFindMistake: Generator = {
   },
 };
 
-/** Two operations in one story — read, do the first step, then use that result for the second. */
+/** Two operations in one story — read, do the first step, then use that result for the second. `noRegroup: true` guarantees both steps are column-safe. */
 export const addSubTwoStep: Generator = {
   id: "addsub.twostep",
-  generate(seed, difficulty): GeneratedInstance {
+  generate(seed, difficulty, params): GeneratedInstance {
     const rng = seededRng(seed);
+    const noRegroup = (params.noRegroup as boolean | undefined) ?? false;
     const max = difficulty <= 2 ? 150 : difficulty <= 4 ? 400 : 700;
     const ctx = pickContext(rng);
-    const a = randInt(rng, 10, max);
-    const b = randInt(rng, 10, max);
-    const total = a + b;
-    const c = randInt(rng, 5, Math.min(total - 1, max));
+    let a = randInt(rng, 10, max);
+    let b = randInt(rng, 10, max);
+    let total = a + b;
+    let c = randInt(rng, 5, Math.min(total - 1, max));
+    if (noRegroup) {
+      for (let attempt = 0; attempt < NO_REGROUP_ATTEMPTS; attempt++) {
+        if (addsWithoutRegroup(a, b) && subtractsWithoutRegroup(total, c)) break;
+        a = randInt(rng, 10, max);
+        b = randInt(rng, 10, max);
+        total = a + b;
+        c = randInt(rng, 5, Math.min(total - 1, max));
+      }
+    }
     const result = total - c;
     const names = ["Ravi", "Sofia", "Malik", "Elena", "Theo", "Amara"];
     const name = names[Math.floor(rng() * names.length)];
@@ -300,14 +406,21 @@ export const addSubExtremePair: Generator = {
   validate: (response, answer) => validateNumeric(response, answer),
 };
 
-/** Replace one digit of an addend or the sum with a blank inside a fully-worked column addition — targets place-value understanding of the algorithm itself, not just the final total. */
+/** Replace one digit of an addend or the sum with a blank inside a fully-worked column addition — targets place-value understanding of the algorithm itself, not just the final total. `noRegroup: true` guarantees no column ever carries. */
 export const additionMissingDigit: Generator = {
   id: "addition.missingdigit",
-  generate(seed, difficulty): GeneratedInstance {
+  generate(seed, difficulty, params): GeneratedInstance {
     const rng = seededRng(seed);
+    const noRegroup = (params.noRegroup as boolean | undefined) ?? false;
     const max = difficulty <= 1 ? 99 : difficulty <= 3 ? 499 : 899;
-    const a = randInt(rng, 10, max);
-    const b = randInt(rng, 10, max);
+    let a = randInt(rng, 10, max);
+    let b = randInt(rng, 10, max);
+    if (noRegroup) {
+      for (let attempt = 0; attempt < NO_REGROUP_ATTEMPTS && !addsWithoutRegroup(a, b); attempt++) {
+        a = randInt(rng, 10, max);
+        b = randInt(rng, 10, max);
+      }
+    }
     const sum = a + b;
     const aStr = String(a);
     const bStr = String(b);
@@ -338,14 +451,19 @@ export const additionMissingDigit: Generator = {
   validate: (response, answer) => validateNumeric(response, answer),
 };
 
-/** Fact triangle: whole = part + part, with any one of the three corners (including the whole) hidden — unlike the number-bond generator, which only ever hides a part, this sometimes turns the problem into addition instead of subtraction. */
+/** Fact triangle: whole = part + part, with any one of the three corners (including the whole) hidden — unlike the number-bond generator, which only ever hides a part, this sometimes turns the problem into addition instead of subtraction. Splits are always place-value safe (no regrouping) — its sole consumer is a pre-regrouping lesson. */
 export const addSubFactTriangle: Generator = {
   id: "addsub.facttriangle",
   generate(seed, difficulty): GeneratedInstance {
     const rng = seededRng(seed);
     const max = difficulty <= 1 ? 20 : difficulty <= 3 ? 100 : 1000;
-    const part1 = randInt(rng, 1, max - 1);
-    const part2 = randInt(rng, 1, max - part1);
+    let part1 = 0;
+    let part2 = 0;
+    for (let attempt = 0; attempt < NO_REGROUP_ATTEMPTS; attempt++) {
+      part1 = randInt(rng, 1, max - 1);
+      part2 = randInt(rng, 1, max - part1);
+      if (addsWithoutRegroup(part1, part2)) break;
+    }
     const whole = part1 + part2;
     const hiddenCorner = pick(rng, ["whole", "part1", "part2"] as const);
 
@@ -403,7 +521,7 @@ const partWholeReasoningScenarios: PartWholeReasoningScenario[] = [
 
 const PART_WHOLE_REASONING_NAMES = ["Ravi", "Sofia", "Malik", "Elena", "Theo", "Amara", "Priya", "Kofi"];
 
-/** Part-whole word problem that makes the whole-vs-part decision explicit before computing — the final answer is still just a number, but the explanation names which quantity is the whole and which is a part. */
+/** Part-whole word problem that makes the whole-vs-part decision explicit before computing — the final answer is still just a number, but the explanation names which quantity is the whole and which is a part. Splits are always place-value safe (no regrouping) — its sole consumer is a pre-regrouping lesson. */
 export const addSubPartWholeReasoning: Generator = {
   id: "addsub.partwholereasoning",
   generate(seed, difficulty, params): GeneratedInstance {
@@ -412,8 +530,12 @@ export const addSubPartWholeReasoning: Generator = {
     const max = difficulty <= 1 ? 40 : difficulty <= 3 ? 200 : 800;
     const scenario = pick(rng, partWholeReasoningScenarios);
     const name = pick(rng, PART_WHOLE_REASONING_NAMES);
-    const part1 = randInt(rng, 5, max);
-    const part2 = randInt(rng, 5, max);
+    let part1 = randInt(rng, 5, max);
+    let part2 = randInt(rng, 5, max);
+    for (let attempt = 0; attempt < NO_REGROUP_ATTEMPTS && !addsWithoutRegroup(part1, part2); attempt++) {
+      part1 = randInt(rng, 5, max);
+      part2 = randInt(rng, 5, max);
+    }
     const whole = part1 + part2;
 
     if (opParam === "add") {
