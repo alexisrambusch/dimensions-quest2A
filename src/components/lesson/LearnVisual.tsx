@@ -216,6 +216,13 @@ export function LearnVisual({ view, data }: LearnVisualSpec) {
       return <ArrayGrid rows={d.rows} cols={d.cols} itemIcon={d.itemIcon} />;
     case "equalGroups":
       return <EqualGroupsVisual groups={d.groups} perGroup={d.perGroup} itemIcon={d.itemIcon} />;
+    case "compareGroups":
+      return (
+        <div className="flex gap-6 items-end justify-center">
+          <EqualGroupsVisual groups={1} perGroup={d.countA} itemIcon={d.itemIcon} />
+          <EqualGroupsVisual groups={1} perGroup={d.countB} itemIcon={d.itemIcon} />
+        </div>
+      );
     case "numberLine":
       return <StaticNumberLine min={d.min} max={d.max} step={d.step} value={d.value} />;
     case "numberBond":

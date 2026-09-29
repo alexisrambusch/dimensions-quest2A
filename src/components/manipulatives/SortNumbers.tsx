@@ -6,11 +6,12 @@ import clsx from "clsx";
 
 interface Props {
   values: number[];
+  direction?: "asc" | "desc";
   onChange: (ordered: number[] | undefined) => void;
 }
 
-/** Tap numbers in order from least to greatest — simpler and more reliable on touch than drag-and-drop. */
-export function SortNumbers({ values, onChange }: Props) {
+/** Tap numbers in order (least to greatest, or greatest to least) — simpler and more reliable on touch than drag-and-drop. */
+export function SortNumbers({ values, direction = "asc", onChange }: Props) {
   const [placed, setPlaced] = useState<number[]>([]);
   const remaining = values.filter((v) => !placed.includes(v));
 
@@ -50,7 +51,7 @@ export function SortNumbers({ values, onChange }: Props) {
           Start over
         </button>
       )}
-      <p className="text-sm text-slate-500">Tap numbers from least to greatest.</p>
+      <p className="text-sm text-slate-500">Tap numbers from {direction === "asc" ? "least to greatest" : "greatest to least"}.</p>
     </div>
   );
 }

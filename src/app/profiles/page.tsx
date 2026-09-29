@@ -1,4 +1,4 @@
-import { listStudents, selectStudentAction, createStudentAction } from "@/lib/actions/students";
+import { listStudents, listGrades, selectStudentAction, createStudentAction } from "@/lib/actions/students";
 import { icon } from "@/components/manipulatives/icons";
 import { CARD, PRIMARY_BUTTON } from "@/components/ui";
 
@@ -12,6 +12,7 @@ export const dynamic = "force-dynamic";
 
 export default async function ProfilesPage() {
   const students = await listStudents();
+  const grades = await listGrades();
 
   return (
     <main className="flex-1 flex flex-col items-center justify-center gap-10 p-6">
@@ -51,6 +52,21 @@ export default async function ProfilesPage() {
               </label>
             ))}
           </div>
+          {grades.length > 1 && (
+            <div className="flex flex-col gap-2">
+              <span className="text-sm font-semibold text-slate-600 text-center">Which curriculum?</span>
+              <div className="flex flex-wrap gap-2 justify-center">
+                {grades.map((g, i) => (
+                  <label key={g.id} className="cursor-pointer">
+                    <input type="radio" name="gradeId" value={g.id} defaultChecked={i === 0} className="peer sr-only" />
+                    <span className="block rounded-xl border-2 border-slate-300 peer-checked:border-blue-500 peer-checked:bg-blue-50 px-3 py-2 text-sm font-semibold text-slate-700">
+                      {g.sequence}
+                    </span>
+                  </label>
+                ))}
+              </div>
+            </div>
+          )}
           <button type="submit" className={PRIMARY_BUTTON}>
             Start the adventure
           </button>

@@ -24,7 +24,9 @@ export interface MapChapter {
 }
 
 export async function getMissionMap(studentId: string): Promise<MapChapter[]> {
+  const student = await prisma.student.findUniqueOrThrow({ where: { id: studentId } });
   const chapters = await prisma.chapter.findMany({
+    where: student.currentGradeId ? { gradeId: student.currentGradeId } : undefined,
     orderBy: { order: "asc" },
     include: { lessons: { orderBy: { order: "asc" } } },
   });

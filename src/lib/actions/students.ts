@@ -13,13 +13,20 @@ export async function listStudents() {
   return prisma.student.findMany({ where: { parentId: parent.id }, orderBy: { createdAt: "asc" } });
 }
 
-export async function createStudent(name: string, avatarKey: string) {
+/** Every grade/curriculum offered, for the "which grade is this for?" picker on profile creation. */
+export async function listGrades() {
+  return prisma.grade.findMany({ orderBy: { order: "asc" } });
+}
+
+export async function createStudent(name: string, avatarKey: string, gradeId?: string) {
   const parent = await prisma.parent.upsert({
     where: { email: HOUSEHOLD_PARENT_EMAIL },
     update: {},
     create: { email: HOUSEHOLD_PARENT_EMAIL, name: "Parent" },
   });
-  const grade = await prisma.grade.findFirst({ where: { sequence: "Dimensions Math 2A" } });
+  const grade = gradeId
+    ? await prisma.grade.findUnique({ where: { id: gradeId } })
+    : await prisma.grade.findFirst({ orderBy: { order: "asc" } });
   const student = await prisma.student.create({
     data: { parentId: parent.id, name: name.trim() || "Learner", avatarKey, currentGradeId: grade?.id },
   });
@@ -55,8 +62,9 @@ export async function selectStudentAction(studentId: string) {
 export async function createStudentAction(formData: FormData) {
   const name = String(formData.get("name") ?? "").trim();
   const avatarKey = String(formData.get("avatarKey") ?? "fox");
+  const gradeId = String(formData.get("gradeId") ?? "") || undefined;
   if (!name) return;
-  const student = await createStudent(name, avatarKey);
+  const student = await createStudent(name, avatarKey, gradeId);
   await setActiveStudent(student.id);
   redirect("/map");
 }

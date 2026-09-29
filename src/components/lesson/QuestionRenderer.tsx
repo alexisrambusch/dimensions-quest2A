@@ -129,8 +129,20 @@ export function QuestionRenderer({ prompt, onSubmit, disabled }: Props) {
       break;
 
     case "sortNumbers":
-      body = <SortNumbers values={d.values} onChange={setResponse} />;
+      body = <SortNumbers values={d.values} direction={d.direction} onChange={setResponse} />;
       readyToSubmit = Array.isArray(response) && response.length === d.values.length;
+      break;
+
+    case "compareGroups":
+      body = (
+        <div className="flex flex-col items-center gap-4">
+          <div className="flex gap-6 items-end">
+            <EqualGroupsVisual groups={1} perGroup={d.countA} itemIcon={d.itemIcon} />
+            <EqualGroupsVisual groups={1} perGroup={d.countB} itemIcon={d.itemIcon} />
+          </div>
+          <ChoiceGrid choices={d.choices} value={response as string | undefined} onChange={setResponse} />
+        </div>
+      );
       break;
 
     case "numberSequence":

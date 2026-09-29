@@ -19,6 +19,7 @@ const WORLD_ICONS: Record<string, string> = {
   factory: "⚖️",
   forest: "🌲",
   realm: "🔷",
+  meadow: "🌼",
 };
 
 const WORLD_BACKDROP: Record<string, string> = {
@@ -29,6 +30,7 @@ const WORLD_BACKDROP: Record<string, string> = {
   factory: "bg-gradient-to-br from-orange-100 via-orange-50 to-white",
   forest: "bg-gradient-to-br from-emerald-100 via-emerald-50 to-white",
   realm: "bg-gradient-to-br from-blue-100 via-blue-50 to-white",
+  meadow: "bg-gradient-to-br from-yellow-100 via-yellow-50 to-white",
 };
 
 const WORLD_RING: Record<string, string> = {
@@ -39,6 +41,7 @@ const WORLD_RING: Record<string, string> = {
   factory: "ring-orange-200",
   forest: "ring-emerald-200",
   realm: "ring-blue-200",
+  meadow: "ring-yellow-200",
 };
 
 /** A short glyph per lesson chip, standing in for "what kind of level is this" at a glance. */

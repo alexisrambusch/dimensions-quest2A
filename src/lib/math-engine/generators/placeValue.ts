@@ -128,12 +128,14 @@ export const placeValueDecompose: Generator = {
   },
 };
 
-/** Compare two numbers with <, >, =. */
+/** Compare two numbers with <, >, =. `params.min`/`params.max` override the difficulty-based range (used by lower grades comparing much smaller numbers). */
 export const compareNumbers: Generator = {
   id: "compare.numbers",
-  generate(seed, difficulty): GeneratedInstance {
+  generate(seed, difficulty, params = {}): GeneratedInstance {
     const rng = seededRng(seed);
-    const [lo, hi] = rangeForDifficulty(difficulty);
+    const [dLo, dHi] = rangeForDifficulty(difficulty);
+    const lo = typeof params.min === "number" ? params.min : dLo;
+    const hi = typeof params.max === "number" ? params.max : dHi;
     let a = randInt(rng, lo, hi);
     let b = randInt(rng, lo, hi);
     if (rng() < 0.15) b = a; // sometimes equal, to test the "=" case
@@ -158,30 +160,33 @@ export const compareNumbers: Generator = {
   },
 };
 
-/** Order 3-4 numbers ascending. */
+/** Order 3-4 numbers ascending (or descending, via `params.direction`). `params.min`/`params.max`/`params.count` override the difficulty-based defaults. */
 export const orderNumbers: Generator = {
   id: "order.numbers",
-  generate(seed, difficulty): GeneratedInstance {
+  generate(seed, difficulty, params = {}): GeneratedInstance {
     const rng = seededRng(seed);
-    const [lo, hi] = rangeForDifficulty(difficulty);
-    const count = difficulty <= 2 ? 3 : 4;
+    const [dLo, dHi] = rangeForDifficulty(difficulty);
+    const lo = typeof params.min === "number" ? params.min : dLo;
+    const hi = typeof params.max === "number" ? params.max : dHi;
+    const count = typeof params.count === "number" ? params.count : difficulty <= 2 ? 3 : 4;
+    const direction = (params.direction as "asc" | "desc" | undefined) ?? "asc";
     const nums = new Set<number>();
     while (nums.size < count) nums.add(randInt(rng, lo, hi));
     const values = Array.from(nums);
-    const sorted = [...values].sort((x, y) => x - y);
+    const sorted = [...values].sort((x, y) => (direction === "asc" ? x - y : y - x));
     return {
       prompt: {
         view: "sortNumbers",
         kind: "SORT_ORDER",
         stage: "ABSTRACT",
-        text: `Put the numbers in order from least to greatest.`,
-        data: { values },
+        text: direction === "asc" ? `Put the numbers in order from least to greatest.` : `Put the numbers in order from greatest to least.`,
+        data: { values, direction },
       },
       answer: {
         value: sorted,
-        explanation: `Ascending order: ${sorted.join(", ")}.`,
+        explanation: `${direction === "asc" ? "Ascending" : "Descending"} order: ${sorted.join(", ")}.`,
       },
-      meta: { values },
+      meta: { values, direction },
     };
   },
   validate(response, answer): ValidationResult {

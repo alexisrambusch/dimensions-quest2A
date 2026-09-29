@@ -7,6 +7,7 @@ import { multiplicationGenerators } from "./generators/multiplication";
 import { divisionGenerators } from "./generators/division";
 import { mixedFactGenerators } from "./generators/mixedFacts";
 import { numberLineGenerators } from "./generators/numberLine";
+import { grade1NumberGenerators } from "./generators/grade1Numbers";
 
 const ALL_GENERATORS: Generator[] = [
   ...placeValueGenerators,
@@ -17,6 +18,7 @@ const ALL_GENERATORS: Generator[] = [
   ...divisionGenerators,
   ...mixedFactGenerators,
   ...numberLineGenerators,
+  ...grade1NumberGenerators,
 ];
 
 const REGISTRY = new Map<string, Generator>(ALL_GENERATORS.map((g) => [g.id, g]));

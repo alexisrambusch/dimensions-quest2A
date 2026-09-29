@@ -1,10 +1,19 @@
 import type { PrismaClient } from "@/generated/prisma/client";
+import type { GradeDef } from "./curriculum/types";
 import { grade2a } from "./curriculum/grade2a";
+import { grade1a } from "./curriculum/grade1a";
 import { ACHIEVEMENTS } from "./gamification/achievements";
 import { CREATURES } from "./gamification/creatures";
 import { ASSESSMENTS } from "./curriculum/assessments";
 
 const HOUSEHOLD_PARENT_EMAIL = "alexisrambusch@gmail.com";
+
+// Every grade offered in the app, each with a stable id (used as the Grade
+// row's primary key so re-seeding is idempotent) and a display order.
+const GRADES: { id: string; order: number; def: GradeDef }[] = [
+  { id: "grade-1a", order: 0, def: grade1a },
+  { id: "grade-2a", order: 1, def: grade2a },
+];
 
 /**
  * Populates the curriculum (chapters/lessons/concepts/skills/questions),
@@ -20,133 +29,137 @@ export async function seedDatabase(prisma: PrismaClient): Promise<string[]> {
     console.log(line);
   };
 
-  say(`Seeding curriculum: ${grade2a.sequence}`);
-
-  const grade = await prisma.grade.upsert({
-    where: { id: "grade-2a" },
-    update: { name: grade2a.name, sequence: grade2a.sequence, order: 1 },
-    create: { id: "grade-2a", name: grade2a.name, sequence: grade2a.sequence, order: 1 },
-  });
-
   // Pass 1: create chapters/lessons/concepts/skills/questions without prerequisite edges,
   // since a skill's prerequisites may reference a skill defined in a later chapter file's
-  // scan order (e.g. ch3 depends on ch1) that must already exist as a row.
+  // scan order (e.g. ch3 depends on ch1) that must already exist as a row. Codes (chapter,
+  // skill, question) are globally unique across every grade, so these maps are shared.
   const skillCodeToId = new Map<string, string>();
   const questionCodeToId = new Map<string, string>();
   const chapterCodeToId = new Map<string, string>();
+  const allChapters = GRADES.flatMap((g) => g.def.chapters);
 
-  for (const [chapterIndex, chapter] of grade2a.chapters.entries()) {
-    const chapterRow = await prisma.chapter.upsert({
-      where: { code: chapter.code },
-      update: {
-        gradeId: grade.id,
-        order: chapterIndex + 1,
-        title: chapter.title,
-        description: chapter.description,
-        worldName: chapter.worldName,
-        worldTheme: chapter.worldTheme,
-      },
-      create: {
-        code: chapter.code,
-        gradeId: grade.id,
-        order: chapterIndex + 1,
-        title: chapter.title,
-        description: chapter.description,
-        worldName: chapter.worldName,
-        worldTheme: chapter.worldTheme,
-      },
+  for (const { id, order, def } of GRADES) {
+    say(`Seeding curriculum: ${def.sequence}`);
+
+    const grade = await prisma.grade.upsert({
+      where: { id },
+      update: { name: def.name, sequence: def.sequence, order },
+      create: { id, name: def.name, sequence: def.sequence, order },
     });
 
-    for (const [lessonIndex, lesson] of chapter.lessons.entries()) {
-      const lessonRow = await prisma.lesson.upsert({
-        where: { code: lesson.code },
+    for (const [chapterIndex, chapter] of def.chapters.entries()) {
+      const chapterRow = await prisma.chapter.upsert({
+        where: { code: chapter.code },
         update: {
-          chapterId: chapterRow.id,
-          order: lessonIndex + 1,
-          title: lesson.title,
-          type: lesson.type,
-          objective: lesson.objective,
-          missionBriefing: lesson.missionBriefing,
-          workedExampleJson: lesson.workedExample ? JSON.stringify(lesson.workedExample) : null,
+          gradeId: grade.id,
+          order: chapterIndex + 1,
+          title: chapter.title,
+          description: chapter.description,
+          worldName: chapter.worldName,
+          worldTheme: chapter.worldTheme,
         },
         create: {
-          code: lesson.code,
-          chapterId: chapterRow.id,
-          order: lessonIndex + 1,
-          title: lesson.title,
-          type: lesson.type,
-          objective: lesson.objective,
-          missionBriefing: lesson.missionBriefing,
-          workedExampleJson: lesson.workedExample ? JSON.stringify(lesson.workedExample) : null,
+          code: chapter.code,
+          gradeId: grade.id,
+          order: chapterIndex + 1,
+          title: chapter.title,
+          description: chapter.description,
+          worldName: chapter.worldName,
+          worldTheme: chapter.worldTheme,
         },
       });
 
-      for (const [conceptIndex, concept] of lesson.concepts.entries()) {
-        // Concepts have no natural unique code in the spec; key on lesson+order.
-        const existingConcept = await prisma.concept.findFirst({
-          where: { lessonId: lessonRow.id, order: conceptIndex + 1 },
+      for (const [lessonIndex, lesson] of chapter.lessons.entries()) {
+        const lessonRow = await prisma.lesson.upsert({
+          where: { code: lesson.code },
+          update: {
+            chapterId: chapterRow.id,
+            order: lessonIndex + 1,
+            title: lesson.title,
+            type: lesson.type,
+            objective: lesson.objective,
+            missionBriefing: lesson.missionBriefing,
+            workedExampleJson: lesson.workedExample ? JSON.stringify(lesson.workedExample) : null,
+          },
+          create: {
+            code: lesson.code,
+            chapterId: chapterRow.id,
+            order: lessonIndex + 1,
+            title: lesson.title,
+            type: lesson.type,
+            objective: lesson.objective,
+            missionBriefing: lesson.missionBriefing,
+            workedExampleJson: lesson.workedExample ? JSON.stringify(lesson.workedExample) : null,
+          },
         });
-        const conceptRow = existingConcept
-          ? await prisma.concept.update({
-              where: { id: existingConcept.id },
-              data: { title: concept.title, bigIdea: concept.bigIdea },
-            })
-          : await prisma.concept.create({
-              data: { lessonId: lessonRow.id, order: conceptIndex + 1, title: concept.title, bigIdea: concept.bigIdea },
-            });
 
-        for (const skill of concept.skills) {
-          const skillRow = await prisma.skill.upsert({
-            where: { code: skill.code },
-            update: {
-              conceptId: conceptRow.id,
-              title: skill.title,
-              description: skill.description,
-              stage: skill.stage,
-            },
-            create: {
-              code: skill.code,
-              conceptId: conceptRow.id,
-              title: skill.title,
-              description: skill.description,
-              stage: skill.stage,
-            },
+        for (const [conceptIndex, concept] of lesson.concepts.entries()) {
+          // Concepts have no natural unique code in the spec; key on lesson+order.
+          const existingConcept = await prisma.concept.findFirst({
+            where: { lessonId: lessonRow.id, order: conceptIndex + 1 },
           });
-          skillCodeToId.set(skill.code, skillRow.id);
+          const conceptRow = existingConcept
+            ? await prisma.concept.update({
+                where: { id: existingConcept.id },
+                data: { title: concept.title, bigIdea: concept.bigIdea },
+              })
+            : await prisma.concept.create({
+                data: { lessonId: lessonRow.id, order: conceptIndex + 1, title: concept.title, bigIdea: concept.bigIdea },
+              });
 
-          for (const q of skill.questions) {
-            const questionRow = await prisma.question.upsert({
-              where: { code: q.code },
+          for (const skill of concept.skills) {
+            const skillRow = await prisma.skill.upsert({
+              where: { code: skill.code },
               update: {
-                kind: q.kind,
-                stage: q.stage,
-                generatorId: q.generatorId,
-                paramsJson: JSON.stringify(q.params),
-                difficulty: q.difficulty,
-                skills: { set: [{ id: skillRow.id }] },
+                conceptId: conceptRow.id,
+                title: skill.title,
+                description: skill.description,
+                stage: skill.stage,
               },
               create: {
-                code: q.code,
-                kind: q.kind,
-                stage: q.stage,
-                generatorId: q.generatorId,
-                paramsJson: JSON.stringify(q.params),
-                difficulty: q.difficulty,
-                skills: { connect: [{ id: skillRow.id }] },
+                code: skill.code,
+                conceptId: conceptRow.id,
+                title: skill.title,
+                description: skill.description,
+                stage: skill.stage,
               },
             });
-            questionCodeToId.set(q.code, questionRow.id);
+            skillCodeToId.set(skill.code, skillRow.id);
+
+            for (const q of skill.questions) {
+              const questionRow = await prisma.question.upsert({
+                where: { code: q.code },
+                update: {
+                  kind: q.kind,
+                  stage: q.stage,
+                  generatorId: q.generatorId,
+                  paramsJson: JSON.stringify(q.params),
+                  difficulty: q.difficulty,
+                  skills: { set: [{ id: skillRow.id }] },
+                },
+                create: {
+                  code: q.code,
+                  kind: q.kind,
+                  stage: q.stage,
+                  generatorId: q.generatorId,
+                  paramsJson: JSON.stringify(q.params),
+                  difficulty: q.difficulty,
+                  skills: { connect: [{ id: skillRow.id }] },
+                },
+              });
+              questionCodeToId.set(q.code, questionRow.id);
+            }
           }
         }
       }
+      chapterCodeToId.set(chapter.code, chapterRow.id);
+      say(`  Chapter ${chapter.code}: ${chapter.lessons.length} lessons seeded.`);
     }
-    chapterCodeToId.set(chapter.code, chapterRow.id);
-    say(`  Chapter ${chapter.code}: ${chapter.lessons.length} lessons seeded.`);
   }
 
-  // Pass 2: wire up prerequisite edges now that every skill exists.
+  // Pass 2: wire up prerequisite edges now that every skill (across every grade) exists.
   let edgeCount = 0;
-  for (const chapter of grade2a.chapters) {
+  for (const chapter of allChapters) {
     for (const lesson of chapter.lessons) {
       for (const concept of lesson.concepts) {
         for (const skill of concept.skills) {
@@ -252,7 +265,7 @@ export async function seedDatabase(prisma: PrismaClient): Promise<string[]> {
         parentId: parent.id,
         name: "Explorer",
         avatarKey: "fox",
-        currentGradeId: grade.id,
+        currentGradeId: "grade-2a",
       },
     });
     say("  Created default student profile 'Explorer'.");
