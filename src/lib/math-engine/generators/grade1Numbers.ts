@@ -408,6 +408,40 @@ export const additionCrossTen: Generator = {
   validate: (response, answer) => validateNumeric(response, answer),
 };
 
+/** A teen number (11-19) minus a single digit that crosses below the ten — the subtrahend is always bigger than the ones digit, so "subtract from 10" or "subtract the ones first" both apply. `bMin`/`bMax` (default 2-9) steer which subtrahends appear; `missing` picks the blank slot (default "result"). */
+export const subtractionCrossTen: Generator = {
+  id: "g1.subtraction.crossten",
+  generate(seed, difficulty, params): GeneratedInstance {
+    const rng = seededRng(seed);
+    const bMin = typeof params.bMin === "number" ? (params.bMin as number) : 2;
+    const bMax = typeof params.bMax === "number" ? (params.bMax as number) : 9;
+    const missing = (params.missing as "a" | "b" | "result" | undefined) ?? "result";
+
+    let ones = 1;
+    let b = bMin;
+    for (let attempt = 0; attempt < 50; attempt++) {
+      ones = randInt(rng, 1, 8);
+      b = randInt(rng, bMin, bMax);
+      if (b > ones) break;
+    }
+    const teen = 10 + ones;
+    const result = teen - b;
+    const text = missing === "result" ? `${teen} − ${b} = ?` : "Find the missing number.";
+    return {
+      prompt: {
+        view: "regroupingColumns",
+        kind: "BUILD_EQUATION",
+        stage: "PICTORIAL",
+        text,
+        data: { a: teen, b, op: "−", result, missing },
+      },
+      answer: { value: missing === "a" ? teen : missing === "b" ? b : result, explanation: `${teen} − ${b} = ${result}.` },
+      meta: { teen, b, result },
+    };
+  },
+  validate: (response, answer) => validateNumeric(response, answer),
+};
+
 export const grade1NumberGenerators = [
   countObjects,
   numberSequenceToTen,
@@ -420,4 +454,5 @@ export const grade1NumberGenerators = [
   teenTensOnes,
   teenAddSubNoCross,
   additionCrossTen,
+  subtractionCrossTen,
 ];
