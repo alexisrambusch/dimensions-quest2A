@@ -165,4 +165,75 @@ export const numberBondMissing: Generator = {
   validate: (response, answer) => validateNumeric(response, answer),
 };
 
-export const grade1NumberGenerators = [countObjects, numberSequenceToTen, compareGroups, numberBondMissing];
+/** Core addition within a small max (default 10). `missing` picks which slot is blank: "a" | "b" | "result" (default "result"). `forceZero` makes one addend 0 (the Addition with 0 lesson). `bMin`/`bMax` bound the second addend (e.g. 1-3 for the counting-on lesson). */
+export const additionBasic: Generator = {
+  id: "g1.addition.basic",
+  generate(seed, difficulty, params): GeneratedInstance {
+    const rng = seededRng(seed);
+    const max = typeof params.max === "number" ? (params.max as number) : 10;
+    const missing = (params.missing as "a" | "b" | "result" | undefined) ?? "result";
+    const forceZero = !!params.forceZero;
+    const bMin = typeof params.bMin === "number" ? (params.bMin as number) : 0;
+    const bMax = typeof params.bMax === "number" ? (params.bMax as number) : max;
+
+    let a: number;
+    let b: number;
+    if (forceZero) {
+      const other = randInt(rng, 0, max);
+      a = rng() < 0.5 ? 0 : other;
+      b = a === 0 ? other : 0;
+    } else {
+      a = randInt(rng, 0, max);
+      const hiB = Math.min(bMax, max - a);
+      const loB = Math.min(bMin, hiB);
+      b = randInt(rng, loB, hiB);
+    }
+    const result = a + b;
+    const text = missing === "result" ? `${a} + ${b} = ?` : "Find the missing number.";
+    return {
+      prompt: {
+        view: "regroupingColumns",
+        kind: "BUILD_EQUATION",
+        stage: missing === "result" ? "PICTORIAL" : "ABSTRACT",
+        text,
+        data: { a, b, op: "+", result, missing },
+      },
+      answer: { value: missing === "a" ? a : missing === "b" ? b : result, explanation: `${a} + ${b} = ${result}.` },
+      meta: { a, b, result },
+    };
+  },
+  validate: (response, answer) => validateNumeric(response, answer),
+};
+
+/** A short addition story within a small max (default 10) — "putting together" two groups, or an initial group with "more" arriving. */
+export const additionWordProblem: Generator = {
+  id: "g1.addition.wordproblem",
+  generate(seed, difficulty, params): GeneratedInstance {
+    const rng = seededRng(seed);
+    const max = typeof params.max === "number" ? (params.max as number) : 10;
+    const style = (params.style as "together" | "more" | undefined) ?? (rng() < 0.5 ? "together" : "more");
+    const item = pick(rng, COUNT_ITEMS);
+    const a = randInt(rng, 1, max - 1);
+    const b = randInt(rng, 1, max - a);
+    const result = a + b;
+    const text =
+      style === "together"
+        ? `There are ${a} ${item.plural} in one spot and ${b} ${item.plural} in another. How many ${item.plural} are there altogether?`
+        : `There are ${a} ${item.plural}. ${b} more ${item.plural} come. How many ${item.plural} are there now?`;
+    return {
+      prompt: { view: "numericAnswer", kind: "WORD_PROBLEM", stage: "ABSTRACT", text, data: {} },
+      answer: { value: result, explanation: `${a} + ${b} = ${result}.` },
+      meta: { a, b, result },
+    };
+  },
+  validate: (response, answer) => validateNumeric(response, answer),
+};
+
+export const grade1NumberGenerators = [
+  countObjects,
+  numberSequenceToTen,
+  compareGroups,
+  numberBondMissing,
+  additionBasic,
+  additionWordProblem,
+];
