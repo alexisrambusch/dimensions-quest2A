@@ -132,4 +132,37 @@ export const compareGroups: Generator = {
   },
 };
 
-export const grade1NumberGenerators = [countObjects, numberSequenceToTen, compareGroups];
+/** Number bonds within a fixed whole (6-10) — one part shown, find the other. `params.wholes` lists the eligible wholes (defaults to 6-10 mixed); `params.framing` picks "bond" ("what is the other part?") or "more" ("how many more make N?"), defaulting to a random mix. */
+export const numberBondMissing: Generator = {
+  id: "g1.numberbond.missing",
+  generate(seed, difficulty, params): GeneratedInstance {
+    const rng = seededRng(seed);
+    const wholes = Array.isArray(params.wholes) ? (params.wholes as number[]) : [6, 7, 8, 9, 10];
+    const whole = pick(rng, wholes);
+    const part1 = randInt(rng, 0, whole);
+    const part2 = whole - part1;
+    const hideFirst = rng() < 0.5;
+    const known = hideFirst ? part2 : part1;
+    const hiddenValue = hideFirst ? part1 : part2;
+    const hidden = hideFirst ? "part1" : "part2";
+    const framing = (params.framing as "bond" | "more" | undefined) ?? (rng() < 0.5 ? "bond" : "more");
+    const text =
+      framing === "more"
+        ? `${known} and how many more make ${whole}?`
+        : `${whole} is made of two parts. One part is ${known}. What is the other part?`;
+    return {
+      prompt: {
+        view: "numberBond",
+        kind: "FILL_IN_BLANK",
+        stage: "PICTORIAL",
+        text,
+        data: { whole, known, hidden },
+      },
+      answer: { value: hiddenValue, explanation: `${part1} and ${part2} make ${whole}.` },
+      meta: { whole, part1, part2 },
+    };
+  },
+  validate: (response, answer) => validateNumeric(response, answer),
+};
+
+export const grade1NumberGenerators = [countObjects, numberSequenceToTen, compareGroups, numberBondMissing];
