@@ -229,6 +229,65 @@ export const additionWordProblem: Generator = {
   validate: (response, answer) => validateNumeric(response, answer),
 };
 
+/** Core subtraction within a small max (default 10), minuend ≥ subtrahend always. `missing` picks which slot is blank: "a" | "b" | "result" (default "result"). `zeroMode`: "subtractZero" (a − 0) or "subtractAll" (a − a). `bMin`/`bMax` bound the subtrahend (e.g. 1-3 for the counting-back lesson). */
+export const subtractionBasic: Generator = {
+  id: "g1.subtraction.basic",
+  generate(seed, difficulty, params): GeneratedInstance {
+    const rng = seededRng(seed);
+    const max = typeof params.max === "number" ? (params.max as number) : 10;
+    const missing = (params.missing as "a" | "b" | "result" | undefined) ?? "result";
+    const zeroMode = params.zeroMode as "subtractZero" | "subtractAll" | undefined;
+    const bMin = typeof params.bMin === "number" ? (params.bMin as number) : 0;
+    const bMax = typeof params.bMax === "number" ? (params.bMax as number) : max;
+
+    let a: number;
+    let b: number;
+    if (zeroMode) {
+      a = randInt(rng, 0, max);
+      b = zeroMode === "subtractZero" ? 0 : a;
+    } else {
+      a = randInt(rng, bMin, max);
+      const hiB = Math.min(bMax, a);
+      const loB = Math.min(bMin, hiB);
+      b = randInt(rng, loB, hiB);
+    }
+    const result = a - b;
+    const text = missing === "result" ? `${a} − ${b} = ?` : "Find the missing number.";
+    return {
+      prompt: {
+        view: "regroupingColumns",
+        kind: "BUILD_EQUATION",
+        stage: missing === "result" ? "PICTORIAL" : "ABSTRACT",
+        text,
+        data: { a, b, op: "−", result, missing },
+      },
+      answer: { value: missing === "a" ? a : missing === "b" ? b : result, explanation: `${a} − ${b} = ${result}.` },
+      meta: { a, b, result },
+    };
+  },
+  validate: (response, answer) => validateNumeric(response, answer),
+};
+
+/** A short "taking away" subtraction story within a small max (default 10). */
+export const subtractionWordProblem: Generator = {
+  id: "g1.subtraction.wordproblem",
+  generate(seed, difficulty, params): GeneratedInstance {
+    const rng = seededRng(seed);
+    const max = typeof params.max === "number" ? (params.max as number) : 10;
+    const item = pick(rng, COUNT_ITEMS);
+    const a = randInt(rng, 1, max);
+    const b = randInt(rng, 0, a);
+    const result = a - b;
+    const text = `There are ${a} ${item.plural}. ${b} ${item.plural} ${b === 1 ? "is" : "are"} taken away. How many ${item.plural} are left?`;
+    return {
+      prompt: { view: "numericAnswer", kind: "WORD_PROBLEM", stage: "ABSTRACT", text, data: {} },
+      answer: { value: result, explanation: `${a} − ${b} = ${result}.` },
+      meta: { a, b, result },
+    };
+  },
+  validate: (response, answer) => validateNumeric(response, answer),
+};
+
 export const grade1NumberGenerators = [
   countObjects,
   numberSequenceToTen,
@@ -236,4 +295,6 @@ export const grade1NumberGenerators = [
   numberBondMissing,
   additionBasic,
   additionWordProblem,
+  subtractionBasic,
+  subtractionWordProblem,
 ];

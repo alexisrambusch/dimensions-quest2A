@@ -22,6 +22,7 @@ const WORLD_ICONS: Record<string, string> = {
   meadow: "🌼",
   treehouse: "🌳",
   garden: "🌻",
+  pond: "🐸",
 };
 
 const WORLD_BACKDROP: Record<string, string> = {
@@ -35,6 +36,7 @@ const WORLD_BACKDROP: Record<string, string> = {
   meadow: "bg-gradient-to-br from-yellow-100 via-yellow-50 to-white",
   treehouse: "bg-gradient-to-br from-green-100 via-green-50 to-white",
   garden: "bg-gradient-to-br from-amber-100 via-amber-50 to-white",
+  pond: "bg-gradient-to-br from-sky-100 via-sky-50 to-white",
 };
 
 const WORLD_RING: Record<string, string> = {
@@ -48,6 +50,7 @@ const WORLD_RING: Record<string, string> = {
   meadow: "ring-yellow-200",
   treehouse: "ring-green-200",
   garden: "ring-amber-200",
+  pond: "ring-sky-200",
 };
 
 /** A short glyph per lesson chip, standing in for "what kind of level is this" at a glance. */
