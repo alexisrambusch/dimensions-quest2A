@@ -372,6 +372,42 @@ export const teenAddSubNoCross: Generator = {
   validate: (response, answer) => validateNumeric(response, answer),
 };
 
+/** Two single-digit addends whose sum crosses into the teens (11-18) — the "make a ten" territory. `aMin`/`aMax`/`bMin`/`bMax` (each default 2-9) steer which addend tends to be the "close to 10" one; `missing` picks the blank slot (default "result"). */
+export const additionCrossTen: Generator = {
+  id: "g1.addition.crossten",
+  generate(seed, difficulty, params): GeneratedInstance {
+    const rng = seededRng(seed);
+    const aMin = typeof params.aMin === "number" ? (params.aMin as number) : 2;
+    const aMax = typeof params.aMax === "number" ? (params.aMax as number) : 9;
+    const bMin = typeof params.bMin === "number" ? (params.bMin as number) : 2;
+    const bMax = typeof params.bMax === "number" ? (params.bMax as number) : 9;
+    const missing = (params.missing as "a" | "b" | "result" | undefined) ?? "result";
+
+    let a = aMin;
+    let b = bMin;
+    for (let attempt = 0; attempt < 50; attempt++) {
+      a = randInt(rng, aMin, aMax);
+      b = randInt(rng, bMin, bMax);
+      const sum = a + b;
+      if (sum >= 11 && sum <= 18) break;
+    }
+    const result = a + b;
+    const text = missing === "result" ? `${a} + ${b} = ?` : "Find the missing number.";
+    return {
+      prompt: {
+        view: "regroupingColumns",
+        kind: "BUILD_EQUATION",
+        stage: "PICTORIAL",
+        text,
+        data: { a, b, op: "+", result, missing },
+      },
+      answer: { value: missing === "a" ? a : missing === "b" ? b : result, explanation: `${a} + ${b} = ${result}.` },
+      meta: { a, b, result },
+    };
+  },
+  validate: (response, answer) => validateNumeric(response, answer),
+};
+
 export const grade1NumberGenerators = [
   countObjects,
   numberSequenceToTen,
@@ -383,4 +419,5 @@ export const grade1NumberGenerators = [
   subtractionWordProblem,
   teenTensOnes,
   teenAddSubNoCross,
+  additionCrossTen,
 ];
