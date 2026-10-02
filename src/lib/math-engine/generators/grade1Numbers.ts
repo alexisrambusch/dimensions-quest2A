@@ -74,15 +74,16 @@ export const countObjects: Generator = {
   validate: (response, answer) => validateNumeric(response, answer),
 };
 
-/** Count on or count back by 1 through a window of 0-10, one number hidden. */
+/** Count on or count back by 1 through a window of 0-`max` (default 10), one number hidden. */
 export const numberSequenceToTen: Generator = {
   id: "g1.count.sequence",
   generate(seed, difficulty, params): GeneratedInstance {
     const rng = seededRng(seed);
     const direction = (params.direction as "forward" | "backward" | undefined) ?? (rng() < 0.5 ? "forward" : "backward");
+    const max = typeof params.max === "number" ? (params.max as number) : 10;
     const length = 5;
     const step = direction === "forward" ? 1 : -1;
-    const start = direction === "forward" ? randInt(rng, 0, 10 - (length - 1)) : randInt(rng, length - 1, 10);
+    const start = direction === "forward" ? randInt(rng, 0, max - (length - 1)) : randInt(rng, length - 1, max);
     const sequence = Array.from({ length }, (_, i) => start + i * step);
     const hiddenIndex = randInt(rng, 1, length - 2);
     const hiddenValue = sequence[hiddenIndex];
@@ -288,6 +289,89 @@ export const subtractionWordProblem: Generator = {
   validate: (response, answer) => validateNumeric(response, answer),
 };
 
+type TeenForm = "addTen" | "addOnes" | "subOnes" | "subTen";
+
+/** A teen number (11-20) as 10 and some ones, in any of four equation forms: 10+ones=teen, ones+10=teen, teen−ones=10, teen−10=ones. `params.forms` restricts which forms appear (default: all four). */
+export const teenTensOnes: Generator = {
+  id: "g1.teen.tensones",
+  generate(seed, difficulty, params): GeneratedInstance {
+    const rng = seededRng(seed);
+    const forms = (Array.isArray(params.forms) ? (params.forms as TeenForm[]) : ["addTen", "addOnes", "subOnes", "subTen"]) as TeenForm[];
+    const form = pick(rng, forms);
+    const ones = randInt(rng, 1, 9);
+    const teen = 10 + ones;
+    let a: number, b: number, op: "+" | "−", result: number;
+    if (form === "addTen") {
+      a = 10;
+      b = ones;
+      op = "+";
+      result = teen;
+    } else if (form === "addOnes") {
+      a = ones;
+      b = 10;
+      op = "+";
+      result = teen;
+    } else if (form === "subOnes") {
+      a = teen;
+      b = ones;
+      op = "−";
+      result = 10;
+    } else {
+      a = teen;
+      b = 10;
+      op = "−";
+      result = ones;
+    }
+    return {
+      prompt: {
+        view: "regroupingColumns",
+        kind: "BUILD_EQUATION",
+        stage: "PICTORIAL",
+        text: `${a} ${op} ${b} = ?`,
+        data: { a, b, op, result, missing: "result" },
+      },
+      answer: { value: result, explanation: `${a} ${op} ${b} = ${result}.` },
+      meta: { teen, ones, form },
+    };
+  },
+  validate: (response, answer) => validateNumeric(response, answer),
+};
+
+/** A teen number (11-19) plus or minus a single digit that never crosses the ten (the ones digit alone absorbs the whole change). `op`: "add" | "sub" (default "add"). `missing` picks the blank slot, default "result". */
+export const teenAddSubNoCross: Generator = {
+  id: "g1.teen.addsub.nocross",
+  generate(seed, difficulty, params): GeneratedInstance {
+    const rng = seededRng(seed);
+    const op = (params.op as "add" | "sub" | undefined) ?? "add";
+    const missing = (params.missing as "a" | "b" | "result" | undefined) ?? "result";
+
+    if (op === "add") {
+      const ones = randInt(rng, 1, 8);
+      const teen = 10 + ones;
+      const b = randInt(rng, 1, 9 - ones);
+      const result = teen + b;
+      const text = missing === "result" ? `${teen} + ${b} = ?` : "Find the missing number.";
+      return {
+        prompt: { view: "regroupingColumns", kind: "BUILD_EQUATION", stage: "PICTORIAL", text, data: { a: teen, b, op: "+", result, missing } },
+        answer: { value: missing === "a" ? teen : missing === "b" ? b : result, explanation: `${teen} + ${b} = ${result}.` },
+        meta: { teen, b, result },
+      };
+    }
+
+    const ones = randInt(rng, 1, 9);
+    const teen = 10 + ones;
+    const b = randInt(rng, 1, ones);
+    const result = teen - b;
+    const text = missing === "result" ? `${teen} − ${b} = ?` : "Find the missing number.";
+    return {
+      prompt: { view: "regroupingColumns", kind: "BUILD_EQUATION", stage: "PICTORIAL", text, data: { a: teen, b, op: "−", result, missing } },
+      answer: { value: missing === "a" ? teen : missing === "b" ? b : result, explanation: `${teen} − ${b} = ${result}.` },
+      meta: { teen, b, result },
+    };
+  },
+  validate: (response, answer) => validateNumeric(response, answer),
+};
+
 export const grade1NumberGenerators = [
   countObjects,
   numberSequenceToTen,
@@ -297,4 +381,6 @@ export const grade1NumberGenerators = [
   additionWordProblem,
   subtractionBasic,
   subtractionWordProblem,
+  teenTensOnes,
+  teenAddSubNoCross,
 ];
