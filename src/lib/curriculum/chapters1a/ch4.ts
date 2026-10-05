@@ -408,7 +408,7 @@ export const g1ch4: ChapterDef = {
       workedExample: {
         problem: "Quick recap: how do counting, number bonds, addition, and subtraction all connect?",
         steps: [
-          { text: "Counting tells you how many are in a group.", visual: { view: "equalGroups", data: { groups: 1, perGroup: 7, itemIcon: "star" } } },
+          { text: "Counting tells you how many are in a group.", visual: { view: "tenFrame", data: { count: 7 } } },
           { text: "A number bond splits that count into two parts.", visual: { view: "numberBond", data: { whole: 7, part1: 3, part2: 4 } } },
           { text: "Addition puts the parts back together: 3 + 4 = 7." },
           { text: "Subtraction finds a missing part: 7 − 4 = 3." },

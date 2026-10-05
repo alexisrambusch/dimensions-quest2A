@@ -11,6 +11,7 @@ import { BarModelMultiplication, BarModelDivision, BarModelPartWhole, BarModelCo
 import { RulerMeasure } from "../manipulatives/RulerMeasure";
 import { SortNumbers } from "../manipulatives/SortNumbers";
 import { NumberLine } from "../manipulatives/NumberLine";
+import { TenFrame } from "../manipulatives/TenFrame";
 import { icon } from "../manipulatives/icons";
 import { CHOICE_BUTTON_IDLE, CHOICE_BUTTON_SELECTED, PRIMARY_BUTTON } from "../ui";
 
@@ -68,6 +69,15 @@ export function QuestionRenderer({ prompt, onSubmit, disabled }: Props) {
       body = (
         <div className="flex flex-col items-center gap-4">
           <EqualGroupsVisual groups={d.groups} perGroup={d.perGroup} />
+          <NumericBlank value={response as number | undefined} onChange={setResponse} />
+        </div>
+      );
+      break;
+
+    case "tenFrame":
+      body = (
+        <div className="flex flex-col items-center gap-4">
+          <TenFrame count={d.count} />
           <NumericBlank value={response as number | undefined} onChange={setResponse} />
         </div>
       );

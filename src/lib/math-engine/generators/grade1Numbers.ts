@@ -32,7 +32,9 @@ function countRangeForDifficulty(difficulty: number): [number, number] {
   return [8, 10];
 }
 
-/** "How many X are there?" — count a group of pictured objects, 0-10. */
+/** "How many dots are there?" — count a ten-frame, 0-10. A true 5-wide, 2-row
+ * grid drawn with CSS (no emoji glyphs to render), matching the textbook's
+ * own ten-frame subitizing pattern rather than an arbitrary themed picture. */
 export const countObjects: Generator = {
   id: "g1.count.objects",
   generate(seed, difficulty, params): GeneratedInstance {
@@ -41,33 +43,31 @@ export const countObjects: Generator = {
     let [lo, hi] = countRangeForDifficulty(difficulty);
     if (typeof params.minCount === "number") lo = params.minCount as number;
     if (typeof params.maxCount === "number") hi = params.maxCount as number;
-    const item = pick(rng, COUNT_ITEMS);
 
     if (allowZero && rng() < 0.25) {
       return {
         prompt: {
-          view: "equalGroups",
+          view: "tenFrame",
           kind: "FILL_IN_BLANK",
           stage: "CONCRETE",
-          text: `How many ${item.plural} are there?`,
-          data: { groups: 1, perGroup: 0, itemIcon: item.icon },
+          text: "How many dots are there?",
+          data: { count: 0 },
         },
-        answer: { value: 0, explanation: `There are 0 ${item.plural} — the plate is empty.` },
+        answer: { value: 0, explanation: "There are 0 dots — the ten-frame is empty." },
         meta: { count: 0 },
       };
     }
 
     const count = randInt(rng, lo, hi);
-    const label = count === 1 ? item.singular : item.plural;
     return {
       prompt: {
-        view: "equalGroups",
+        view: "tenFrame",
         kind: "FILL_IN_BLANK",
         stage: "CONCRETE",
-        text: `How many ${label} are there?`,
-        data: { groups: 1, perGroup: count, itemIcon: item.icon },
+        text: "How many dots are there?",
+        data: { count },
       },
-      answer: { value: count, explanation: `Count each ${item.singular} one time: there are ${count}.` },
+      answer: { value: count, explanation: `Count each red dot one time: there are ${count}.` },
       meta: { count },
     };
   },

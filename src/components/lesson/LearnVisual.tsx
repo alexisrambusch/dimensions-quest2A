@@ -3,6 +3,7 @@
 import clsx from "clsx";
 import { ArrayGrid } from "../manipulatives/ArrayGrid";
 import { EqualGroupsVisual } from "../manipulatives/EqualGroupsVisual";
+import { TenFrame } from "../manipulatives/TenFrame";
 import { BarModelMultiplication, BarModelDivision, BarModelPartWhole, BarModelCompare } from "../manipulatives/BarModel";
 import { icon } from "../manipulatives/icons";
 
@@ -212,6 +213,8 @@ export function LearnVisual({ view, data }: LearnVisualSpec) {
   switch (view) {
     case "placeValueBlocks":
       return <PlaceValueBlocksStatic hundreds={d.hundreds ?? 0} tens={d.tens ?? 0} ones={d.ones ?? 0} />;
+    case "tenFrame":
+      return <TenFrame count={d.count} />;
     case "arrayGrid":
       return <ArrayGrid rows={d.rows} cols={d.cols} itemIcon={d.itemIcon} />;
     case "equalGroups":

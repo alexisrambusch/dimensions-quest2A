@@ -14,16 +14,16 @@ export const g1ch1: ChapterDef = {
       objective: "Count a group of up to 10 objects and match the count to its numeral.",
       missionBriefing: "Welcome to the Counting Meadow! Count the twinkling stars and friendly critters you find here, one at a time.",
       workedExample: {
-        problem: "How many stars are twinkling over the meadow?",
+        problem: "How many dots are on the ten-frame?",
         steps: [
           {
-            text: "Point to each star and count it just one time.",
-            visual: { view: "equalGroups", data: { groups: 1, perGroup: 6, itemIcon: "star" } },
+            text: "A ten-frame has 10 boxes — point to each filled dot and count it just one time.",
+            visual: { view: "tenFrame", data: { count: 6 } },
           },
-          { text: "1, 2, 3, 4, 5, 6 — that's every star counted." },
+          { text: "1, 2, 3, 4, 5, 6 — that's every dot counted. The dots always fill the top row first." },
         ],
-        answer: "There are 6 stars.",
-        answerVisual: { view: "equalGroups", data: { groups: 1, perGroup: 6, itemIcon: "star" } },
+        answer: "There are 6 dots.",
+        answerVisual: { view: "tenFrame", data: { count: 6 } },
       },
       concepts: [
         {
@@ -55,16 +55,16 @@ export const g1ch1: ChapterDef = {
       objective: "Understand that 0 means none, and count back from 10 to 0.",
       missionBriefing: "Some baskets in the meadow are empty! Learn what 0 means, then count backward from 10 to 0 like a rocket countdown.",
       workedExample: {
-        problem: "How many apples are in the empty basket?",
+        problem: "How many dots are on this ten-frame?",
         steps: [
           {
-            text: "Look closely inside the basket — are there any apples at all?",
-            visual: { view: "equalGroups", data: { groups: 1, perGroup: 0, itemIcon: "apple" } },
+            text: "Look closely at the ten-frame — is even one dot filled in?",
+            visual: { view: "tenFrame", data: { count: 0 } },
           },
-          { text: "There isn't a single apple. When there's nothing at all, we write the number 0." },
+          { text: "There isn't a single filled dot. When there's nothing at all, we write the number 0." },
         ],
-        answer: "There are 0 apples.",
-        answerVisual: { view: "equalGroups", data: { groups: 1, perGroup: 0, itemIcon: "apple" } },
+        answer: "There are 0 dots.",
+        answerVisual: { view: "tenFrame", data: { count: 0 } },
       },
       concepts: [
         {
@@ -216,7 +216,7 @@ export const g1ch1: ChapterDef = {
       workedExample: {
         problem: "Quick recap: what's the one big idea behind every skill in the Counting Meadow?",
         steps: [
-          { text: "Counting a group? Point to each object and say one number for each, only once.", visual: { view: "equalGroups", data: { groups: 1, perGroup: 6, itemIcon: "star" } } },
+          { text: "Counting a group? Point to each filled dot and say one number for each, only once.", visual: { view: "tenFrame", data: { count: 6 } } },
           { text: "Ordering numbers? Compare them two at a time until they're all lined up.", visual: { view: "sortedNumbers", data: { values: [2, 7, 9] } } },
           { text: "Comparing numbers? Decide which group has more, fewer, or if they're equal.", visual: { view: "compareNumbers", data: { a: 5, b: 3, symbol: ">" } } },
         ],
