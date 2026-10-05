@@ -54,6 +54,15 @@ export async function clearActiveStudent() {
   store.delete(ACTIVE_STUDENT_COOKIE);
 }
 
+/** Permanently deletes a student profile and all of their progress (lessons, attempts, mastery, achievements, shop collection — cascades via the schema). */
+export async function deleteStudent(studentId: string) {
+  const activeId = await getActiveStudentId();
+  await prisma.student.delete({ where: { id: studentId } });
+  if (activeId === studentId) {
+    await clearActiveStudent();
+  }
+}
+
 export async function selectStudentAction(studentId: string) {
   await setActiveStudent(studentId);
   redirect("/map");
@@ -71,5 +80,12 @@ export async function createStudentAction(formData: FormData) {
 
 export async function switchProfileAction() {
   await clearActiveStudent();
+  redirect("/profiles");
+}
+
+export async function deleteStudentAction(formData: FormData) {
+  const studentId = String(formData.get("studentId") ?? "");
+  if (!studentId) return;
+  await deleteStudent(studentId);
   redirect("/profiles");
 }

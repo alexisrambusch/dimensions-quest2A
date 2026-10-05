@@ -1,5 +1,6 @@
-import { listStudents, listGrades, selectStudentAction, createStudentAction } from "@/lib/actions/students";
+import { listStudents, listGrades, selectStudentAction, createStudentAction, deleteStudentAction } from "@/lib/actions/students";
 import { icon } from "@/components/manipulatives/icons";
+import { DeleteStudentButton } from "@/components/DeleteStudentButton";
 import { CARD, PRIMARY_BUTTON } from "@/components/ui";
 
 const AVATAR_OPTIONS = ["fox", "dog", "star", "crown"];
@@ -72,6 +73,23 @@ export default async function ProfilesPage() {
           </button>
         </form>
       </details>
+
+      {students.length > 0 && (
+        <details className={`${CARD} w-full max-w-sm`}>
+          <summary className="cursor-pointer font-semibold text-slate-500">Manage profiles</summary>
+          <div className="mt-4 flex flex-col gap-3">
+            {students.map((s) => (
+              <div key={s.id} className="flex items-center justify-between gap-3 rounded-xl border border-slate-200 px-4 py-2">
+                <span className="flex items-center gap-2 text-slate-700">
+                  <span className="text-xl">{icon(s.avatarKey)}</span>
+                  <span className="font-semibold">{s.name}</span>
+                </span>
+                <DeleteStudentButton studentId={s.id} studentName={s.name} action={deleteStudentAction} />
+              </div>
+            ))}
+          </div>
+        </details>
+      )}
     </main>
   );
 }
