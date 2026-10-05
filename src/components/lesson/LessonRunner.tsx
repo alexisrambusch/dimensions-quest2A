@@ -19,6 +19,7 @@ import { startMatchingGame, completeMatchingGame, type MatchingGameBoard } from 
 import { getMatchingGameFactor } from "@/lib/curriculum/matchingGames";
 import { CARD, PRIMARY_BUTTON, SECONDARY_BUTTON } from "../ui";
 import { ConfettiBurst } from "../ConfettiBurst";
+import { SpeakButton } from "../SpeakButton";
 import clsx from "clsx";
 import type { LessonPhase } from "@/generated/prisma/enums";
 import { playCorrect, playWrong, playLevelUp } from "@/lib/sound";
@@ -282,7 +283,11 @@ export function LessonRunner({
 
   if (stage === "BRIEFING") {
     return (
-      <div className={`${CARD} max-w-lg mx-auto text-center flex flex-col gap-4`}>
+      <div className={`${CARD} max-w-lg mx-auto text-center flex flex-col gap-4 relative`}>
+        <SpeakButton
+          text={`${runtime.lesson.title}. ${runtime.lesson.missionBriefing}`}
+          className="absolute top-4 right-4"
+        />
         <p className="text-xs font-bold uppercase tracking-wide text-blue-400">
           {runtime.lesson.worldName} · {runtime.lesson.chapterTitle}
         </p>
@@ -300,8 +305,10 @@ export function LessonRunner({
 
   if (stage === "LEARN" && runtime.lesson.workedExample) {
     const { problem, steps, answer, answerVisual } = runtime.lesson.workedExample;
+    const learnNarration = [problem, ...steps.map((s) => s.text), answer].join(". ");
     return (
-      <div className={`${CARD} max-w-lg mx-auto flex flex-col gap-5`}>
+      <div className={`${CARD} max-w-lg mx-auto flex flex-col gap-5 relative`}>
+        <SpeakButton text={learnNarration} className="absolute top-4 right-4" />
         <div>
           <p className="text-xs font-bold uppercase tracking-wide text-blue-400">Learn It</p>
           <p className="text-slate-600 mt-1">Let&apos;s think through one together before you try it yourself.</p>

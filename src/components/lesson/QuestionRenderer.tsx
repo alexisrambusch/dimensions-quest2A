@@ -13,6 +13,7 @@ import { SortNumbers } from "../manipulatives/SortNumbers";
 import { NumberLine } from "../manipulatives/NumberLine";
 import { TenFrame } from "../manipulatives/TenFrame";
 import { icon } from "../manipulatives/icons";
+import { SpeakButton } from "../SpeakButton";
 import { CHOICE_BUTTON_IDLE, CHOICE_BUTTON_SELECTED, PRIMARY_BUTTON } from "../ui";
 
 interface Props {
@@ -335,7 +336,10 @@ export function QuestionRenderer({ prompt, onSubmit, disabled }: Props) {
 
   return (
     <div className="flex flex-col items-center gap-6">
-      <p className="text-xl font-semibold text-slate-800 text-center max-w-md">{prompt.text}</p>
+      <div className="flex items-center gap-2 max-w-md">
+        <p className="text-xl font-semibold text-slate-800 text-center flex-1">{prompt.text}</p>
+        <SpeakButton text={prompt.text} />
+      </div>
       {body}
       <button type="button" disabled={disabled || !readyToSubmit} onClick={submit} className={PRIMARY_BUTTON}>
         Check my answer

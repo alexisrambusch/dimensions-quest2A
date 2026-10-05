@@ -12,6 +12,7 @@ import {
   type AssessmentResult,
 } from "@/lib/actions/assessment";
 import { QuestionRenderer } from "./QuestionRenderer";
+import { SpeakButton } from "../SpeakButton";
 import { CARD, PRIMARY_BUTTON, SECONDARY_BUTTON } from "../ui";
 
 interface Props {
@@ -71,7 +72,8 @@ export function AssessmentRunner({ assessmentCode, studentId, title, description
 
   if (stage === "INTRO") {
     return (
-      <div className={`${CARD} max-w-lg mx-auto flex flex-col gap-4 text-center`}>
+      <div className={`${CARD} max-w-lg mx-auto flex flex-col gap-4 text-center relative`}>
+        <SpeakButton text={`${title}. ${description}`} className="absolute top-4 right-4" />
         <p className="text-xs font-bold uppercase tracking-wide text-blue-400">{style === "TEST_A" ? "Test A" : "Test B"}</p>
         <h1 className="text-2xl font-black text-slate-800">{title}</h1>
         <p className="text-slate-600">{description}</p>
