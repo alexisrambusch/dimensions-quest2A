@@ -8,6 +8,7 @@ import { HundredChartTool } from "./tools/HundredChartTool";
 import { PlaceValueCardsTool } from "./tools/PlaceValueCardsTool";
 import { BaseTenBlocksTool } from "./tools/BaseTenBlocksTool";
 import { TenFrameTool } from "./tools/TenFrameTool";
+import { PartPartWholeTool } from "./tools/PartPartWholeTool";
 import { NumberLineTool } from "./tools/NumberLineTool";
 import { RulerTool } from "./tools/RulerTool";
 import { GridPaperTool } from "./tools/GridPaperTool";
@@ -18,6 +19,7 @@ const TOOLS = [
   { key: "placeValue", label: "Place Value Cards", icon: "🗂️", Component: PlaceValueCardsTool },
   { key: "blocks", label: "Base-Ten Blocks", icon: "🧱", Component: BaseTenBlocksTool },
   { key: "tenFrame", label: "Ten-Frames", icon: "🟦", Component: TenFrameTool },
+  { key: "partWhole", label: "Part-Whole", icon: "⭕", Component: PartPartWholeTool },
   { key: "numberLine", label: "Number Line", icon: "📏", Component: NumberLineTool },
   { key: "ruler", label: "Ruler", icon: "📐", Component: RulerTool },
   { key: "grid", label: "Grid Paper", icon: "🧮", Component: GridPaperTool },
