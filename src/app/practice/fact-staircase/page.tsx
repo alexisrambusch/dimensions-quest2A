@@ -12,7 +12,7 @@ export default async function FactStaircasePage() {
   return (
     <main className="flex-1 p-6 max-w-2xl mx-auto w-full flex flex-col gap-6">
       <PracticeHeader title="Fact Staircase" subtitle="Every addition and subtraction fact, in order." />
-      <FactStaircaseClient />
+      <FactStaircaseClient studentId={student.id} />
     </main>
   );
 }

@@ -4,16 +4,21 @@ import { useState } from "react";
 import clsx from "clsx";
 import { PRIMARY_BUTTON, CARD } from "../ui";
 import { buildBoard, pickPrompt, type BoardCell, type FactPrompt, type RollCoverMode, BOARD_SIZE } from "@/lib/practice/rollAndCover";
+import { awardPracticeReward, type PracticeRewardResult } from "@/lib/actions/practiceRewards";
+import { PracticeRewardToast } from "./PracticeRewardToast";
+import { playCorrect, playCoin } from "@/lib/sound";
 
 function startGame(mode: RollCoverMode): { board: BoardCell[]; prompt: FactPrompt | null } {
   const board = buildBoard(mode);
   return { board, prompt: pickPrompt(mode, board) };
 }
 
-export function RollAndCoverClient() {
+export function RollAndCoverClient({ studentId }: { studentId: string }) {
   const [mode, setMode] = useState<RollCoverMode>("multiply");
   const [{ board, prompt }, setState] = useState(() => startGame("multiply"));
   const [wrongId, setWrongId] = useState<number | null>(null);
+  const [reward, setReward] = useState<PracticeRewardResult | null>(null);
+  const [rewardedThisBoard, setRewardedThisBoard] = useState(false);
 
   const covered = board.filter((c) => c.covered).length;
   const won = covered === BOARD_SIZE;
@@ -22,6 +27,8 @@ export function RollAndCoverClient() {
     setMode(next);
     setState(startGame(next));
     setWrongId(null);
+    setReward(null);
+    setRewardedThisBoard(false);
   }
 
   function tapCell(cell: BoardCell) {
@@ -33,6 +40,15 @@ export function RollAndCoverClient() {
     }
     const nextBoard = board.map((c) => (c.id === cell.id ? { ...c, covered: true } : c));
     setState({ board: nextBoard, prompt: pickPrompt(mode, nextBoard) });
+
+    if (nextBoard.filter((c) => c.covered).length === BOARD_SIZE && !rewardedThisBoard) {
+      setRewardedThisBoard(true);
+      playCorrect();
+      awardPracticeReward(studentId, 20, `Roll & Cover: ${mode}`).then((r) => {
+        setReward(r);
+        if (r.coinsAwarded > 0) playCoin();
+      });
+    }
   }
 
   return (
@@ -62,6 +78,7 @@ export function RollAndCoverClient() {
         {won ? (
           <>
             <p className="text-2xl font-black text-emerald-600 text-center">Board cleared! 🎉</p>
+            {reward && <PracticeRewardToast reward={reward} />}
             <button type="button" className={clsx(PRIMARY_BUTTON, "!min-h-11 !py-2 !px-8")} onClick={() => switchMode(mode)}>
               Play again
             </button>

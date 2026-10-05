@@ -4,8 +4,11 @@ import { useState } from "react";
 import clsx from "clsx";
 import { PRIMARY_BUTTON, CARD } from "../ui";
 import { generateMentalMath, MENTAL_MATH_CATEGORIES, type MentalMathCategory, type MentalMathProblem } from "@/lib/practice/mentalMath";
+import { awardPracticeReward, type PracticeRewardResult } from "@/lib/actions/practiceRewards";
+import { PracticeRewardToast } from "./PracticeRewardToast";
+import { playCorrect, playWrong, playCoin } from "@/lib/sound";
 
-export function MentalMathClient() {
+export function MentalMathClient({ studentId }: { studentId: string }) {
   const [category, setCategory] = useState<MentalMathCategory>("addSub10");
   const [problem, setProblem] = useState<MentalMathProblem>(() => generateMentalMath("addSub10"));
   const [value, setValue] = useState("");
@@ -14,12 +17,14 @@ export function MentalMathClient() {
   const [best, setBest] = useState(0);
   const [total, setTotal] = useState(0);
   const [correct, setCorrect] = useState(0);
+  const [reward, setReward] = useState<PracticeRewardResult | null>(null);
 
   function pickCategory(c: MentalMathCategory) {
     setCategory(c);
     setProblem(generateMentalMath(c));
     setValue("");
     setFeedback("idle");
+    setReward(null);
   }
 
   function submit() {
@@ -27,6 +32,7 @@ export function MentalMathClient() {
       setProblem(generateMentalMath(category));
       setValue("");
       setFeedback("idle");
+      setReward(null);
       return;
     }
     if (value === "") return;
@@ -39,8 +45,14 @@ export function MentalMathClient() {
         setBest((b) => Math.max(b, next));
         return next;
       });
+      playCorrect();
+      awardPracticeReward(studentId, 2, "Mental Math Drill").then((r) => {
+        setReward(r);
+        if (r.coinsAwarded > 0) playCoin();
+      });
     } else {
       setStreak(0);
+      playWrong();
     }
     setFeedback(isCorrect ? "correct" : "wrong");
   }
@@ -98,7 +110,12 @@ export function MentalMathClient() {
         />
 
         {feedback === "wrong" && <p className="text-sm font-semibold text-rose-600">Not quite — the answer was {problem.answer}.</p>}
-        {feedback === "correct" && <p className="text-sm font-semibold text-emerald-600">Nice work!</p>}
+        {feedback === "correct" && (
+          <div className="flex flex-col items-center gap-1">
+            <p className="text-sm font-semibold text-emerald-600">Nice work!</p>
+            {reward && <PracticeRewardToast reward={reward} />}
+          </div>
+        )}
 
         <button type="button" className={clsx(PRIMARY_BUTTON, "!min-h-11 !py-2 !px-8")} onClick={submit}>
           {feedback === "idle" ? "Check" : "Next"}

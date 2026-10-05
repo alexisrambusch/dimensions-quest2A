@@ -12,7 +12,7 @@ export default async function ArrowGamePage() {
   return (
     <main className="flex-1 p-6 max-w-2xl mx-auto w-full flex flex-col gap-6">
       <PracticeHeader title="Arrow Game" subtitle="Follow the arrows around the hundred chart." />
-      <ArrowGameClient />
+      <ArrowGameClient studentId={student.id} />
     </main>
   );
 }

@@ -5,13 +5,17 @@ import clsx from "clsx";
 import { PRIMARY_BUTTON, SECONDARY_BUTTON, CARD } from "../ui";
 import { generateArrowProblem, type ArrowProblem } from "@/lib/practice/arrowGame";
 import { MiniHundredChart } from "./MiniHundredChart";
+import { awardPracticeReward, type PracticeRewardResult } from "@/lib/actions/practiceRewards";
+import { PracticeRewardToast } from "./PracticeRewardToast";
+import { playCorrect, playWrong, playCoin } from "@/lib/sound";
 
-export function ArrowGameClient() {
+export function ArrowGameClient({ studentId }: { studentId: string }) {
   const [problem, setProblem] = useState<ArrowProblem>(() => generateArrowProblem());
   const [value, setValue] = useState("");
   const [feedback, setFeedback] = useState<"idle" | "correct" | "wrong">("idle");
   const [showChart, setShowChart] = useState(false);
   const [streak, setStreak] = useState(0);
+  const [reward, setReward] = useState<PracticeRewardResult | null>(null);
 
   const answer = problem.mode === "findEnd" ? problem.end : problem.start;
 
@@ -20,6 +24,7 @@ export function ArrowGameClient() {
     setValue("");
     setFeedback("idle");
     setShowChart(false);
+    setReward(null);
   }
 
   function submit() {
@@ -31,6 +36,15 @@ export function ArrowGameClient() {
     const isCorrect = Number(value) === answer;
     setFeedback(isCorrect ? "correct" : "wrong");
     setStreak((s) => (isCorrect ? s + 1 : 0));
+    if (isCorrect) {
+      playCorrect();
+      awardPracticeReward(studentId, 2, "Arrow Game").then((r) => {
+        setReward(r);
+        if (r.coinsAwarded > 0) playCoin();
+      });
+    } else {
+      playWrong();
+    }
   }
 
   const highlights: Record<number, string> = {
@@ -78,7 +92,12 @@ export function ArrowGameClient() {
         />
 
         {feedback === "wrong" && <p className="text-sm font-semibold text-rose-600">Not quite — the answer was {answer}.</p>}
-        {feedback === "correct" && <p className="text-sm font-semibold text-emerald-600">Nailed it!</p>}
+        {feedback === "correct" && (
+          <div className="flex flex-col items-center gap-1">
+            <p className="text-sm font-semibold text-emerald-600">Nailed it!</p>
+            {reward && <PracticeRewardToast reward={reward} />}
+          </div>
+        )}
 
         <div className="flex gap-3">
           <button type="button" className={clsx(PRIMARY_BUTTON, "!min-h-11 !py-2 !px-8")} onClick={submit}>

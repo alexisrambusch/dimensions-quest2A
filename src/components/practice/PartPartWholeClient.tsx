@@ -4,14 +4,19 @@ import { useState } from "react";
 import clsx from "clsx";
 import { PRIMARY_BUTTON, SECONDARY_BUTTON, CARD } from "../ui";
 import { PartPartWholeDiagram } from "./PartPartWholeDiagram";
+import { awardPracticeReward, type PracticeRewardResult } from "@/lib/actions/practiceRewards";
+import { PracticeRewardToast } from "./PracticeRewardToast";
+import { playCorrect, playCoin } from "@/lib/sound";
 
 type RowStatus = "unchecked" | "correct" | "wrong";
 
-export function PartPartWholeClient() {
+export function PartPartWholeClient({ studentId }: { studentId: string }) {
   const [whole, setWhole] = useState(8);
   const [inputs, setInputs] = useState<Record<number, string>>({});
   const [statuses, setStatuses] = useState<Record<number, RowStatus>>({});
   const [checked, setChecked] = useState(false);
+  const [reward, setReward] = useState<PracticeRewardResult | null>(null);
+  const [rewardedWhole, setRewardedWhole] = useState<number | null>(null);
 
   const combos = Array.from({ length: whole + 1 }, (_, partA) => partA);
 
@@ -20,6 +25,7 @@ export function PartPartWholeClient() {
     setInputs({});
     setStatuses({});
     setChecked(false);
+    setReward(null);
   }
 
   function setInput(partA: number, v: string) {
@@ -35,6 +41,15 @@ export function PartPartWholeClient() {
     }
     setStatuses(next);
     setChecked(true);
+
+    if (combos.every((partA) => next[partA] === "correct") && rewardedWhole !== whole) {
+      setRewardedWhole(whole);
+      playCorrect();
+      awardPracticeReward(studentId, 20, `Part-Part-Whole: ${whole}`).then((r) => {
+        setReward(r);
+        if (r.coinsAwarded > 0) playCoin();
+      });
+    }
   }
 
   const correctCount = combos.filter((partA) => statuses[partA] === "correct").length;
@@ -89,9 +104,12 @@ export function PartPartWholeClient() {
         </div>
 
         {checked && (
-          <p className={clsx("text-center font-bold", allCorrect ? "text-emerald-600" : "text-slate-500")}>
-            {allCorrect ? `You found all ${combos.length} ways to make ${whole}! 🎉` : `${correctCount} of ${combos.length} correct — fix the red ones and check again.`}
-          </p>
+          <div className="flex flex-col items-center gap-1">
+            <p className={clsx("text-center font-bold", allCorrect ? "text-emerald-600" : "text-slate-500")}>
+              {allCorrect ? `You found all ${combos.length} ways to make ${whole}! 🎉` : `${correctCount} of ${combos.length} correct — fix the red ones and check again.`}
+            </p>
+            {reward && <PracticeRewardToast reward={reward} />}
+          </div>
         )}
       </div>
     </div>

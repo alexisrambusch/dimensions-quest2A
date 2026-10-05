@@ -4,6 +4,9 @@ import { useMemo, useState } from "react";
 import clsx from "clsx";
 import { PRIMARY_BUTTON, SECONDARY_BUTTON, CARD } from "../ui";
 import { buildStaircase, type StaircaseOp, type StaircaseRange } from "@/lib/practice/staircase";
+import { awardPracticeReward, type PracticeRewardResult } from "@/lib/actions/practiceRewards";
+import { PracticeRewardToast } from "./PracticeRewardToast";
+import { playCorrect, playCoin } from "@/lib/sound";
 
 type CellStatus = "unchecked" | "correct" | "wrong";
 
@@ -13,12 +16,14 @@ function key(col: number, row: number): string {
   return `${col}-${row}`;
 }
 
-export function FactStaircaseClient() {
+export function FactStaircaseClient({ studentId }: { studentId: string }) {
   const [range, setRange] = useState<StaircaseRange>(10);
   const [op, setOp] = useState<StaircaseOp>("add");
   const [inputs, setInputs] = useState<Record<string, string>>({});
   const [statuses, setStatuses] = useState<Record<string, CellStatus>>({});
   const [checked, setChecked] = useState(false);
+  const [reward, setReward] = useState<PracticeRewardResult | null>(null);
+  const [rewardedKey, setRewardedKey] = useState<string | null>(null);
 
   const { cells, cols } = useMemo(() => buildStaircase(range, op), [range, op]);
 
@@ -28,6 +33,7 @@ export function FactStaircaseClient() {
     setInputs({});
     setStatuses({});
     setChecked(false);
+    setReward(null);
   }
 
   function setInput(k: string, v: string) {
@@ -43,6 +49,16 @@ export function FactStaircaseClient() {
     }
     setStatuses(next);
     setChecked(true);
+
+    const tableKey = `${range}-${op}`;
+    if (cells.every((c) => next[key(c.col, c.row)] === "correct") && rewardedKey !== tableKey) {
+      setRewardedKey(tableKey);
+      playCorrect();
+      awardPracticeReward(studentId, 20, `Fact Staircase: ${op} within ${range}`).then((r) => {
+        setReward(r);
+        if (r.coinsAwarded > 0) playCoin();
+      });
+    }
   }
 
   const correctCount = cells.filter((c) => statuses[key(c.col, c.row)] === "correct").length;
@@ -132,9 +148,12 @@ export function FactStaircaseClient() {
         </div>
 
         {checked && (
-          <p className={clsx("text-center font-bold", correctCount === cells.length ? "text-emerald-600" : "text-slate-500")}>
-            {correctCount === cells.length ? `Perfect! All ${cells.length} facts correct! 🎉` : `${correctCount} of ${cells.length} correct so far.`}
-          </p>
+          <div className="flex flex-col items-center gap-1">
+            <p className={clsx("text-center font-bold", correctCount === cells.length ? "text-emerald-600" : "text-slate-500")}>
+              {correctCount === cells.length ? `Perfect! All ${cells.length} facts correct! 🎉` : `${correctCount} of ${cells.length} correct so far.`}
+            </p>
+            {reward && <PracticeRewardToast reward={reward} />}
+          </div>
         )}
       </div>
     </div>

@@ -12,7 +12,7 @@ export default async function PartPartWholePage() {
   return (
     <main className="flex-1 p-6 max-w-2xl mx-auto w-full flex flex-col gap-6">
       <PracticeHeader title="Part-Part-Whole" subtitle="Every way to split a number into two parts." />
-      <PartPartWholeClient />
+      <PartPartWholeClient studentId={student.id} />
     </main>
   );
 }

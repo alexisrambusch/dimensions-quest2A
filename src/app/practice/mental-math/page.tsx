@@ -12,7 +12,7 @@ export default async function MentalMathPage() {
   return (
     <main className="flex-1 p-6 max-w-2xl mx-auto w-full flex flex-col gap-6">
       <PracticeHeader title="Mental Math Drills" subtitle="Quick-fire facts, one at a time." />
-      <MentalMathClient />
+      <MentalMathClient studentId={student.id} />
     </main>
   );
 }
