@@ -11,11 +11,19 @@ interface Props {
 }
 
 const TRACK_WIDTH = 320;
+// Below this spacing, numeric labels start to overlap each other, so only every
+// Nth tick gets a label once there are more ticks than the track can fit legibly.
+const MIN_LABEL_SPACING = 34;
+const NICE_LABEL_STRIDES = [1, 2, 5, 10, 20, 25, 50, 100];
 
 export function NumberLine({ min, max, step, value, onChange }: Props) {
   const trackRef = useRef<HTMLDivElement>(null);
   const [hover, setHover] = useState<number | null>(null);
   const ticks = Array.from({ length: Math.round((max - min) / step) + 1 }, (_, i) => min + i * step);
+  const pixelsPerTick = ticks.length > 1 ? TRACK_WIDTH / (ticks.length - 1) : TRACK_WIDTH;
+  const labelStride =
+    NICE_LABEL_STRIDES.find((s) => pixelsPerTick * s >= MIN_LABEL_SPACING) ?? NICE_LABEL_STRIDES[NICE_LABEL_STRIDES.length - 1];
+  const lastTickIndex = ticks.length - 1;
 
   function valueFromClientX(clientX: number): number {
     const rect = trackRef.current!.getBoundingClientRect();
@@ -39,12 +47,15 @@ export function NumberLine({ min, max, step, value, onChange }: Props) {
         onTouchStart={(e) => onChange(valueFromClientX(e.touches[0].clientX))}
       >
         <div className="absolute top-8 left-0 right-0 h-1.5 bg-slate-300 rounded-full" />
-        {ticks.map((t) => (
-          <div key={t} className="absolute top-6 flex flex-col items-center" style={{ left: `${toPercent(t)}%`, transform: "translateX(-50%)" }}>
-            <div className="w-0.5 h-5 bg-slate-500" />
-            <span className="text-xs text-slate-500 mt-0.5 whitespace-nowrap">{t}</span>
-          </div>
-        ))}
+        {ticks.map((t, i) => {
+          const labeled = i % labelStride === 0 || i === lastTickIndex;
+          return (
+            <div key={t} className="absolute top-6 flex flex-col items-center" style={{ left: `${toPercent(t)}%`, transform: "translateX(-50%)" }}>
+              <div className={labeled ? "w-0.5 h-5 bg-slate-500" : "w-0.5 h-3 bg-slate-300"} />
+              {labeled && <span className="text-xs text-slate-500 mt-0.5 whitespace-nowrap">{t}</span>}
+            </div>
+          );
+        })}
         {hover !== null && value === undefined && (
           <div
             className="absolute top-8 h-4 w-4 -mt-[7px] rounded-full bg-blue-200 border-2 border-blue-400"
