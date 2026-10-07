@@ -53,6 +53,10 @@ export default async function ProfilesPage() {
               </label>
             ))}
           </div>
+          <label className="flex items-center justify-center gap-2 cursor-pointer rounded-xl border-2 border-slate-200 px-3 py-2">
+            <input type="checkbox" name="isPreschool" className="h-5 w-5 accent-blue-600" />
+            <span className="text-sm font-semibold text-slate-600">This is a preschooler (ages 3-5) — Preschool Play track</span>
+          </label>
           {grades.length > 1 && (
             <div className="flex flex-col gap-2">
               <span className="text-sm font-semibold text-slate-600 text-center">Which curriculum?</span>

@@ -8,14 +8,13 @@ const COLORS = ["#1e293b", "#dc2626", "#2563eb", "#16a34a", "#f59e0b"];
 interface Props {
   /** Rendered behind the canvas — a faint guide to trace, or nothing for free drawing. */
   guide?: React.ReactNode;
-  /** Shows a small color picker above the canvas (used for free-drawing journal pages, not plain tracing). */
   showColorPicker?: boolean;
   width?: number;
   height?: number;
   onChange?: (dataUrl: string) => void;
 }
 
-/** A finger/mouse-drawable canvas over an optional guide picture — shared by guided tracing and free journal drawing. Purely a motor-practice surface: nothing here is graded. */
+/** A finger/mouse-drawable canvas over an optional guide picture — purely a motor-practice surface: nothing here is graded. */
 export function DrawSurface({ guide, showColorPicker, width = 320, height = 220, onChange }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const drawingRef = useRef(false);

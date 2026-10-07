@@ -8,9 +8,6 @@ import { divisionGenerators } from "./generators/division";
 import { mixedFactGenerators } from "./generators/mixedFacts";
 import { numberLineGenerators } from "./generators/numberLine";
 import { grade1NumberGenerators } from "./generators/grade1Numbers";
-import { prekNumberGenerators } from "./generators/prekNumbers";
-import { prekLiteracyGenerators } from "./generators/prekLiteracy";
-import { prekScienceGenerators } from "./generators/prekScience";
 
 const ALL_GENERATORS: Generator[] = [
   ...placeValueGenerators,
@@ -22,9 +19,6 @@ const ALL_GENERATORS: Generator[] = [
   ...mixedFactGenerators,
   ...numberLineGenerators,
   ...grade1NumberGenerators,
-  ...prekNumberGenerators,
-  ...prekLiteracyGenerators,
-  ...prekScienceGenerators,
 ];
 
 const REGISTRY = new Map<string, Generator>(ALL_GENERATORS.map((g) => [g.id, g]));

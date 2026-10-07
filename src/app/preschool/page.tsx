@@ -1,9 +1,9 @@
 import Link from "next/link";
-import clsx from "clsx";
 import { redirect } from "next/navigation";
-import { getActiveStudent } from "@/lib/actions/students";
-import { listPreschoolWeeks } from "@/lib/actions/preschool";
-import { CARD } from "@/components/ui";
+import { getActiveStudent, switchProfileAction } from "@/lib/actions/students";
+import { PlayRunner } from "@/components/preschool/PlayRunner";
+import { icon } from "@/components/manipulatives/icons";
+import { levelForXp } from "@/lib/gamification/level";
 
 export const dynamic = "force-dynamic";
 
@@ -11,55 +11,32 @@ export default async function PreschoolPage() {
   const student = await getActiveStudent();
   if (!student) redirect("/profiles");
 
-  const weeks = await listPreschoolWeeks(student.id);
-
   return (
     <main className="flex-1 p-6 max-w-2xl mx-auto w-full flex flex-col gap-6">
       <header className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-black text-blue-800">Preschool Program</h1>
-          <p className="text-sm text-slate-500">A short lesson every day across reading, math, science, and more.</p>
+        <div className="flex items-center gap-3">
+          <span className="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-blue-200 to-cyan-100 text-3xl shadow-sm ring-2 ring-white">
+            {icon(student.avatarKey)}
+          </span>
+          <div>
+            <h1 className="text-xl font-black text-blue-800">{student.name}&apos;s Play Time</h1>
+            <p className="text-xs text-blue-500 font-semibold">
+              Level {levelForXp(student.totalXp)} · {student.totalXp} XP · {student.coins} 🪙
+            </p>
+          </div>
         </div>
-        <Link href="/map" className="text-sm font-semibold text-slate-500 hover:text-blue-700">
-          Back to map
-        </Link>
+        <form action={switchProfileAction}>
+          <button type="submit" className="text-sm font-semibold text-slate-500 hover:text-blue-700">
+            Switch profile
+          </button>
+        </form>
       </header>
 
-      {weeks.map((week) => (
-        <div key={week.id} className={`${CARD} flex flex-col gap-4`}>
-          <div>
-            <p className="text-xs font-bold uppercase tracking-wide text-blue-400">Week {week.number}</p>
-            <h2 className="text-lg font-black text-slate-800">{week.theme}</h2>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-5 gap-2">
-            {week.days.map((day) => {
-              const content = (
-                <div
-                  className={clsx(
-                    "rounded-xl border-2 p-3 flex flex-col items-center gap-1 text-center transition-transform touch-manipulation",
-                    day.complete && "border-emerald-400 bg-emerald-50",
-                    !day.complete && day.unlocked && "border-blue-300 bg-blue-50 hover:-translate-y-0.5",
-                    !day.unlocked && "border-slate-200 bg-slate-50 opacity-50",
-                  )}
-                >
-                  <span className="text-xs font-bold text-slate-500">Day {day.dayNumber}</span>
-                  <span className="text-sm font-semibold text-slate-700">{day.title}</span>
-                  <span className="text-[11px] text-slate-400">
-                    {day.complete ? "✓ Done" : day.unlocked ? `${day.completedCount}/${day.activityCount}` : "Locked"}
-                  </span>
-                </div>
-              );
-              return day.unlocked ? (
-                <Link key={day.id} href={`/preschool/day/${day.id}`} className="active:scale-95 transition-transform">
-                  {content}
-                </Link>
-              ) : (
-                <div key={day.id}>{content}</div>
-              );
-            })}
-          </div>
-        </div>
-      ))}
+      <PlayRunner studentId={student.id} studentName={student.name} />
+
+      <Link href="/parent" className="text-xs text-slate-400 hover:text-blue-600 text-center">
+        Parent Dashboard
+      </Link>
     </main>
   );
 }

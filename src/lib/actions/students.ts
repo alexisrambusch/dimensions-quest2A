@@ -18,17 +18,21 @@ export async function listGrades() {
   return prisma.grade.findMany({ orderBy: { order: "asc" } });
 }
 
-export async function createStudent(name: string, avatarKey: string, gradeId?: string) {
+export async function createStudent(name: string, avatarKey: string, gradeId?: string, isPreschool?: boolean) {
   const parent = await prisma.parent.upsert({
     where: { email: HOUSEHOLD_PARENT_EMAIL },
     update: {},
     create: { email: HOUSEHOLD_PARENT_EMAIL, name: "Parent" },
   });
-  const grade = gradeId
-    ? await prisma.grade.findUnique({ where: { id: gradeId } })
-    : await prisma.grade.findFirst({ orderBy: { order: "asc" } });
+  // A preschool profile follows the separate skill/mastery-driven preschool
+  // system, not the Grade -> Chapter -> Lesson math track, so it gets no grade.
+  const grade = isPreschool
+    ? null
+    : gradeId
+      ? await prisma.grade.findUnique({ where: { id: gradeId } })
+      : await prisma.grade.findFirst({ orderBy: { order: "asc" } });
   const student = await prisma.student.create({
-    data: { parentId: parent.id, name: name.trim() || "Learner", avatarKey, currentGradeId: grade?.id },
+    data: { parentId: parent.id, name: name.trim() || "Learner", avatarKey, currentGradeId: grade?.id, isPreschool: !!isPreschool },
   });
   return student;
 }
@@ -65,17 +69,19 @@ export async function deleteStudent(studentId: string) {
 
 export async function selectStudentAction(studentId: string) {
   await setActiveStudent(studentId);
-  redirect("/map");
+  const student = await prisma.student.findUnique({ where: { id: studentId }, select: { isPreschool: true } });
+  redirect(student?.isPreschool ? "/preschool" : "/map");
 }
 
 export async function createStudentAction(formData: FormData) {
   const name = String(formData.get("name") ?? "").trim();
   const avatarKey = String(formData.get("avatarKey") ?? "fox");
   const gradeId = String(formData.get("gradeId") ?? "") || undefined;
+  const isPreschool = formData.get("isPreschool") === "on";
   if (!name) return;
-  const student = await createStudent(name, avatarKey, gradeId);
+  const student = await createStudent(name, avatarKey, gradeId, isPreschool);
   await setActiveStudent(student.id);
-  redirect("/map");
+  redirect(isPreschool ? "/preschool" : "/map");
 }
 
 export async function switchProfileAction() {

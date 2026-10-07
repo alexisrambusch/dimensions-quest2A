@@ -1,240 +1,190 @@
 "use server";
 
 import { prisma } from "@/lib/prisma";
-import { generateInstance, validateResponse } from "@/lib/math-engine/registry";
-import type { RenderedPrompt } from "@/lib/math-engine/types";
 import { awardXp } from "@/lib/mastery/engine";
 import { checkAndAwardAchievements } from "@/lib/gamification/engine";
+import { levelForScore, PREREQUISITE_READY_LEVELS, CHECK_READY_LEVELS } from "@/lib/preschool/mastery";
+import { PreschoolMasteryLevel } from "@/generated/prisma/enums";
 import type {
-  ExperimentContent,
-  JournalContent,
-  MorningRoutineContent,
-  MovementBreakContent,
-  ParentActivityContent,
-  QuestionContent,
-  ReadAloudContent,
-  SelScenarioContent,
+  DragSortContent,
+  HuntContent,
+  MatchPairsContent,
+  StickerCountContent,
+  TapAnswerContent,
   TraceContent,
 } from "@/lib/preschool/types";
 
-const QUESTION_XP = 5;
-const ACTIVITY_XP = 3;
-const DAY_COMPLETE_XP = 20;
-
-export interface PreschoolDaySummary {
-  id: string;
-  dayNumber: number;
-  title: string;
-  activityCount: number;
-  completedCount: number;
-  requiredCount: number;
-  requiredCompletedCount: number;
-  complete: boolean;
-  unlocked: boolean;
-}
-
-export interface PreschoolWeekSummary {
-  id: string;
-  number: number;
-  theme: string;
-  days: PreschoolDaySummary[];
-}
-
-/** All weeks with per-day completion and lock status for this student — the preschool equivalent of getMissionMap. */
-export async function listPreschoolWeeks(studentId: string): Promise<PreschoolWeekSummary[]> {
-  const weeks = await prisma.preschoolWeek.findMany({
-    orderBy: { number: "asc" },
-    include: {
-      days: {
-        orderBy: { dayNumber: "asc" },
-        include: {
-          activities: {
-            include: { progress: { where: { studentId } } },
-          },
-        },
-      },
-    },
-  });
-
-  const result: PreschoolWeekSummary[] = [];
-  let previousDayComplete = true; // Week 1 Day 1 is always unlocked
-
-  for (const week of weeks) {
-    const days: PreschoolDaySummary[] = [];
-    for (const day of week.days) {
-      const required = day.activities.filter((a) => !a.optional);
-      const requiredCompleted = required.filter((a) => a.progress.length > 0);
-      const completed = day.activities.filter((a) => a.progress.length > 0);
-      const complete = required.length > 0 && requiredCompleted.length === required.length;
-      days.push({
-        id: day.id,
-        dayNumber: day.dayNumber,
-        title: day.title,
-        activityCount: day.activities.length,
-        completedCount: completed.length,
-        requiredCount: required.length,
-        requiredCompletedCount: requiredCompleted.length,
-        complete,
-        unlocked: previousDayComplete,
-      });
-      previousDayComplete = complete;
-    }
-    result.push({ id: week.id, number: week.number, theme: week.theme, days });
-  }
-
-  return result;
-}
+const GAME_XP = 4;
+const CHECK_CORRECT_XP = 6;
+const CHECK_INCORRECT_XP = 1;
+const MASTERY_LEVEL_UP_XP = 15;
 
 export type PreschoolActivityForClient =
-  | { id: string; order: number; domain: string; type: "QUESTION"; title: string; instructions: string; optional: boolean; completed: boolean; questionPrompt: RenderedPrompt }
-  | { id: string; order: number; domain: string; type: "SEL_SCENARIO"; title: string; instructions: string; optional: boolean; completed: boolean; content: SelScenarioContent }
-  | { id: string; order: number; domain: string; type: "TRACE"; title: string; instructions: string; optional: boolean; completed: boolean; content: TraceContent }
-  | { id: string; order: number; domain: string; type: "EXPERIMENT"; title: string; instructions: string; optional: boolean; completed: boolean; content: ExperimentContent }
-  | { id: string; order: number; domain: string; type: "READ_ALOUD"; title: string; instructions: string; optional: boolean; completed: boolean; content: ReadAloudContent }
-  | { id: string; order: number; domain: string; type: "JOURNAL"; title: string; instructions: string; optional: boolean; completed: boolean; content: JournalContent }
-  | { id: string; order: number; domain: string; type: "PARENT_ACTIVITY"; title: string; instructions: string; optional: boolean; completed: boolean; content: ParentActivityContent }
-  | { id: string; order: number; domain: string; type: "MOVEMENT_BREAK"; title: string; instructions: string; optional: boolean; completed: boolean; content: MovementBreakContent }
-  | { id: string; order: number; domain: string; type: "MORNING_ROUTINE"; title: string; instructions: string; optional: boolean; completed: boolean; content: MorningRoutineContent };
+  | { id: string; code: string; skillCode: string; skillTitle: string; domain: string; engine: "hunt"; title: string; instructions: string; isCheck: boolean; content: HuntContent }
+  | { id: string; code: string; skillCode: string; skillTitle: string; domain: string; engine: "stickerCount"; title: string; instructions: string; isCheck: boolean; content: StickerCountContent }
+  | { id: string; code: string; skillCode: string; skillTitle: string; domain: string; engine: "dragSort"; title: string; instructions: string; isCheck: boolean; content: DragSortContent }
+  | { id: string; code: string; skillCode: string; skillTitle: string; domain: string; engine: "matchPairs"; title: string; instructions: string; isCheck: boolean; content: MatchPairsContent }
+  | { id: string; code: string; skillCode: string; skillTitle: string; domain: string; engine: "trace"; title: string; instructions: string; isCheck: boolean; content: TraceContent }
+  | { id: string; code: string; skillCode: string; skillTitle: string; domain: string; engine: "tapAnswer"; title: string; instructions: string; isCheck: boolean; content: TapAnswerContent };
 
-export interface PreschoolDayForClient {
-  id: string;
-  dayNumber: number;
-  title: string;
-  weekNumber: number;
-  weekTheme: string;
-  activities: PreschoolActivityForClient[];
+function substituteStudentName<T>(content: T, studentName: string): T {
+  return JSON.parse(JSON.stringify(content).replaceAll("__STUDENT_NAME__", studentName));
 }
 
-/** Builds the rendered prompt for a QUESTION activity, merging in anything the generator needs from the student's own profile (currently just their name). The activity id doubles as the seed, so re-visiting a day shows the same instance rather than a new random one each time. */
-async function renderQuestionActivity(activityId: string, content: QuestionContent, studentId: string): Promise<RenderedPrompt> {
-  const params = { ...content.params };
-  if (content.generatorId === "prek.name.recognize") {
-    const student = await prisma.student.findUniqueOrThrow({ where: { id: studentId }, select: { name: true } });
-    params.studentName = student.name;
+function formatActivity(
+  activity: { id: string; code: string; engine: string; title: string; instructions: string; isCheck: boolean; contentJson: string },
+  skill: { code: string; title: string; domain: string },
+  studentName: string,
+): PreschoolActivityForClient {
+  const content = substituteStudentName(JSON.parse(activity.contentJson), studentName);
+  return {
+    id: activity.id,
+    code: activity.code,
+    skillCode: skill.code,
+    skillTitle: skill.title,
+    domain: skill.domain,
+    engine: activity.engine as PreschoolActivityForClient["engine"],
+    title: activity.title,
+    instructions: activity.instructions,
+    isCheck: activity.isCheck,
+    content,
+  } as PreschoolActivityForClient;
+}
+
+/**
+ * Picks the single best next activity for this student, purely from current
+ * skill mastery — there is no week/day position. A skill becomes eligible
+ * once every prerequisite is at least PRACTICING; within an eligible skill,
+ * ungraded teaching games are always served before any graded check, and a
+ * check only enters the rotation once the skill itself has reached
+ * PRACTICING (mixed in ~30% of the time after that, never exclusively).
+ */
+export async function getNextPreschoolActivity(studentId: string): Promise<PreschoolActivityForClient | null> {
+  const [skills, masteryRows, student] = await Promise.all([
+    prisma.preschoolSkill.findMany({ include: { activities: true } }),
+    prisma.studentPreschoolMastery.findMany({ where: { studentId } }),
+    prisma.student.findUniqueOrThrow({ where: { id: studentId }, select: { name: true } }),
+  ]);
+
+  const masteryBySkillId = new Map(masteryRows.map((m) => [m.skillId, m]));
+  const levelByCode = new Map(skills.map((s) => [s.code, masteryBySkillId.get(s.id)?.level ?? PreschoolMasteryLevel.NOT_STARTED]));
+
+  function prereqsReady(skill: (typeof skills)[number]): boolean {
+    const codes = JSON.parse(skill.prerequisiteCodes) as string[];
+    return codes.every((c) => PREREQUISITE_READY_LEVELS.includes(levelByCode.get(c) ?? PreschoolMasteryLevel.NOT_STARTED));
   }
-  const instance = generateInstance(content.generatorId, activityId, content.difficulty, params);
-  return instance.prompt;
-}
 
-/** A day's full activity list, ready to render — questions pre-generated, everything else parsed from its stored JSON. */
-export async function getPreschoolDay(dayId: string, studentId: string): Promise<PreschoolDayForClient> {
-  const day = await prisma.preschoolDay.findUniqueOrThrow({
-    where: { id: dayId },
-    include: {
-      week: true,
-      activities: { orderBy: { order: "asc" }, include: { progress: { where: { studentId } } } },
-    },
-  });
+  const candidates = skills.filter((s) => s.activities.length > 0 && prereqsReady(s) && (masteryBySkillId.get(s.id)?.level ?? PreschoolMasteryLevel.NOT_STARTED) !== PreschoolMasteryLevel.MASTERED);
+  if (candidates.length === 0) return null;
 
-  const activities: PreschoolActivityForClient[] = await Promise.all(
-    day.activities.map(async (a) => {
-      const base = {
-        id: a.id,
-        order: a.order,
-        domain: a.domain,
-        title: a.title,
-        instructions: a.instructions,
-        optional: a.optional,
-        completed: a.progress.length > 0,
-      };
-      if (a.type === "QUESTION") {
-        const content = JSON.parse(a.contentJson) as QuestionContent;
-        return { ...base, type: "QUESTION", questionPrompt: await renderQuestionActivity(a.id, content, studentId) };
-      }
-      return { ...base, type: a.type, content: JSON.parse(a.contentJson) } as PreschoolActivityForClient;
-    }),
+  candidates.sort((a, b) => (masteryBySkillId.get(a.id)?.score ?? 0) - (masteryBySkillId.get(b.id)?.score ?? 0));
+  const reviewPool = candidates.filter((s) => CHECK_READY_LEVELS.includes(masteryBySkillId.get(s.id)?.level ?? PreschoolMasteryLevel.NOT_STARTED));
+  const chosenSkill = reviewPool.length > 0 && Math.random() < 0.25 ? reviewPool[Math.floor(Math.random() * reviewPool.length)] : candidates[0];
+
+  const skillLevel = masteryBySkillId.get(chosenSkill.id)?.level ?? PreschoolMasteryLevel.NOT_STARTED;
+  const checkReady = CHECK_READY_LEVELS.includes(skillLevel);
+
+  const attempted = new Set(
+    (
+      await prisma.studentPreschoolAttempt.findMany({
+        where: { studentId, activityId: { in: chosenSkill.activities.map((a) => a.id) } },
+        select: { activityId: true },
+      })
+    ).map((a) => a.activityId),
   );
 
-  return { id: day.id, dayNumber: day.dayNumber, title: day.title, weekNumber: day.week.number, weekTheme: day.week.theme, activities };
+  function pick(pool: (typeof chosenSkill.activities)) {
+    const unseen = pool.filter((a) => !attempted.has(a.id));
+    const list = unseen.length > 0 ? unseen : pool;
+    return list[Math.floor(Math.random() * list.length)];
+  }
+
+  const games = [...chosenSkill.activities].filter((a) => !a.isCheck).sort((a, b) => a.difficulty - b.difficulty);
+  const checks = chosenSkill.activities.filter((a) => a.isCheck);
+
+  let activity;
+  if (!checkReady || games.length === 0) {
+    activity = games.find((a) => !attempted.has(a.id)) ?? games[0] ?? checks[0];
+  } else {
+    activity = Math.random() < 0.3 && checks.length > 0 ? pick(checks) : pick(games.length > 0 ? games : checks);
+  }
+  if (!activity) return null;
+
+  return formatActivity(activity, chosenSkill, student.name);
 }
 
-export interface PreschoolActivityResult {
-  correct?: boolean;
-  explanation?: string;
+export interface PreschoolAttemptResult {
   xpAwarded: number;
   coinsAwarded: number;
   leveledUp: boolean;
   newLevel: number;
   newBadges: Array<{ code: string; title: string; icon: string }>;
-  dayComplete: boolean;
+  skillTitle: string;
+  masteryLevel: PreschoolMasteryLevel | null;
+  masteryLeveledUp: boolean;
 }
 
-/** Marks an activity done (idempotent — revisiting an already-completed activity awards no extra XP) and, for QUESTION activities, grades the response. */
-export async function completePreschoolActivity(studentId: string, activityId: string, response?: unknown): Promise<PreschoolActivityResult> {
-  const activity = await prisma.preschoolActivity.findUniqueOrThrow({
-    where: { id: activityId },
-    include: { day: { include: { activities: true } } },
+/** Records one attempt. `correct` is null for an ungraded teaching game (always counts as a successful rep); for a graded check, only a correct answer counts toward mastery. */
+export async function recordPreschoolAttempt(studentId: string, activityId: string, correct: boolean | null, response?: unknown): Promise<PreschoolAttemptResult> {
+  const activity = await prisma.preschoolActivity.findUniqueOrThrow({ where: { id: activityId }, include: { skill: true } });
+
+  await prisma.studentPreschoolAttempt.create({
+    data: { studentId, activityId, correct, responseJson: response !== undefined ? JSON.stringify(response) : null },
   });
 
-  const already = await prisma.studentActivityProgress.findUnique({
-    where: { studentId_activityId: { studentId, activityId } },
-  });
+  const xpAwarded = activity.isCheck ? (correct ? CHECK_CORRECT_XP : CHECK_INCORRECT_XP) : GAME_XP;
+  const xpResult = await awardXp(prisma, studentId, xpAwarded, `Preschool: ${activity.title}`);
+  let coinsAwarded = xpResult.coinsAwarded;
+  let leveledUp = xpResult.leveledUp;
+  let newLevel = xpResult.newLevel;
 
-  let correct: boolean | undefined;
-  let explanation: string | undefined;
-
-  if (activity.type === "QUESTION") {
-    const content = JSON.parse(activity.contentJson) as QuestionContent;
-    const params = { ...content.params };
-    if (content.generatorId === "prek.name.recognize") {
-      const student = await prisma.student.findUniqueOrThrow({ where: { id: studentId }, select: { name: true } });
-      params.studentName = student.name;
+  let masteryLevel: PreschoolMasteryLevel | null = null;
+  let masteryLeveledUp = false;
+  const countsTowardMastery = !activity.isCheck || correct === true;
+  if (countsTowardMastery) {
+    const existing = await prisma.studentPreschoolMastery.findUnique({ where: { studentId_skillId: { studentId, skillId: activity.skillId } } });
+    const prevLevel = existing?.level ?? PreschoolMasteryLevel.NOT_STARTED;
+    const newScore = (existing?.score ?? 0) + activity.masteryWeight;
+    const computedLevel = levelForScore(newScore);
+    await prisma.studentPreschoolMastery.upsert({
+      where: { studentId_skillId: { studentId, skillId: activity.skillId } },
+      update: { score: newScore, level: computedLevel },
+      create: { studentId, skillId: activity.skillId, score: newScore, level: computedLevel },
+    });
+    masteryLevel = computedLevel;
+    masteryLeveledUp = computedLevel !== prevLevel;
+    if (masteryLeveledUp) {
+      const bonus = await awardXp(prisma, studentId, MASTERY_LEVEL_UP_XP, `Mastery up: ${activity.skill.title} -> ${computedLevel}`);
+      coinsAwarded += bonus.coinsAwarded;
+      leveledUp = leveledUp || bonus.leveledUp;
+      newLevel = bonus.leveledUp ? bonus.newLevel : newLevel;
     }
-    const instance = generateInstance(content.generatorId, activityId, content.difficulty, params);
-    const result = validateResponse(content.generatorId, response, instance.answer, instance.meta);
-    correct = result.correct;
-    explanation = instance.answer.explanation;
   }
 
-  const required = activity.day.activities.filter((a) => !a.optional);
-  let dayWasCompleteBefore = false;
-  if (!already) {
-    const beforeRows = await prisma.studentActivityProgress.findMany({
-      where: { studentId, activityId: { in: required.map((a) => a.id) } },
-    });
-    dayWasCompleteBefore = required.length > 0 && beforeRows.length === required.length;
+  const badgeResult = await checkAndAwardAchievements(prisma, studentId);
+  coinsAwarded += badgeResult.coinsAwarded;
+  leveledUp = leveledUp || badgeResult.leveledUp;
+  newLevel = badgeResult.leveledUp ? badgeResult.newLevel : newLevel;
 
-    await prisma.studentActivityProgress.create({
-      data: { studentId, activityId, responseJson: response !== undefined ? JSON.stringify(response) : null },
-    });
-  }
+  return { xpAwarded, coinsAwarded, leveledUp, newLevel, newBadges: badgeResult.newBadges, skillTitle: activity.skill.title, masteryLevel, masteryLeveledUp };
+}
 
-  let xpAwarded = 0;
-  let coinsAwarded = 0;
-  let leveledUp = false;
-  let newLevel = 0;
-  let newBadges: Array<{ code: string; title: string; icon: string }> = [];
+export interface PreschoolSkillProgress {
+  code: string;
+  title: string;
+  domain: string;
+  level: PreschoolMasteryLevel;
+}
 
-  if (!already) {
-    xpAwarded = activity.type === "QUESTION" ? QUESTION_XP : ACTIVITY_XP;
-    const xpResult = await awardXp(prisma, studentId, xpAwarded, `Preschool: ${activity.title}`);
-    coinsAwarded += xpResult.coinsAwarded;
-    leveledUp = xpResult.leveledUp;
-    newLevel = xpResult.newLevel;
-
-    const afterRows = await prisma.studentActivityProgress.findMany({
-      where: { studentId, activityId: { in: required.map((a) => a.id) } },
-    });
-    const dayNowComplete = required.length > 0 && afterRows.length === required.length;
-    if (dayNowComplete && !dayWasCompleteBefore) {
-      const dayXpResult = await awardXp(prisma, studentId, DAY_COMPLETE_XP, `Preschool day complete: ${activity.day.title}`);
-      xpAwarded += DAY_COMPLETE_XP;
-      coinsAwarded += dayXpResult.coinsAwarded;
-      leveledUp = leveledUp || dayXpResult.leveledUp;
-      newLevel = dayXpResult.leveledUp ? dayXpResult.newLevel : newLevel;
-    }
-
-    const badgeResult = await checkAndAwardAchievements(prisma, studentId);
-    coinsAwarded += badgeResult.coinsAwarded;
-    leveledUp = leveledUp || badgeResult.leveledUp;
-    newLevel = badgeResult.leveledUp ? badgeResult.newLevel : newLevel;
-    newBadges = badgeResult.newBadges;
-  }
-
-  const finalProgressRows = await prisma.studentActivityProgress.findMany({
-    where: { studentId, activityId: { in: required.map((a) => a.id) } },
+/** A simple per-skill mastery readout — the seed of a future preschool parent dashboard. */
+export async function getPreschoolProgress(studentId: string): Promise<PreschoolSkillProgress[]> {
+  const skills = await prisma.preschoolSkill.findMany({
+    include: { mastery: { where: { studentId } } },
   });
-  const dayComplete = required.length > 0 && finalProgressRows.length === required.length;
-
-  return { correct, explanation, xpAwarded, coinsAwarded, leveledUp, newLevel, newBadges, dayComplete };
+  return skills.map((s) => ({
+    code: s.code,
+    title: s.title,
+    domain: s.domain,
+    level: s.mastery[0]?.level ?? PreschoolMasteryLevel.NOT_STARTED,
+  }));
 }

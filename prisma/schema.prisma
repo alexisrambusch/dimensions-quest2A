@@ -35,22 +35,28 @@ model Student {
   currentGradeId String?
   currentGrade   Grade?  @relation(fields: [currentGradeId], references: [id])
 
+  // A preschool profile follows the separate skill/mastery-driven preschool
+  // system (below) instead of the Grade -> Chapter -> Lesson math track, and
+  // has no currentGradeId.
+  isPreschool Boolean @default(false)
+
   totalXp      Int       @default(0)
   coins        Int       @default(0) // spent in the shop; minted automatically whenever totalXp crosses a level threshold
   streakDays   Int       @default(0)
   lastActiveAt DateTime?
 
-  lessonProgress        LessonProgress[]
-  attempts              Attempt[]
-  skillMastery          SkillMastery[]
-  factMastery           FactMastery[]
-  sessions              LearningSession[]
-  misconceptions        Misconception[]
-  xpEvents              XpEvent[]
-  achievements          StudentAchievement[]
-  assessmentTakes       AssessmentAttempt[]
-  creatures             StudentCreature[]
-  preschoolActivityDone StudentActivityProgress[]
+  lessonProgress     LessonProgress[]
+  attempts           Attempt[]
+  skillMastery       SkillMastery[]
+  factMastery        FactMastery[]
+  sessions           LearningSession[]
+  misconceptions     Misconception[]
+  xpEvents           XpEvent[]
+  achievements       StudentAchievement[]
+  assessmentTakes    AssessmentAttempt[]
+  creatures          StudentCreature[]
+  preschoolMastery   StudentPreschoolMastery[]
+  preschoolAttempts  StudentPreschoolAttempt[]
 }
 
 // ── Curriculum hierarchy: Grade → Chapter → Lesson → Concept → Skill ─────
@@ -449,80 +455,83 @@ model AssessmentAttempt {
   completedAt  DateTime?
 }
 
-// ── Preschool daily curriculum (36-week kindergarten-readiness program) ──
-// A parallel, separate content system from Grade/Chapter/Lesson above: each
-// day is a short sequence of small activities across many domains (not one
-// skill's concrete-pictorial-abstract progression), so it gets its own
-// simpler tree rather than being forced into the math lesson shape.
+// ── Preschool: skill/mastery-driven kindergarten-readiness program ───────
+// Deliberately NOT a Grade -> Chapter -> Lesson -> calendar tree. A 4-year-
+// old's pacing is set by what she's actually mastered, not by a fixed week
+// number, so the content is just a flat bank of skills (each tagged with
+// which skills must come first) and activities that teach or check one
+// skill each. "What to play next" is computed from PreschoolMastery, not
+// looked up from a week/day position — see src/lib/preschool/nextActivity.ts.
 
-enum CurriculumDomain {
-  MORNING
+enum PreschoolDomain {
   LITERACY
+  PHONICS
+  PHONOLOGICAL_AWARENESS
+  READING
+  WRITING
   MATH
   SCIENCE
   SOCIAL_STUDIES
-  WRITING
-  GAME
-  READ_ALOUD
-  CREATIVE
-  MOVEMENT
-  EXTENSION
+  SEL
 }
 
-enum PreschoolActivityType {
-  QUESTION // reuses the existing math-engine generator + QuestionRenderer
-  SEL_SCENARIO // "what should you do?" branching choice with explanation
-  TRACE // guided trace-over of a letter/number/name, ungraded
-  EXPERIMENT // Ask -> Predict -> Test -> Observe -> Record
-  READ_ALOUD // a recommended book with before/during/after questions
-  JOURNAL // a prompt answered by drawing (saved as an image) or a short pick
-  PARENT_ACTIVITY // an offline card the parent marks done, not app-graded
-  MOVEMENT_BREAK // an offline movement card with a short timer
-  MORNING_ROUTINE // mood check-in + calendar/weather/season widget
+enum PreschoolMasteryLevel {
+  NOT_STARTED
+  INTRODUCED
+  PRACTICING
+  DEVELOPING
+  PROFICIENT
+  MASTERED
 }
 
-model PreschoolWeek {
-  id     String @id @default(cuid())
-  number Int    @unique // 1-36
-  theme  String
-  days   PreschoolDay[]
-}
+model PreschoolSkill {
+  id                String          @id @default(cuid())
+  code              String          @unique // "math.count.subitize.1to5"
+  domain            PreschoolDomain
+  title             String
+  description       String
+  prerequisiteCodes String // JSON string[] of other PreschoolSkill.code values
 
-model PreschoolDay {
-  id         String              @id @default(cuid())
-  weekId     String
-  week       PreschoolWeek       @relation(fields: [weekId], references: [id], onDelete: Cascade)
-  dayNumber  Int // 1-5 (Mon-Fri)
-  title      String
   activities PreschoolActivity[]
-
-  @@unique([weekId, dayNumber])
+  mastery    StudentPreschoolMastery[]
 }
 
 model PreschoolActivity {
-  id           String                     @id @default(cuid())
-  dayId        String
-  day          PreschoolDay               @relation(fields: [dayId], references: [id], onDelete: Cascade)
-  order        Int
-  domain       CurriculumDomain
-  type         PreschoolActivityType
-  title        String
-  instructions String
-  contentJson  String // type-specific payload (see src/lib/preschool/types.ts)
-  optional     Boolean                    @default(false) // skipping an optional activity doesn't block day completion
-  progress     StudentActivityProgress[]
+  id            String  @id @default(cuid())
+  code          String  @unique // "math.count.subitize.1to5.stickercount.1"
+  skillId       String
+  skill         PreschoolSkill @relation(fields: [skillId], references: [id], onDelete: Cascade)
+  engine        String // which game component renders this — "hunt" | "stickerCount" | "dragSort" | "matchPairs" | "trace" | "tapAnswer" | ...
+  title         String
+  instructions  String
+  difficulty    Int     @default(1) // 1..3, served in order within a skill
+  contentJson   String // engine-specific payload (see src/lib/preschool/types.ts)
+  isCheck       Boolean @default(false) // a graded confirmation activity (tapAnswer-style) vs. an ungraded teaching game
+  masteryWeight Int     @default(1) // how many mastery points one successful pass is worth
 
-  @@unique([dayId, order])
+  attempts StudentPreschoolAttempt[]
 }
 
-model StudentActivityProgress {
-  id           String             @id @default(cuid())
+model StudentPreschoolAttempt {
+  id           String            @id @default(cuid())
   studentId    String
-  student      Student            @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  student      Student           @relation(fields: [studentId], references: [id], onDelete: Cascade)
   activityId   String
-  activity     PreschoolActivity  @relation(fields: [activityId], references: [id], onDelete: Cascade)
-  responseJson String? // free-form captured response (journal drawing, SEL choice, trace confirmation, ...)
-  completedAt  DateTime           @default(now())
+  activity     PreschoolActivity @relation(fields: [activityId], references: [id], onDelete: Cascade)
+  correct      Boolean? // null for ungraded teaching games — they always "pass"
+  responseJson String?
+  createdAt    DateTime          @default(now())
+}
 
-  @@unique([studentId, activityId])
+model StudentPreschoolMastery {
+  id        String                @id @default(cuid())
+  studentId String
+  student   Student               @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  skillId   String
+  skill     PreschoolSkill        @relation(fields: [skillId], references: [id], onDelete: Cascade)
+  level     PreschoolMasteryLevel @default(NOT_STARTED)
+  score     Int                   @default(0) // accumulates with each successful attempt; level is derived from thresholds
+  updatedAt DateTime              @updatedAt
+
+  @@unique([studentId, skillId])
 }
