@@ -84,6 +84,10 @@ export function QuestionRenderer({ prompt, onSubmit, disabled }: Props) {
       );
       break;
 
+    case "textChoice":
+      body = <ChoiceGrid choices={d.choices as string[]} value={response as string | undefined} onChange={setResponse} />;
+      break;
+
     case "quantityNumeralChoice":
       body = (
         <div className="flex flex-col items-center gap-5">

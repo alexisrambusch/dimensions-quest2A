@@ -6,6 +6,7 @@ import { gradePrek } from "./curriculum/gradePrek";
 import { ACHIEVEMENTS } from "./gamification/achievements";
 import { CREATURES } from "./gamification/creatures";
 import { ASSESSMENTS } from "./curriculum/assessments";
+import { seedPreschool } from "./preschool/seedPreschool";
 
 const HOUSEHOLD_PARENT_EMAIL = "alexisrambusch@gmail.com";
 
@@ -251,6 +252,8 @@ export async function seedDatabase(prisma: PrismaClient): Promise<string[]> {
     assessmentCount++;
   }
   say(`  Seeded ${assessmentCount} assessments.`);
+
+  await seedPreschool(prisma, say);
 
   // Default household: one parent profile and one student profile so the
   // app is immediately usable without a signup flow.

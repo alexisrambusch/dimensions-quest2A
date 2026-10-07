@@ -40,16 +40,17 @@ model Student {
   streakDays   Int       @default(0)
   lastActiveAt DateTime?
 
-  lessonProgress  LessonProgress[]
-  attempts        Attempt[]
-  skillMastery    SkillMastery[]
-  factMastery     FactMastery[]
-  sessions        LearningSession[]
-  misconceptions  Misconception[]
-  xpEvents        XpEvent[]
-  achievements    StudentAchievement[]
-  assessmentTakes AssessmentAttempt[]
-  creatures       StudentCreature[]
+  lessonProgress        LessonProgress[]
+  attempts              Attempt[]
+  skillMastery          SkillMastery[]
+  factMastery           FactMastery[]
+  sessions              LearningSession[]
+  misconceptions        Misconception[]
+  xpEvents              XpEvent[]
+  achievements          StudentAchievement[]
+  assessmentTakes       AssessmentAttempt[]
+  creatures             StudentCreature[]
+  preschoolActivityDone StudentActivityProgress[]
 }
 
 // ── Curriculum hierarchy: Grade → Chapter → Lesson → Concept → Skill ─────
@@ -446,4 +447,82 @@ model AssessmentAttempt {
   scoreJson    String
   startedAt    DateTime   @default(now())
   completedAt  DateTime?
+}
+
+// ── Preschool daily curriculum (36-week kindergarten-readiness program) ──
+// A parallel, separate content system from Grade/Chapter/Lesson above: each
+// day is a short sequence of small activities across many domains (not one
+// skill's concrete-pictorial-abstract progression), so it gets its own
+// simpler tree rather than being forced into the math lesson shape.
+
+enum CurriculumDomain {
+  MORNING
+  LITERACY
+  MATH
+  SCIENCE
+  SOCIAL_STUDIES
+  WRITING
+  GAME
+  READ_ALOUD
+  CREATIVE
+  MOVEMENT
+  EXTENSION
+}
+
+enum PreschoolActivityType {
+  QUESTION // reuses the existing math-engine generator + QuestionRenderer
+  SEL_SCENARIO // "what should you do?" branching choice with explanation
+  TRACE // guided trace-over of a letter/number/name, ungraded
+  EXPERIMENT // Ask -> Predict -> Test -> Observe -> Record
+  READ_ALOUD // a recommended book with before/during/after questions
+  JOURNAL // a prompt answered by drawing (saved as an image) or a short pick
+  PARENT_ACTIVITY // an offline card the parent marks done, not app-graded
+  MOVEMENT_BREAK // an offline movement card with a short timer
+  MORNING_ROUTINE // mood check-in + calendar/weather/season widget
+}
+
+model PreschoolWeek {
+  id     String @id @default(cuid())
+  number Int    @unique // 1-36
+  theme  String
+  days   PreschoolDay[]
+}
+
+model PreschoolDay {
+  id         String              @id @default(cuid())
+  weekId     String
+  week       PreschoolWeek       @relation(fields: [weekId], references: [id], onDelete: Cascade)
+  dayNumber  Int // 1-5 (Mon-Fri)
+  title      String
+  activities PreschoolActivity[]
+
+  @@unique([weekId, dayNumber])
+}
+
+model PreschoolActivity {
+  id           String                     @id @default(cuid())
+  dayId        String
+  day          PreschoolDay               @relation(fields: [dayId], references: [id], onDelete: Cascade)
+  order        Int
+  domain       CurriculumDomain
+  type         PreschoolActivityType
+  title        String
+  instructions String
+  contentJson  String // type-specific payload (see src/lib/preschool/types.ts)
+  optional     Boolean                    @default(false) // skipping an optional activity doesn't block day completion
+  progress     StudentActivityProgress[]
+
+  @@unique([dayId, order])
+}
+
+model StudentActivityProgress {
+  id           String             @id @default(cuid())
+  studentId    String
+  student      Student            @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  activityId   String
+  activity     PreschoolActivity  @relation(fields: [activityId], references: [id], onDelete: Cascade)
+  responseJson String? // free-form captured response (journal drawing, SEL choice, trace confirmation, ...)
+  completedAt  DateTime           @default(now())
+
+  @@unique([studentId, activityId])
 }
