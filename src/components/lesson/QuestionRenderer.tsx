@@ -84,6 +84,49 @@ export function QuestionRenderer({ prompt, onSubmit, disabled }: Props) {
       );
       break;
 
+    case "quantityNumeralChoice":
+      body = (
+        <div className="flex flex-col items-center gap-5">
+          <TenFrame count={d.count} />
+          <div className="flex gap-3 flex-wrap justify-center">
+            {(d.choices as string[]).map((c) => (
+              <button
+                key={c}
+                type="button"
+                onClick={() => setResponse(c)}
+                className={clsx(
+                  "h-16 w-16 rounded-2xl text-3xl font-black shadow-md active:scale-90 transition-transform touch-manipulation border-2",
+                  response === c ? "bg-blue-100 text-blue-800 border-blue-500" : "bg-white text-slate-800 border-slate-200 hover:border-blue-300",
+                )}
+              >
+                {c}
+              </button>
+            ))}
+          </div>
+        </div>
+      );
+      break;
+
+    case "quantityCompare":
+      body = (
+        <div className="flex gap-4 flex-wrap justify-center">
+          {(["A", "B"] as const).map((side) => (
+            <button
+              key={side}
+              type="button"
+              onClick={() => setResponse(side)}
+              className={clsx(
+                "rounded-2xl p-2 border-2 transition-transform active:scale-95 touch-manipulation",
+                response === side ? "border-blue-500 bg-blue-50" : "border-transparent hover:border-blue-200",
+              )}
+            >
+              <TenFrame count={side === "A" ? d.countA : d.countB} />
+            </button>
+          ))}
+        </div>
+      );
+      break;
+
     case "arrayGrid":
       body = (
         <div className="flex flex-col items-center gap-4">

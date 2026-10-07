@@ -153,6 +153,21 @@ function StaticCompareNumbers({ a, b, symbol }: { a: number | string; b: number 
   );
 }
 
+function StaticQuantityCompare({ countA, countB, highlight }: { countA: number; countB: number; highlight?: "A" | "B" }) {
+  return (
+    <div className="flex gap-4 flex-wrap justify-center">
+      {(["A", "B"] as const).map((side) => (
+        <div
+          key={side}
+          className={clsx("rounded-2xl p-2 border-2", side === highlight ? "border-blue-500 bg-blue-50" : "border-transparent")}
+        >
+          <TenFrame count={side === "A" ? countA : countB} />
+        </div>
+      ))}
+    </div>
+  );
+}
+
 function StaticScaleBalance({
   leftLabel,
   leftIcon,
@@ -239,6 +254,8 @@ export function LearnVisual({ view, data }: LearnVisualSpec) {
       );
     case "numberLine":
       return <StaticNumberLine min={d.min} max={d.max} step={d.step} value={d.value} />;
+    case "quantityCompare":
+      return <StaticQuantityCompare countA={d.countA} countB={d.countB} highlight={d.highlight} />;
     case "numberBond":
       return <StaticNumberBond whole={d.whole} part1={d.part1} part2={d.part2} />;
     case "barModelMultiplication":

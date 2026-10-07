@@ -2,6 +2,7 @@ import type { PrismaClient } from "@/generated/prisma/client";
 import type { GradeDef } from "./curriculum/types";
 import { grade2a } from "./curriculum/grade2a";
 import { grade1a } from "./curriculum/grade1a";
+import { gradePrek } from "./curriculum/gradePrek";
 import { ACHIEVEMENTS } from "./gamification/achievements";
 import { CREATURES } from "./gamification/creatures";
 import { ASSESSMENTS } from "./curriculum/assessments";
@@ -11,8 +12,9 @@ const HOUSEHOLD_PARENT_EMAIL = "alexisrambusch@gmail.com";
 // Every grade offered in the app, each with a stable id (used as the Grade
 // row's primary key so re-seeding is idempotent) and a display order.
 const GRADES: { id: string; order: number; def: GradeDef }[] = [
-  { id: "grade-1a", order: 0, def: grade1a },
-  { id: "grade-2a", order: 1, def: grade2a },
+  { id: "grade-prek", order: 0, def: gradePrek },
+  { id: "grade-1a", order: 1, def: grade1a },
+  { id: "grade-2a", order: 2, def: grade2a },
 ];
 
 /**
