@@ -17,6 +17,8 @@ export interface StickerCountContent {
   sceneLabel: string;
   /** How many stickers are offered in the tray (>= targetCount, so placing "just enough" is a real choice). */
   trayCount: number;
+  /** Icon key (from the shared emoji icon bank) rendered on each sticker — e.g. "star", "frog". */
+  stickerIcon: string;
 }
 
 /** A queue of items sorted one at a time into one of two buckets by tapping — teaches a category distinction through repetition. */

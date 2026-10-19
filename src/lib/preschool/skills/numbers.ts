@@ -15,9 +15,9 @@ export const numberSkills: SkillDef[] = [
     description: "Place stickers one at a time to build a group of a given size.",
     prerequisites: [],
     activities: [
-      { code: "math.count.subitize.1to3.sticker.1", engine: "stickerCount", title: "Fill the Pond", instructions: "Tap lily pads to put 2 frogs in the pond.", difficulty: 1, content: { targetCount: 2, sceneLabel: "the pond", trayCount: 4 } },
-      { code: "math.count.subitize.1to3.sticker.2", engine: "stickerCount", title: "Decorate the Sky", instructions: "Tap to put 3 stars in the sky.", difficulty: 2, content: { targetCount: 3, sceneLabel: "the night sky", trayCount: 5 } },
-      { code: "math.count.subitize.1to3.sticker.3", engine: "stickerCount", title: "Build a Tower", instructions: "Tap to stack 1 block.", difficulty: 1, content: { targetCount: 1, sceneLabel: "the tower", trayCount: 3 } },
+      { code: "math.count.subitize.1to3.sticker.1", engine: "stickerCount", title: "Fill the Pond", instructions: "Tap lily pads to put 2 frogs in the pond.", difficulty: 1, content: { targetCount: 2, sceneLabel: "the pond", trayCount: 4, stickerIcon: "frog" } },
+      { code: "math.count.subitize.1to3.sticker.2", engine: "stickerCount", title: "Decorate the Sky", instructions: "Tap to put 3 stars in the sky.", difficulty: 2, content: { targetCount: 3, sceneLabel: "the night sky", trayCount: 5, stickerIcon: "star" } },
+      { code: "math.count.subitize.1to3.sticker.3", engine: "stickerCount", title: "Build a Tower", instructions: "Tap to stack 1 block.", difficulty: 1, content: { targetCount: 1, sceneLabel: "the tower", trayCount: 3, stickerIcon: "cube" } },
     ],
   },
   {
@@ -27,8 +27,8 @@ export const numberSkills: SkillDef[] = [
     description: "Place stickers one at a time to build a bigger group.",
     prerequisites: ["math.count.subitize.1to3"],
     activities: [
-      { code: "math.count.subitize.4to5.sticker.1", engine: "stickerCount", title: "Feed the Puppies", instructions: "Tap to give 4 treats to the puppies.", difficulty: 1, content: { targetCount: 4, sceneLabel: "the puppies", trayCount: 6 } },
-      { code: "math.count.subitize.4to5.sticker.2", engine: "stickerCount", title: "Plant the Garden", instructions: "Tap to plant 5 flowers.", difficulty: 2, content: { targetCount: 5, sceneLabel: "the garden", trayCount: 7 } },
+      { code: "math.count.subitize.4to5.sticker.1", engine: "stickerCount", title: "Feed the Puppies", instructions: "Tap to give 4 treats to the puppies.", difficulty: 1, content: { targetCount: 4, sceneLabel: "the puppies", trayCount: 6, stickerIcon: "bone" } },
+      { code: "math.count.subitize.4to5.sticker.2", engine: "stickerCount", title: "Plant the Garden", instructions: "Tap to plant 5 flowers.", difficulty: 2, content: { targetCount: 5, sceneLabel: "the garden", trayCount: 7, stickerIcon: "flower" } },
     ],
   },
   {

@@ -38,6 +38,8 @@ const ICONS: Record<string, string> = {
   cat: "🐱",
   bread: "🍞",
   cube: "🟪",
+  frog: "🐸",
+  bone: "🦴",
 };
 
 export function icon(key: string | undefined): string {

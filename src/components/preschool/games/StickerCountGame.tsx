@@ -5,6 +5,7 @@ import clsx from "clsx";
 import { PRIMARY_BUTTON, SECONDARY_BUTTON } from "../../ui";
 import { SpeakButton } from "../../SpeakButton";
 import { playCorrect, playWrong } from "@/lib/sound";
+import { icon } from "../../manipulatives/icons";
 import type { StickerCountContent } from "@/lib/preschool/types";
 
 /** Tap stickers from the tray into the scene until the count feels right, then check — teaches counting by doing and self-correcting, not by naming a numeral. */
@@ -12,6 +13,7 @@ export function StickerCountGame({ content, onDone }: { content: StickerCountCon
   const [placed, setPlaced] = useState<number>(0);
   const [checked, setChecked] = useState<"idle" | "correct" | "wrong">("idle");
   const promptText = `Put ${content.targetCount} in ${content.sceneLabel}.`;
+  const stickerEmoji = icon(content.stickerIcon);
 
   function check() {
     if (placed === content.targetCount) {
@@ -30,7 +32,7 @@ export function StickerCountGame({ content, onDone }: { content: StickerCountCon
         <SpeakButton text={promptText} />
       </div>
 
-      <div className="w-full max-w-sm rounded-2xl border-2 border-slate-200 bg-blue-50 p-4 min-h-20 flex flex-wrap gap-2 items-center justify-center">
+      <div className="w-full max-w-sm rounded-2xl border-2 border-slate-200 bg-gradient-to-b from-blue-50 to-sky-100 p-4 min-h-24 flex flex-wrap gap-2 items-center justify-center">
         {Array.from({ length: placed }, (_, i) => (
           <button
             key={i}
@@ -40,8 +42,10 @@ export function StickerCountGame({ content, onDone }: { content: StickerCountCon
               setChecked("idle");
             }}
             aria-label="Remove one"
-            className="h-10 w-10 rounded-full bg-amber-400 shadow-sm active:scale-90 transition-transform touch-manipulation"
-          />
+            className="animate-pop-in h-14 w-14 rounded-2xl bg-white shadow-md border border-slate-100 flex items-center justify-center text-4xl active:scale-90 transition-transform touch-manipulation"
+          >
+            {stickerEmoji}
+          </button>
         ))}
         {placed === 0 && <p className="text-sm text-slate-400">Tap a sticker below to add it here</p>}
       </div>
@@ -56,8 +60,10 @@ export function StickerCountGame({ content, onDone }: { content: StickerCountCon
               setChecked("idle");
             }}
             aria-label="Add one"
-            className="h-12 w-12 rounded-full bg-amber-300 border-2 border-amber-400 shadow-sm active:scale-90 transition-transform touch-manipulation"
-          />
+            className="h-16 w-16 rounded-2xl bg-white border-2 border-amber-300 shadow-sm flex items-center justify-center text-4xl active:scale-90 transition-transform touch-manipulation"
+          >
+            {stickerEmoji}
+          </button>
         ))}
       </div>
 
