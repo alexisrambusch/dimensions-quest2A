@@ -19,6 +19,10 @@ ALTER TABLE "StudentActivityProgress" DROP CONSTRAINT "StudentActivityProgress_s
 -- DropIndex
 DROP INDEX "PreschoolActivity_dayId_order_key";
 
+-- This whole model is being replaced; old activity rows have no values for the
+-- new required columns below (code/engine/skillId), so clear them first.
+DELETE FROM "PreschoolActivity";
+
 -- AlterTable
 ALTER TABLE "PreschoolActivity" DROP COLUMN "dayId",
 DROP COLUMN "domain",
