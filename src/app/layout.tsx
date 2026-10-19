@@ -4,6 +4,7 @@ import { HomeButton } from "@/components/HomeButton";
 import { Toolbox } from "@/components/toolbox/Toolbox";
 import { BackgroundDecor } from "@/components/BackgroundDecor";
 import { SoundToggle } from "@/components/SoundToggle";
+import { getActiveStudent } from "@/lib/actions/students";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -21,7 +22,8 @@ export const metadata: Metadata = {
   description: "An adaptive Singapore Math learning adventure for Grade 2.",
 };
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+export default async function RootLayout({ children }: LayoutProps<"/">) {
+  const student = await getActiveStudent();
   return (
     <html
       lang="en"
@@ -31,7 +33,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <BackgroundDecor />
         {children}
         <SoundToggle />
-        <HomeButton />
+        <HomeButton href={student?.isPreschool ? "/preschool" : "/map"} />
         <Toolbox />
       </body>
     </html>

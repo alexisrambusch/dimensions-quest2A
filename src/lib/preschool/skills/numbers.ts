@@ -27,7 +27,7 @@ export const numberSkills: SkillDef[] = [
     description: "Place stickers one at a time to build a bigger group.",
     prerequisites: ["math.count.subitize.1to3"],
     activities: [
-      { code: "math.count.subitize.4to5.sticker.1", engine: "stickerCount", title: "Feed the Puppies", instructions: "Tap to give 4 treats to the puppies.", difficulty: 1, content: { targetCount: 4, sceneLabel: "the puppies", trayCount: 6, stickerIcon: "bone" } },
+      { code: "math.count.subitize.4to5.sticker.1", engine: "stickerCount", title: "Feed the Puppies", instructions: "Tap to give 4 treats to the puppies.", difficulty: 1, content: { targetCount: 4, sceneLabel: "the puppies", trayCount: 6, stickerIcon: "bone", sceneAnchor: "dog" } },
       { code: "math.count.subitize.4to5.sticker.2", engine: "stickerCount", title: "Plant the Garden", instructions: "Tap to plant 5 flowers.", difficulty: 2, content: { targetCount: 5, sceneLabel: "the garden", trayCount: 7, stickerIcon: "flower" } },
     ],
   },

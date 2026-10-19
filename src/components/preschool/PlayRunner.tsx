@@ -12,6 +12,7 @@ import { TapAnswerGame } from "./games/TapAnswerGame";
 import { PracticeRewardToast } from "../practice/PracticeRewardToast";
 import { CARD, PRIMARY_BUTTON } from "../ui";
 import { ConfettiBurst } from "../ConfettiBurst";
+import { SpeakButton } from "../SpeakButton";
 import { playCoin } from "@/lib/sound";
 
 interface Props {
@@ -95,7 +96,10 @@ export function PlayRunner({ studentId, studentName }: Props) {
       <div className="text-center">
         <p className="text-xs font-bold uppercase tracking-wide text-blue-400">{DOMAIN_LABEL[activity.domain] ?? activity.domain}</p>
         <h2 className={clsx("text-xl font-black text-slate-800")}>{activity.title}</h2>
-        <p className="text-slate-500 text-sm mt-1">{activity.instructions}</p>
+        <div className="flex items-center justify-center gap-2 mt-1">
+          <p className="text-slate-500 text-sm">{activity.instructions}</p>
+          <SpeakButton text={activity.instructions} />
+        </div>
       </div>
 
       {activity.engine === "hunt" && <HuntGame content={activity.content} onDone={() => finish(null)} />}

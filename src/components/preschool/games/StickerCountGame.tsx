@@ -49,9 +49,15 @@ export function StickerCountGame({ content, onDone }: { content: StickerCountCon
           sceneGradient,
         )}
       >
-        <span className="absolute inset-0 flex items-center justify-center text-[6rem] leading-none opacity-20 pointer-events-none select-none">
-          {stickerEmoji}
-        </span>
+        {content.sceneAnchor ? (
+          <span className="absolute bottom-1 left-2 text-5xl leading-none pointer-events-none select-none" aria-hidden>
+            {icon(content.sceneAnchor)}
+          </span>
+        ) : (
+          <span className="absolute inset-0 flex items-center justify-center text-[6rem] leading-none opacity-20 pointer-events-none select-none" aria-hidden>
+            {stickerEmoji}
+          </span>
+        )}
         {Array.from({ length: placed }, (_, i) => (
           <button
             key={i}

@@ -21,6 +21,8 @@ export interface StickerCountContent {
   trayCount: number;
   /** Icon key (from the shared emoji icon bank) rendered on each sticker — e.g. "star", "frog". */
   stickerIcon: string;
+  /** Icon key for a real (non-watermark) decoration anchoring the scene — e.g. the dog itself in "Feed the Puppies", where the stickers are the treats, not the thing the scene is about. */
+  sceneAnchor?: string;
 }
 
 /** A queue of items sorted one at a time into one of two buckets by tapping — teaches a category distinction through repetition. */
