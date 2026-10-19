@@ -17,7 +17,7 @@ export const numberSkills: SkillDef[] = [
     activities: [
       { code: "math.count.subitize.1to3.sticker.1", engine: "stickerCount", title: "Fill the Pond", instructions: "Tap lily pads to put 2 frogs in the pond.", difficulty: 1, content: { targetCount: 2, sceneLabel: "the pond", trayCount: 4, stickerIcon: "frog" } },
       { code: "math.count.subitize.1to3.sticker.2", engine: "stickerCount", title: "Decorate the Sky", instructions: "Tap to put 3 stars in the sky.", difficulty: 2, content: { targetCount: 3, sceneLabel: "the night sky", trayCount: 5, stickerIcon: "star" } },
-      { code: "math.count.subitize.1to3.sticker.3", engine: "stickerCount", title: "Build a Tower", instructions: "Tap to stack 1 block.", difficulty: 1, content: { targetCount: 1, sceneLabel: "the tower", trayCount: 3, stickerIcon: "cube" } },
+      { code: "math.count.subitize.1to3.sticker.3", engine: "stickerCount", title: "Build a Tower", instructions: "Tap to stack 1 block.", difficulty: 1, content: { targetCount: 1, sceneLabel: "the tower", trayCount: 3, stickerIcon: "brick" } },
     ],
   },
   {

@@ -48,9 +48,10 @@ export function HuntGame({ content, onDone }: { content: HuntContent; onDone: ()
         Found {foundIds.size} of {totalMatches}
       </p>
 
-      <div className="flex flex-wrap gap-3 justify-center max-w-sm">
+      <div className="flex flex-wrap gap-4 justify-center max-w-sm">
         {items.map((item) => {
           const found = foundIds.has(item.id);
+          const isWord = item.label.length > 2;
           return (
             <button
               key={item.id}
@@ -58,7 +59,8 @@ export function HuntGame({ content, onDone }: { content: HuntContent; onDone: ()
               onClick={() => tap(item)}
               disabled={found}
               className={clsx(
-                "h-16 w-16 rounded-2xl text-3xl font-black shadow-md transition-transform touch-manipulation border-2",
+                "min-h-16 min-w-16 rounded-2xl font-black shadow-md transition-transform touch-manipulation border-2 flex items-center justify-center",
+                isWord ? "px-5 py-3 text-xl whitespace-nowrap" : "text-3xl",
                 found && "bg-emerald-100 border-emerald-400 text-emerald-700 scale-95",
                 !found && wobbleId === item.id && "animate-shake-x bg-rose-50 border-rose-300",
                 !found && wobbleId !== item.id && "bg-white border-slate-200 text-slate-800 active:scale-90 hover:border-blue-300",

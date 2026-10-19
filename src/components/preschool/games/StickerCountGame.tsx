@@ -8,12 +8,23 @@ import { playCorrect, playWrong } from "@/lib/sound";
 import { icon } from "../../manipulatives/icons";
 import type { StickerCountContent } from "@/lib/preschool/types";
 
+// Scene backdrop keyed by the activity's sticker icon, so "the pond" reads as
+// a pond and "the night sky" reads as a night sky instead of one generic box.
+const SCENE_THEME: Record<string, string> = {
+  frog: "from-teal-100 to-emerald-100",
+  star: "from-indigo-900 to-slate-800",
+  brick: "from-amber-100 to-stone-200",
+  bone: "from-orange-100 to-amber-100",
+  flower: "from-lime-100 to-green-100",
+};
+
 /** Tap stickers from the tray into the scene until the count feels right, then check — teaches counting by doing and self-correcting, not by naming a numeral. */
 export function StickerCountGame({ content, onDone }: { content: StickerCountContent; onDone: () => void }) {
   const [placed, setPlaced] = useState<number>(0);
   const [checked, setChecked] = useState<"idle" | "correct" | "wrong">("idle");
   const promptText = `Put ${content.targetCount} in ${content.sceneLabel}.`;
   const stickerEmoji = icon(content.stickerIcon);
+  const sceneGradient = SCENE_THEME[content.stickerIcon] ?? "from-blue-50 to-sky-100";
 
   function check() {
     if (placed === content.targetCount) {
@@ -32,7 +43,15 @@ export function StickerCountGame({ content, onDone }: { content: StickerCountCon
         <SpeakButton text={promptText} />
       </div>
 
-      <div className="w-full max-w-sm rounded-2xl border-2 border-slate-200 bg-gradient-to-b from-blue-50 to-sky-100 p-4 min-h-24 flex flex-wrap gap-2 items-center justify-center">
+      <div
+        className={clsx(
+          "relative overflow-hidden w-full max-w-sm rounded-2xl border-2 border-slate-200 bg-gradient-to-b p-4 min-h-24 flex flex-wrap gap-2 items-center justify-center",
+          sceneGradient,
+        )}
+      >
+        <span className="absolute inset-0 flex items-center justify-center text-[6rem] leading-none opacity-20 pointer-events-none select-none">
+          {stickerEmoji}
+        </span>
         {Array.from({ length: placed }, (_, i) => (
           <button
             key={i}
@@ -42,12 +61,12 @@ export function StickerCountGame({ content, onDone }: { content: StickerCountCon
               setChecked("idle");
             }}
             aria-label="Remove one"
-            className="animate-pop-in h-14 w-14 rounded-2xl bg-white shadow-md border border-slate-100 flex items-center justify-center text-4xl active:scale-90 transition-transform touch-manipulation"
+            className="relative animate-pop-in h-14 w-14 rounded-2xl bg-white shadow-md border border-slate-100 flex items-center justify-center text-4xl active:scale-90 transition-transform touch-manipulation"
           >
             {stickerEmoji}
           </button>
         ))}
-        {placed === 0 && <p className="text-sm text-slate-400">Tap a sticker below to add it here</p>}
+        {placed === 0 && <p className="relative text-sm font-semibold text-slate-500 bg-white/70 rounded-lg px-3 py-1">Tap a sticker below to add it here</p>}
       </div>
 
       <div className="flex flex-wrap gap-2 justify-center">

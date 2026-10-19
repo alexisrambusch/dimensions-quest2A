@@ -40,6 +40,7 @@ const ICONS: Record<string, string> = {
   cube: "🟪",
   frog: "🐸",
   bone: "🦴",
+  brick: "🧱",
 };
 
 export function icon(key: string | undefined): string {
