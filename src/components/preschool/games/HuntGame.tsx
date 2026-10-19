@@ -35,6 +35,15 @@ export function HuntGame({ content, onDone }: { content: HuntContent; onDone: ()
         <SpeakButton text={content.promptText} />
       </div>
 
+      {content.targetVisual && (
+        <div className="flex flex-col items-center gap-1">
+          <div className="h-24 w-24 rounded-3xl bg-blue-50 border-2 border-blue-200 shadow-md flex items-center justify-center text-6xl font-black text-blue-700">
+            {content.targetVisual}
+          </div>
+          <p className="text-xs font-semibold text-slate-400">This is what you&apos;re looking for</p>
+        </div>
+      )}
+
       <p className="text-sm font-semibold text-blue-500">
         Found {foundIds.size} of {totalMatches}
       </p>

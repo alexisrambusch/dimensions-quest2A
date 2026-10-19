@@ -9,6 +9,8 @@ export interface HuntContent {
   /** What we're hunting for, read aloud at the start — e.g. "Find every letter A!" */
   promptText: string;
   items: { label: string; isMatch: boolean }[];
+  /** Shown large above the grid before the hunt starts — e.g. "A" for a letter hunt, so the child has something to match against rather than having to already know the shape. */
+  targetVisual?: string;
 }
 
 /** Tap to place stickers one at a time until the target count is reached — teaches counting by doing, not by naming a numeral. */
